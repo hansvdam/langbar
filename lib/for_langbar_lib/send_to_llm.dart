@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:langbar/for_langbar_lib/retriever_tool.dart';
 import 'package:langchain/langchain.dart';
+import 'package:langchain_ollama/langchain_ollama.dart';
 import 'package:langchain_openai/langchain_openai.dart';
 import 'package:provider/provider.dart';
 
@@ -10,17 +11,52 @@ import '../routes.dart';
 import 'generic_screen_tool.dart';
 import 'langbar_states.dart';
 import 'llm_go_route.dart';
+
+enum Service {
+  openai,
+  openrouter,
+  ollama,
+}
+
 // uses langchain and langchain_openai, and implicitly uses openai_dart
 void submitToLLM(BuildContext context) {
   var langbarState = Provider.of<LangBarState>(context, listen: false);
   var apiKey2 = getOpenAIKey();
   var baseUrl = getLlmBaseUrl();
-  final llm = ChatOpenAI(
-      apiKey: apiKey2,
-      baseUrl: baseUrl ?? 'https://api.openai.com/v1',
-      defaultOptions: const ChatOpenAIOptions(
-          temperature: 0.0,
-          model: 'gpt-4-1106-preview')); // model: 'gpt-4-1106-preview');
+  var llm;
+
+  var service = Service.openai;
+  switch (service) {
+    case Service.openai:
+      llm = ChatOpenAI(
+          // nu met de tools moet aan assistant.tool-calls gevolgd worden door iets anders (verplicht, anders is er een bad request)
+          apiKey: apiKey2,
+          baseUrl: baseUrl ?? 'https://api.openai.com/v1',
+          defaultOptions: const ChatOpenAIOptions(
+              temperature: 0.0,
+              model: 'gpt-4o')); // model: 'gpt-4-1106-preview');
+      break;
+    case Service.openrouter:
+      const model = 'meta-llama/llama-3.1-70b-instruct';
+      // const model = 'gpt-4o';
+      llm = ChatOpenAI(
+          apiKey:
+              "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",
+          baseUrl: "https://openrouter.ai/api/v1",
+          defaultOptions: const ChatOpenAIOptions(
+              temperature: 0.0,
+              model: model,
+              toolChoice:
+                  ChatToolChoice.required)); // model: 'gpt-4-1106-preview');
+      break;
+    case Service.ollama:
+      llm = ChatOllama(
+          // baseUrl: baseUrl ?? 'https://api.openai.com/v1',
+          defaultOptions: const ChatOllamaOptions(
+              temperature: 0.0,
+              model: 'llama3.1')); // model: 'gpt-4-1106-preview');
+      break;
+  }
   // model: 'gpt-3.5-turbo');
   langbarState.sendingToOpenAI = true;
   sendToOpenai(llm, context);
