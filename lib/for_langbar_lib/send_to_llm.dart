@@ -80,9 +80,28 @@ Future<void> sendToOpenai(ChatOpenAI llm, BuildContext context) async {
   tools.insert(0, tool);
   var chatHistory = Provider.of<ChatHistory>(context, listen: false);
 
-  // ConversationBufferMemory memory = ConversationBufferMemory(returnMessages: true);;
+  //
+  // final promptTemplate = ChatPromptTemplate.fromPromptMessages([
+  //   SystemChatMessagePromptTemplate.fromTemplate(
+  //     'Never directly answer a question yourself, but always use a function call.',
+  //   ),
+  //   const MessagesPlaceholder(variableName: 'history'),
+  //   HumanChatMessagePromptTemplate.fromTemplate('{input}'),
+  // ]);
+  //
+  // final chain = Runnable.fromMap({
+  //   'input': Runnable.passthrough(),
+  //   'history': Runnable.mapInput(
+  //         (_) async {
+  //       final m = await memory.loadMemoryVariables();
+  //       return m['history'];
+  //     },
+  //   ),
+  // }) |
+  // promptTemplate |
+  // llm |
+  // ToolsOutputParser();
 
-  // DateTime now = DateTime.now();
   // String formattedDate = DateFormat('yyyy-MM-ddTHH:mm:ssZ').format(now);
   final agent = OpenAIToolsAgent.fromLLMAndTools(
       systemChatMessage: const SystemChatMessagePromptTemplate(
