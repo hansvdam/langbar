@@ -11,6 +11,7 @@ import '../routes.dart';
 import 'generic_screen_tool.dart';
 import 'langbar_states.dart';
 import 'llm_go_route.dart';
+import 'my_conversation_buffer_memory.dart';
 
 enum Service {
   openai,
@@ -21,8 +22,9 @@ enum Service {
 // uses langchain and langchain_openai, and implicitly uses openai_dart
 void submitToLLM(BuildContext context) {
   var langbarState = Provider.of<LangBarState>(context, listen: false);
-  var apiKey2 = getOpenAIKey();
-  var baseUrl = getLlmBaseUrl();
+  var apiKey2 = getOpenAIKey2();
+  var baseUrl;
+  // var baseUrl = getLlmBaseUrl();
   var llm;
 
   var service = Service.openai;
@@ -62,7 +64,7 @@ void submitToLLM(BuildContext context) {
   sendToOpenai(llm, context);
 }
 
-final memory = ConversationBufferWindowMemory(
+final memory = MyConversationBufferWindowMemory(
     chatHistory: ChatMessageHistory(),
     returnMessages: true); // default window length is 5
 // final memory = MyConversationBufferWindowMemory(
@@ -80,69 +82,76 @@ Future<void> sendToOpenai(ChatOpenAI llm, BuildContext context) async {
   tools.insert(0, tool);
   var chatHistory = Provider.of<ChatHistory>(context, listen: false);
 
-  //
-  // final promptTemplate = ChatPromptTemplate.fromPromptMessages([
-  //   SystemChatMessagePromptTemplate.fromTemplate(
-  //     'Never directly answer a question yourself, but always use a function call.',
-  //   ),
-  //   const MessagesPlaceholder(variableName: 'history'),
-  //   HumanChatMessagePromptTemplate.fromTemplate('{input}'),
-  // ]);
-  //
-  // final chain = Runnable.fromMap({
-  //   'input': Runnable.passthrough(),
-  //   'history': Runnable.mapInput(
-  //         (_) async {
-  //       final m = await memory.loadMemoryVariables();
-  //       return m['history'];
-  //     },
-  //   ),
-  // }) |
-  // promptTemplate |
-  // llm |
-  // ToolsOutputParser();
+  final promptTemplate = ChatPromptTemplate.fromPromptMessages([
+    SystemChatMessagePromptTemplate.fromTemplate(
+      'Never directly answer a question yourself, but always use a function call.',
+    ),
+    const MessagesPlaceholder(variableName: 'history'),
+    HumanChatMessagePromptTemplate.fromTemplate('{input}'),
+  ]);
 
-  // String formattedDate = DateFormat('yyyy-MM-ddTHH:mm:ssZ').format(now);
-  final agent = OpenAIToolsAgent.fromLLMAndTools(
-      systemChatMessage: const SystemChatMessagePromptTemplate(
-        prompt: PromptTemplate(
-          inputVariables: {},
-          template:
-              'Never directly answer a question yourself, but always use a function call.',
-        ),
-      ),
-      llm: llm,
-      tools: tools,
-      memory: memory);
-  final executor = AgentExecutor(agent: agent);
-  // final res = await executor.run('What is 40 raised to the 0.43 power?');
-  var response;
   var query = langbarState.controllerOutlined.text;
+
+  var llm_with_tool = llm.bind(ChatOpenAIOptions(
+    tools: tools,
+    toolChoice: ChatToolChoice.required,
+  ));
+
+  var fromMap = Runnable.fromMap({
+    'input': Runnable.passthrough(),
+    'history': Runnable.mapInput(
+      (_) async {
+        final m = await memory.loadMemoryVariables();
+        return m['history'];
+      },
+    ),
+  });
+  final chain = fromMap | promptTemplate | llm_with_tool | ToolsOutputParser();
+  var response;
+
+  var lastResult;
   try {
-    response = await executor.run(query);
+    final output1 = await chain.invoke(query);
+    memory.chatHistory.addHumanChatMessage(query);
+
+    var toolcalls = output1 as List<ParsedToolCall>;
+    var results = [];
+    for (var parsedToolCall in toolcalls) {
+      Tool tool = matchTool(parsedToolCall, tools);
+      lastResult = await tool.invoke(parsedToolCall.arguments);
+      results.add(lastResult);
+    }
+    print(output1);
   } catch (e) {
     response = e.toString();
     memory
         .clear(); // make sure an error does not prevent the next query from being processed (strange things in the history may cause bad-request errors)
   }
-  await replace_retriever_function_call_with_assistant_response_in_history(
-      response);
-  print(response);
   langbarState.controllerOutlined.clear();
   langbarState.sendingToOpenAI = false;
-  // if response contains spaces, we assume it is not a path, but a response from the AI (when this becomes too much of a hack, we should start responding from tools with more complex objects with fields etc.
-  if (response.contains(' ')) {
+
+  if (lastResult is String && !lastResult.startsWith("/")) {
+    // lastResult is not a hyperlink, so it is a message to the user:
+    memory.chatHistory.addAIChatMessage(lastResult);
     chatHistory.add(HistoryMessage(text: query, isHuman: true));
-    chatHistory.add(HistoryMessage(text: response, isHuman: false));
+    chatHistory.add(HistoryMessage(text: lastResult, isHuman: false));
     langbarState.historyExpansion = ChatSheetExpansion.full;
     langbarState.historyShowing = true;
   } else {
+    //lastResult is a hyperlink, so add hyperlink to the history:
     // add the original query, but the navigation-uri-repsonse as the hyperlink when you click on it
     langbarState.historyShowing = false;
     langbarState.historyExpansion = ChatSheetExpansion.part;
     chatHistory
-        .add(HistoryMessage(text: query, isHuman: true, navUri: response));
+        .add(HistoryMessage(text: query, isHuman: true, navUri: lastResult));
   }
+}
+
+Tool matchTool(ParsedToolCall parsedToolCall,
+    List<Tool<Object, ToolOptions, Object>> tools) {
+  var tool = tools
+      .firstWhere((toolelement) => toolelement.name == parsedToolCall.name);
+  return tool;
 }
 
 /**
