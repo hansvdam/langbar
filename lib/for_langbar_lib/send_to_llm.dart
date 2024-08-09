@@ -22,9 +22,9 @@ enum Service {
 // uses langchain and langchain_openai, and implicitly uses openai_dart
 void submitToLLM(BuildContext context) {
   var langbarState = Provider.of<LangBarState>(context, listen: false);
-  var apiKey2 = getOpenAIKey2();
-  var baseUrl;
-  // var baseUrl = getLlmBaseUrl();
+  var apiKey2 = getOpenAIKey();
+  // var baseUrl;
+  var baseUrl = getLlmBaseUrl();
   var llm;
 
   var service = Service.openai;
