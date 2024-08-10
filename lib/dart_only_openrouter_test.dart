@@ -2,11 +2,17 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:http/retry.dart';
 import 'package:langchain/langchain.dart';
+import 'package:langchain_ollama/langchain_ollama.dart';
 import 'package:langchain_openai/langchain_openai.dart';
 
 import 'openAIKey.dart';
+
+enum Service {
+  openai,
+  openrouter,
+  ollama,
+}
 
 class LoggingClient extends http.BaseClient {
   final http.Client _inner;
@@ -100,15 +106,47 @@ void test() async {
     HumanChatMessagePromptTemplate.fromTemplate('{input}'),
   ]);
 
-  final chat = ChatOpenAI(
-      // nu met de tools moet aan assistant.tool-calls gevolgd worden door iets anders (verplicht, anders is er een bad request)
-      apiKey: getOpenAIKey2(),
-      client: LoggingClient(RetryClient(http.Client())),
-      defaultOptions: const ChatOpenAIOptions(
-          temperature: 0.0,
-          model: 'gpt-4o',
-          toolChoice:
-              ChatToolChoice.required)); // model: 'gpt-4-1106-preview');
+  var llm;
+  var apiKey2 = getOpenAIKey2();
+  var service = Service.ollama;
+  var baseUrl;
+  // var baseUrl = getLlmBaseUrl();
+  switch (service) {
+    case Service.openai:
+      llm = ChatOpenAI(
+          // nu met de tools moet aan assistant.tool-calls gevolgd worden door iets anders (verplicht, anders is er een bad request)
+          apiKey: apiKey2,
+          baseUrl: baseUrl ?? 'https://api.openai.com/v1',
+          defaultOptions: const ChatOpenAIOptions(
+              temperature: 0.0,
+              model: 'gpt-4o',
+              toolChoice:
+                  ChatToolChoice.required)); // model: 'gpt-4-1106-preview');
+      break;
+    case Service.openrouter:
+      const model = 'meta-llama/llama-3.1-405b-instruct';
+      // const model = 'meta-llama/llama-3.1-70b-instruct';
+      // const model = 'gpt-4o';
+      llm = ChatOpenAI(
+          apiKey:
+              "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",
+          baseUrl: "https://openrouter.ai/api/v1",
+          defaultOptions: const ChatOpenAIOptions(
+              temperature: 0.0,
+              model: model,
+              toolChoice:
+                  ChatToolChoice.required)); // model: 'gpt-4-1106-preview');
+      break;
+    case Service.ollama:
+      llm = ChatOllama(
+          baseUrl: "http://38.29.145.13:40115/api",
+          defaultOptions: const ChatOllamaOptions(
+              temperature: 0.0,
+              model: 'llama3.1:70b',
+              toolChoice:
+                  ChatToolChoice.required)); // model: 'gpt-4-1106-preview');
+      break;
+  }
 
   // final chat = ChatOpenAI(
   //   apiKey:
@@ -136,7 +174,19 @@ void test() async {
   // var bla = await chainTest.invoke("bla");
   // print(bla);
 
-  final chain = Runnable.fromMap({
+  var llm_with_tools;
+  switch (service) {
+    case Service.openai:
+      llm_with_tools = llm.bind(ChatOpenAIOptions(tools: tools));
+      break;
+    case Service.openrouter:
+      // llm_with_tools = llm.bind(ChatModelOptions(tools: tools));
+      break;
+    case Service.ollama:
+      llm_with_tools = llm.bind(ChatOllamaOptions(tools: tools));
+      break;
+  }
+  var bald_chain = Runnable.fromMap({
         'input': Runnable.passthrough(),
         'history': Runnable.mapInput(
           (_) async {
@@ -146,16 +196,18 @@ void test() async {
         ),
       }) |
       promptTemplate1 |
-      chat.bind(ChatOpenAIOptions(tools: tools)) |
-      outputParser;
+      llm_with_tools;
+  var chain = bald_chain | outputParser;
+
+  // chain = bald_chain;
 
   // final chain = promptTemplate1
-  //     .pipe(chat.bind(ChatOpenAIOptions(tools: const [tool])))
+  //     .pipe(llm.bind(ChatOpenAIOptions(tools: const [tool])))
   //     .pipe(outputParser);
 
   var input1 = 'foo bears';
-  final List<ParsedToolCall> result =
-      await chain.invoke({input1}) as List<ParsedToolCall>;
+  var result1 = await chain.invoke({input1});
+  final List<ParsedToolCall> result = result1 as List<ParsedToolCall>;
 
   result.forEach((element) {
     var foundTool =

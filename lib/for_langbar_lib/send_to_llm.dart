@@ -27,7 +27,7 @@ void submitToLLM(BuildContext context) {
   var baseUrl = getLlmBaseUrl();
   var llm;
 
-  var service = Service.openai;
+  var service = Service.ollama;
   switch (service) {
     case Service.openai:
       llm = ChatOpenAI(
@@ -36,10 +36,13 @@ void submitToLLM(BuildContext context) {
           baseUrl: baseUrl ?? 'https://api.openai.com/v1',
           defaultOptions: const ChatOpenAIOptions(
               temperature: 0.0,
-              model: 'gpt-4o')); // model: 'gpt-4-1106-preview');
+              model: 'gpt-4o',
+              toolChoice:
+                  ChatToolChoice.required)); // model: 'gpt-4-1106-preview');
       break;
     case Service.openrouter:
-      const model = 'meta-llama/llama-3.1-70b-instruct';
+      const model = 'meta-llama/llama-3.1-405b-instruct';
+      // const model = 'meta-llama/llama-3.1-70b-instruct';
       // const model = 'gpt-4o';
       llm = ChatOpenAI(
           apiKey:
@@ -53,10 +56,12 @@ void submitToLLM(BuildContext context) {
       break;
     case Service.ollama:
       llm = ChatOllama(
-          // baseUrl: baseUrl ?? 'https://api.openai.com/v1',
+          baseUrl: "http://38.29.145.13:40115/api",
           defaultOptions: const ChatOllamaOptions(
               temperature: 0.0,
-              model: 'llama3.1')); // model: 'gpt-4-1106-preview');
+              model: 'llama3.1:70b',
+              toolChoice:
+                  ChatToolChoice.required)); // model: 'gpt-4-1106-preview');
       break;
   }
   // model: 'gpt-3.5-turbo');
@@ -71,7 +76,7 @@ final memory = MyConversationBufferWindowMemory(
 //     chatHistory: ChatMessageHistory(),
 //     returnMessages: true); // default window length is 5
 
-Future<void> sendToOpenai(ChatOpenAI llm, BuildContext context) async {
+Future<void> sendToOpenai(BaseChatModel llm, BuildContext context) async {
   // final forecastTool = ForecastScreen.getTool(GoRouter.of(context));
   // final creditCardTool = CreditCardScreen.getTool(GoRouter.of(context));
   var langbarState = Provider.of<LangBarState>(context, listen: false);
@@ -92,11 +97,18 @@ Future<void> sendToOpenai(ChatOpenAI llm, BuildContext context) async {
 
   var query = langbarState.controllerOutlined.text;
 
-  var llm_with_tool = llm.bind(ChatOpenAIOptions(
-    tools: tools,
-    toolChoice: ChatToolChoice.required,
-  ));
-
+  var llm_with_tools;
+  if (llm is ChatOpenAI) {
+    llm_with_tools = llm.bind(ChatOpenAIOptions(
+      tools: tools,
+      toolChoice: ChatToolChoice.required,
+    ));
+  } else {
+    llm_with_tools = llm.bind(ChatOllamaOptions(
+      tools: tools,
+      toolChoice: ChatToolChoice.required,
+    ));
+  }
   var fromMap = Runnable.fromMap({
     'input': Runnable.passthrough(),
     'history': Runnable.mapInput(
@@ -106,14 +118,17 @@ Future<void> sendToOpenai(ChatOpenAI llm, BuildContext context) async {
       },
     ),
   });
-  final chain = fromMap | promptTemplate | llm_with_tool | ToolsOutputParser();
+  var chain = fromMap | promptTemplate | llm_with_tools | ToolsOutputParser();
+
+  // moet blijkbaar anders of met andere toolparser: https://langchaindart.dev/#/modules/model_io/models/chat_models/integrations/ollama?id=chatollama
+  // var chain = fromMap | promptTemplate | llm_with_tools | ToolsOutputParser();
+  // final chain = chain1 | OpenRouterLlamaOutputParser();
   var response;
 
   var lastResult;
   try {
     final output1 = await chain.invoke(query);
     memory.chatHistory.addHumanChatMessage(query);
-
     var toolcalls = output1 as List<ParsedToolCall>;
     var results = [];
     for (var parsedToolCall in toolcalls) {
