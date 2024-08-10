@@ -16,8 +16,7 @@ import 'my_conversation_buffer_memory.dart';
 enum Service {
   openai,
   openrouter,
-  ollama,
-}
+  ollama, groq }
 
 // uses langchain and langchain_openai, and implicitly uses openai_dart
 void submitToLLM(BuildContext context) {
@@ -27,7 +26,7 @@ void submitToLLM(BuildContext context) {
   var baseUrl = getLlmBaseUrl();
   var llm;
 
-  var service = Service.ollama;
+  var service = Service.groq;
   switch (service) {
     case Service.openai:
       llm = ChatOpenAI(
@@ -60,6 +59,16 @@ void submitToLLM(BuildContext context) {
           defaultOptions: const ChatOllamaOptions(
               temperature: 0.0,
               model: 'llama3.1:70b',
+              toolChoice:
+                  ChatToolChoice.required)); // model: 'gpt-4-1106-preview');
+      break;
+    case Service.groq:
+      llm = ChatOpenAI(
+          apiKey: "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",
+          baseUrl: "https://api.groq.com/openai/v1",
+          defaultOptions: const ChatOpenAIOptions(
+              temperature: 0.0,
+              model: 'llama-3.1-8b-instant',
               toolChoice:
                   ChatToolChoice.required)); // model: 'gpt-4-1106-preview');
       break;

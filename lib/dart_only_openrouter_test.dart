@@ -12,6 +12,7 @@ enum Service {
   openai,
   openrouter,
   ollama,
+  groq,
 }
 
 class LoggingClient extends http.BaseClient {
@@ -108,7 +109,7 @@ void test() async {
 
   var llm;
   var apiKey2 = getOpenAIKey2();
-  var service = Service.ollama;
+  var service = Service.groq;
   var baseUrl;
   // var baseUrl = getLlmBaseUrl();
   switch (service) {
@@ -145,6 +146,15 @@ void test() async {
               model: 'llama3.1:70b',
               toolChoice:
                   ChatToolChoice.required)); // model: 'gpt-4-1106-preview');
+    case Service.groq:
+      llm = ChatOpenAI(
+          apiKey: "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",
+          baseUrl: "https://api.groq.com/openai/v1",
+          defaultOptions: const ChatOpenAIOptions(
+              temperature: 0.0,
+              model: 'llama-3.1-8b-instant',
+              toolChoice:
+                  ChatToolChoice.required)); // model: 'gpt-4-1106-preview');
       break;
   }
 
@@ -177,6 +187,9 @@ void test() async {
   var llm_with_tools;
   switch (service) {
     case Service.openai:
+      llm_with_tools = llm.bind(ChatOpenAIOptions(tools: tools));
+      break;
+    case Service.groq:
       llm_with_tools = llm.bind(ChatOpenAIOptions(tools: tools));
       break;
     case Service.openrouter:
