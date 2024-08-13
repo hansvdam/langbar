@@ -26,7 +26,7 @@ void submitToLLM(BuildContext context) {
   var baseUrl = getLlmBaseUrl();
   var llm;
 
-  var service = Service.groq;
+  var service = Service.openai;
   switch (service) {
     case Service.openai:
       llm = ChatOpenAI(
@@ -55,7 +55,7 @@ void submitToLLM(BuildContext context) {
       break;
     case Service.ollama:
       llm = ChatOllama(
-          baseUrl: "http://38.29.145.13:40115/api",
+          baseUrl: "http://129.146.20.55:16707/api",
           defaultOptions: const ChatOllamaOptions(
               temperature: 0.0,
               model: 'llama3.1:70b',
@@ -68,7 +68,9 @@ void submitToLLM(BuildContext context) {
           baseUrl: "https://api.groq.com/openai/v1",
           defaultOptions: const ChatOpenAIOptions(
               temperature: 0.0,
-              model: 'llama-3.1-8b-instant',
+              // versatile lijkt het alleen te doen bij beperkt aantal functies
+              model: 'llama-3.1-70b-versatile',
+              // model: 'llama-3.1-8b-instant',
               toolChoice:
                   ChatToolChoice.required)); // model: 'gpt-4-1106-preview');
       break;
