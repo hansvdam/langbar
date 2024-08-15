@@ -26,7 +26,7 @@ void submitToLLM(BuildContext context) {
   var baseUrl = getLlmBaseUrl();
   var llm;
 
-  var service = Service.openai;
+  var service = Service.groq;
   switch (service) {
     case Service.openai:
       llm = ChatOpenAI(
