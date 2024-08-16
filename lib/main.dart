@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:langbar/ui/main_scaffolds.dart';
+import 'package:langbar/ui/screens/models/BSMap.dart';
+import 'package:langbar/ui/screens/models/Space.dart';
 import 'package:provider/provider.dart';
 
 import 'for_langbar_lib/langbar_states.dart';
@@ -43,6 +45,23 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(
             create: (context) => WidthChanged(),
             // child: const MyApp(),
+          ),
+          Provider(create: (context) => BSMap([])),
+          // CartModel is implemented as a ChangeNotifier, which calls for the use
+          // of ChangeNotifierProvider. Moreover, CartModel depends
+          // on CatalogModel, so a ProxyProvider is needed.
+          ChangeNotifierProxyProvider<BSMap, Space?>(
+            create: (context) => null,
+            update: (context, bsMap, previousSpace) {
+              // if (bsMap.currentSpace != null) {
+              return bsMap.currentSpace;
+            },
+          ),
+          ChangeNotifierProxyProvider2<BSMap, Space?, Ticket?>(
+            create: (context) => null,
+            update: (context, bsMap, currentSpace, previousTicket) {
+              return bsMap.currentTicket;
+            },
           ),
         ],
         child: Consumer<ChatHistory>(builder: (context, cart, child) {

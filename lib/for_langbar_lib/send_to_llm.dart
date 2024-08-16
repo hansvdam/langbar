@@ -26,13 +26,13 @@ void submitToLLM(BuildContext context) {
   var baseUrl = getLlmBaseUrl();
   var llm;
 
-  var service = Service.groq;
+  var service = Service.openai;
   switch (service) {
     case Service.openai:
       llm = ChatOpenAI(
           // nu met de tools moet aan assistant.tool-calls gevolgd worden door iets anders (verplicht, anders is er een bad request)
-          apiKey: apiKey2,
-          baseUrl: baseUrl ?? 'https://api.openai.com/v1',
+          apiKey: getOpenAIKey2(),
+          // baseUrl: baseUrl ?? 'https://api.openai.com/v1',
           defaultOptions: const ChatOpenAIOptions(
               temperature: 0.0,
               model: 'gpt-4o',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:langbar/ui/screens/AccountsScreen.dart';
+import 'package:langbar/ui/screens/AveryScreen.dart';
 import 'package:langbar/ui/screens/Contacts.dart';
 import 'package:langbar/ui/screens/TransactionsScreen.dart';
 import 'package:langbar/ui/screens/TransferScreen.dart';
@@ -11,7 +12,6 @@ import 'for_langbar_lib/llm_go_route.dart';
 import 'for_langchain/for_langchain.dart';
 import 'ui/main_scaffolds.dart';
 import 'ui/screens/CreditCardScreen.dart';
-import 'ui/screens/MapScreen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigator1Key = GlobalKey<NavigatorState>(debugLabel: 'shell1');
@@ -26,7 +26,7 @@ List<UIParameter> cardparams = const [
   UIParameter(
     name: 'limit',
     description: 'New limit for the card',
-    type: 'integer',
+    type: Type.integer,
   ),
   UIParameter(
     name: 'action',
@@ -234,22 +234,25 @@ List<RouteBase> navBarRoutes = [
         navigatorKey: _shellNavigatorMapKey,
         routes: [
           DocumentedGoRoute(
-            name: MapScreen.name,
-            description:
-                "Show ATMs or Bank offices on map, nearest to user's current location",
-            path: "/${MapScreen.name}",
+            name: AveryScreen.name,
+            description: "vergaar data over een gat of scheur in het schip",
+            path: "/${AveryScreen.name}",
             parameters: const [
               UIParameter(
-                name: 'atmOrOffice',
-                description: 'show atms or offices',
-                enumeration: ["atms", "offices"],
+                name: 'bakboord_of_stuurboord',
+                description:
+                    'of de averij zich bevindt aan bakboord- (linker) of stuurboordzijde (rechts) van het schip',
+                enumeration: ["bakboord", "stuurboord"],
+              ),
+              UIParameter(
+                name: 'voor_of_achter',
+                description:
+                    'of de averij zich bevindt aan de voorkant of achterkant van het schip',
+                enumeration: ["voor", "achter"],
               ),
             ],
             pageBuilder: (context, state) {
-              return NoTransitionPage(
-                  child: MapScreen(
-                      label: 'ATMS and Offices',
-                      atmOrOffice: state.uri.queryParameters['atmOrOffice']));
+              return NoTransitionPage(child: AveryScreen());
             },
           ),
         ],
@@ -265,7 +268,7 @@ List<RouteBase> navBarRoutes = [
               UIParameter(
                 name: 'amount',
                 description: 'amount to transfer',
-                type: 'number',
+                type: Type.number,
               ),
               UIParameter(
                 name: 'destinationName',

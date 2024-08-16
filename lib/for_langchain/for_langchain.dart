@@ -1,24 +1,26 @@
 import 'package:langchain/langchain.dart';
 
+enum Type { string, integer, number, boolean, object, array, enumeration }
+
 class UIParameter {
   const UIParameter({
     required this.name,
     required this.description,
-    this.type = 'string',
+    this.type = Type.string,
     this.required = false,
     this.enumeration,
   });
 
   final String name;
   final String description;
-  final String type;
+  final Type type;
   final bool required;
   final List<String>? enumeration;
 
   Map<String, dynamic> asFunctionParam() {
     Map<String, dynamic> map = {
       'description': description,
-      'type': type,
+      'type': type.toString().split('.').last
     };
     if (enumeration != null) {
       map['enum'] = enumeration!;
