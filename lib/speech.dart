@@ -32,6 +32,7 @@ class Speech {
     if (isAvailable) {
       langbarLogger.d('startListening');
       _speech.listen(
+        localeId: "nl_NL",
         onResult: (value) => onResult(value.recognizedWords),
         listenFor: const Duration(seconds: 30),
         pauseFor: const Duration(seconds: 3),

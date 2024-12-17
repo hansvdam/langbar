@@ -75,7 +75,7 @@ void submitToLLM(BuildContext context) {
       break;
     case Service.ollama:
       llm = ChatOllama(
-          // baseUrl: "http://129.146.20.55:16707/api",
+          baseUrl: "http://45.135.56.11:25215/api",
           defaultOptions: const ChatOllamaOptions(
               temperature: 0.0,
               model: 'llama3.3:70b-instruct-q8_0',
