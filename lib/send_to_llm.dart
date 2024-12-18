@@ -35,6 +35,10 @@ void setSystemPrompt(String prompt) {
   systemPrompt = prompt;
 }
 
+var service = Service.openai;
+String? externalModel;
+String? baseUrl;
+
 // uses langchain and langchain_openai, and implicitly uses openai_dart
 void submitToLLM(BuildContext context) {
   var langbarState = Provider.of<LangBarState>(context, listen: false);
@@ -47,7 +51,6 @@ void submitToLLM(BuildContext context) {
   BaseChatModel llm;
 
   // var service = Service.ollama;
-  var service = Service.openai;
   switch (service) {
     case Service.openai:
       llm = ChatOpenAI(
@@ -74,14 +77,18 @@ void submitToLLM(BuildContext context) {
                   ChatToolChoice.required)); // model: 'gpt-4-1106-preview');
       break;
     case Service.ollama:
-      llm = ChatOllama(
-          baseUrl: "http://45.135.56.11:25215/api",
-          defaultOptions: const ChatOllamaOptions(
-              temperature: 0.0,
-              model: 'llama3.3:70b-instruct-q8_0',
-              // model: 'llama3.1:70b',
-              toolChoice:
-                  ChatToolChoice.required)); // model: 'gpt-4-1106-preview');
+      llm = baseUrl != null
+          ? ChatOllama(
+              baseUrl: baseUrl!,
+              defaultOptions: ChatOllamaOptions(
+                  temperature: 0.0,
+                  model: externalModel ?? 'llama3.3:70b-instruct-q8_0',
+                  toolChoice: ChatToolChoice.required))
+          : ChatOllama(
+              defaultOptions: ChatOllamaOptions(
+                  temperature: 0.0,
+                  model: externalModel ?? 'llama3.3:70b-instruct-q8_0',
+                  toolChoice: ChatToolChoice.required));
       break;
     case Service.groq:
       llm = ChatOpenAI(
