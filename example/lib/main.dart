@@ -74,17 +74,14 @@ class MyApp extends StatelessWidget {
         providers: [
           ChangeNotifierProvider(
             create: (context) => ChatHistory(),
-            // child: const MyApp(),
           ),
           ChangeNotifierProvider(
             create: (context) => LangBarState(
                 enableSpeech:
                     PlatformDetails().isMobile || PlatformDetails().isWeb),
-            // child: const MyApp(),
           ),
           ChangeNotifierProvider(
             create: (context) => WidthChanged(),
-            // child: const MyApp(),
           ),
           BlocProvider(create: (context) => CurrentScreenCubit()),
           Provider(create: (context) => BSMap([])),
@@ -94,7 +91,6 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProxyProvider<BSMap, Space?>(
             create: (context) => null,
             update: (context, bsMap, previousSpace) {
-              // if (bsMap.currentSpace != null) {
               return bsMap.currentSpace;
             },
           ),

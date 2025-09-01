@@ -80,8 +80,6 @@ class _ForecastScreenState extends State<ForecastScreen> {
 
     List<Widget> children = [];
     var children2 = <Widget>[
-      // Text('Screen ${widget.label}',
-      //     style: Theme.of(context).textTheme.titleLarge),
       const Padding(padding: EdgeInsets.all(4)),
       Wrap(
         children: [

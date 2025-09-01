@@ -47,7 +47,6 @@ Future<List<Contact>> readContactsFromCsv(BuildContext context) async {
   // do not use rootBundle.loadString, because it does not work on web (or you have to specify the assets folder as assets/assets)
   String fileContent = await DefaultAssetBundle.of(context)
       .loadString('assets/data/contacts.csv');
-  // String fileContent = await webFriendlyLoadString('assets/data/contacts.csv');
   final csvRows = const CsvToListConverter().convert(fileContent, eol: "\n");
 
   // Skip the header row and map each row to a Contact object
@@ -57,30 +56,6 @@ Future<List<Contact>> readContactsFromCsv(BuildContext context) async {
   return list;
 }
 
-// // on web (on firebase deploy) stuff ends up in assets/assets. instead of just assets
-// // also have to make sure firebase.json rewrites are as follows:
-// // "rewrites": [
-// // {
-// // "source": "/assets/**",
-// // "destination": "/assets/**"
-// // },
-// // {
-// // "source": "**",
-// // "destination": "/index.html"
-// // }
-// // ]
-// Future<String> webFriendlyLoadString(String path) async {
-//   String fileContent = "";
-//   try {
-//     fileContent = await rootBundle.loadString(path);
-//   } catch (e) {
-//     try {
-//       fileContent = await rootBundle.loadString('assets/$path');
-//     } catch (e) {
-//     }
-//   }
-//   return fileContent;
-// }
 
 Future<List<BankTransaction>> readTransactionsFromCsv(
     BuildContext context) async {

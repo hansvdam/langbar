@@ -31,7 +31,6 @@ class Locations {
   String? name;
   String? displayname;
   String? subType;
-  // Null? englishSubType;
   String? region;
   String? url;
 
@@ -41,7 +40,6 @@ class Locations {
         this.name,
         this.displayname,
         this.subType,
-        // this.englishSubType,
         this.region,
         this.url});
 
@@ -51,7 +49,6 @@ class Locations {
     name = json['Name'];
     displayname = json['Displayname'];
     subType = json['SubType'];
-    // englishSubType = json['EnglishSubType'];
     region = json['Region'];
     url = json['Url'];
   }
@@ -63,7 +60,6 @@ class Locations {
     data['Name'] = this.name;
     data['Displayname'] = this.displayname;
     data['SubType'] = this.subType;
-    // data['EnglishSubType'] = this.englishSubType;
     data['Region'] = this.region;
     data['Url'] = this.url;
     return data;

@@ -29,9 +29,6 @@ class BSMap extends ChangeNotifier {
     notifyListeners();
   }
 
-  // /// The current total price of all items.
-  // int get totalPrice =>
-  //     tickets.fold(0, (total, current) => total + current.price);
 
   /// Adds [item] to cart. This is the only way to modify the cart from outside.
   void add(Ticket item) {

@@ -143,8 +143,6 @@ class TransferContentState extends UpdatingScreenState<TransferContentWidget> {
     _descriptionController.clear();
   }
 
-  ///
-  /// ******* look for flutter material autocomplete***********
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -183,7 +181,6 @@ class TransferContentState extends UpdatingScreenState<TransferContentWidget> {
         Center(
             child: FilledButton(
               onPressed: () {
-                // need to clear the transfer screen somehow:
                 context.go("/" + TransferScreen.name);
             var goRouter = GoRouter.of(context);
             // ugly trick, but we need to clear the Transfer screen first.

@@ -20,12 +20,6 @@ class LoggingClient extends http.BaseClient {
 
   LoggingClient(this._inner);
 
-  // Future<String> getBodyFromStreamedRequest(http.BaseRequest request) async {
-  //   // Read the stream of bytes
-  //   final bytes = await request.finalize().toList();
-  //   // Convert bytes to a single string
-  //   return utf8.decode(bytes.expand((x) => x).toList());
-  // }
 
   Future<String> getBodyFromStreamedResponse(
       http.StreamedResponse response) async {
@@ -111,7 +105,6 @@ void test() async {
   var apiKey2 = getOpenAIKey2();
   var service = Service.groq;
   var baseUrl;
-  // var baseUrl = getLlmBaseUrl();
   switch (service) {
     case Service.openai:
       llm = ChatOpenAI(
@@ -126,8 +119,6 @@ void test() async {
       break;
     case Service.openrouter:
       const model = 'meta-llama/llama-3.1-405b-instruct';
-      // const model = 'meta-llama/llama-3.1-70b-instruct';
-      // const model = 'gpt-4o';
       llm = ChatOpenAI(
           apiKey:
               "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",
@@ -158,31 +149,11 @@ void test() async {
       break;
   }
 
-  // final chat = ChatOpenAI(
-  //   apiKey:
-  //       "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",
-  //   baseUrl: 'https://openrouter.ai/api/v1',
-  //   defaultOptions:
-  //       ChatOpenAIOptions(model: 'gpt-4o', toolChoice: ChatToolChoice.required),
-  // );
   final outputParser = ToolsOutputParser();
 
   final memory = ConversationBufferMemory(returnMessages: true);
 
   const tools = const [tool];
-  // final chainTest = Runnable.fromMap({
-  //   'input': Runnable.passthrough(),
-  //   'history': Runnable.mapInput(
-  //         (_) async {
-  //       final m = await memory.loadMemoryVariables();
-  //       return m['history'];
-  //     },
-  //   ),
-  // }) |
-  // promptTemplate1;
-  //
-  // var bla = await chainTest.invoke("bla");
-  // print(bla);
 
   var llm_with_tools;
   switch (service) {
@@ -193,7 +164,6 @@ void test() async {
       llm_with_tools = llm.bind(ChatOpenAIOptions(tools: tools));
       break;
     case Service.openrouter:
-      // llm_with_tools = llm.bind(ChatModelOptions(tools: tools));
       break;
     case Service.ollama:
       llm_with_tools = llm.bind(ChatOllamaOptions(tools: tools));
@@ -212,11 +182,7 @@ void test() async {
       llm_with_tools;
   var chain = bald_chain | outputParser;
 
-  // chain = bald_chain;
 
-  // final chain = promptTemplate1
-  //     .pipe(llm.bind(ChatOpenAIOptions(tools: const [tool])))
-  //     .pipe(outputParser);
 
   var input1 = 'foo bears';
   var result1 = await chain.invoke({input1});

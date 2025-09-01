@@ -50,7 +50,6 @@ class FrontScreen extends StatelessWidget {
               label: label,
               body: const SafeArea(
                   child: Markdown(
-                // controller: controller,
                 selectable: true,
                 data: _markdownData,
                 imageDirectory: 'https://raw.githubusercontent.com',

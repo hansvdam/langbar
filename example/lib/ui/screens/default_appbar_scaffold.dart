@@ -114,10 +114,6 @@ class _DefaultDrawerState extends State<DefaultDrawer> {
               selectedIndex: _selectedIndex,
               label: "Payment Request",
               path: '/payment_request'),
-          // DrawerItem(
-          //     selectedIndex: _selectedIndex,
-          //     label: "Weather",
-          //     path: '/${ForecastScreen.name}'),
         ],
       ),
     );

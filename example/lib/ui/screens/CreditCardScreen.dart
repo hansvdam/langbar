@@ -110,8 +110,6 @@ class CreditCardScreenBody extends StatelessWidget {
           }
         });
       }
-      //     // textEditingController.text = (state._limit ?? '').toString();
-      // actionController.text = state.action.name;
       final List<DropdownMenuEntry<ActionOnCard>> actionEntries =
           <DropdownMenuEntry<ActionOnCard>>[];
       for (final ActionOnCard action in ActionOnCard.values) {

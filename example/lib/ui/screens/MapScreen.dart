@@ -37,7 +37,6 @@ class _MapScreenState extends UpdatingScreenState<MapScreen> {
         label: widget.label,
         body: SafeArea(
             child: Column(mainAxisSize: MainAxisSize.max, children: [
-              // Text("hoi")
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
