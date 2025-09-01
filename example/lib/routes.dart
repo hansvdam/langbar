@@ -7,9 +7,10 @@ import 'package:langbar/ui/screens/TransactionsScreen.dart';
 import 'package:langbar/ui/screens/TransferScreen.dart';
 import 'package:langbar/ui/screens/front_screen.dart';
 
-import 'for_langbar_lib/langbar_wrapper.dart';
-import 'for_langbar_lib/llm_go_route.dart';
-import 'for_langchain/for_langchain.dart';
+import 'package:langbar_core/ui/langfield/langbar_wrapper.dart';
+import 'package:langbar_core/documented_route.dart';
+import 'package:langbar_core/data/for_langchain.dart';
+import 'package:langbar_core/data/data_key.dart';
 import 'ui/main_scaffolds.dart';
 import 'ui/screens/CreditCardScreen.dart';
 
@@ -22,16 +23,28 @@ final _shellNavigatorMapKey = GlobalKey<NavigatorState>(debugLabel: 'shellB');
 final _shellNavigatorContactsKey =
     GlobalKey<NavigatorState>(debugLabel: 'shellContacts');
 
-List<UIParameter> cardparams = const [
-  UIParameter(
+// Define DataKey constants for the example app
+const DataKey limitKey = DataKey('limit');
+const DataKey actionKey = DataKey('action');
+const DataKey filterStringKey = DataKey('filterString');
+const DataKey bakboordOfStuurboordKey = DataKey('bakboord_of_stuurboord');
+const DataKey voorOfAchterKey = DataKey('voor_of_achter');
+const DataKey amountKey = DataKey('amount');
+const DataKey destinationNameKey = DataKey('destinationName');
+const DataKey purposeKey = DataKey('purpose');
+
+List<SUIParameter> cardparams = const [
+  SUIParameter(
     name: 'limit',
     description: 'New limit for the card',
-    type: Type.integer,
+    type: DataType.integer,
+    key: limitKey,
   ),
-  UIParameter(
+  SUIParameter(
     name: 'action',
     description: 'action to perform on the card',
     enumeration: ['replace', 'cancel'],
+    key: actionKey,
   ),
 ];
 
@@ -81,7 +94,7 @@ List<RouteBase> hamburgerRoutes = [
   //     name: 'payment_request',
   //     description: 'make a payment request',
   //     parameters: const [
-  //       UIParameter(
+  //       SUIParameter(
   //         name: 'amount',
   //         description: 'amount to reques',
   //         type: 'number',
@@ -103,12 +116,12 @@ List<RouteBase> hamburgerRoutes = [
   //     parentNavigatorKey: _rootNavigatorKey,
   //     description: "get weather forecast information for a place on earth",
   //     parameters: const [
-  //       UIParameter(
+  //       SUIParameter(
   //         name: 'place',
   //         description: 'place on earth',
   //         required: true,
   //       ),
-  //       UIParameter(
+  //       SUIParameter(
   //         name: 'numDays',
   //         description: 'The number of days to forecast',
   //         type: 'integer',
@@ -135,28 +148,28 @@ List<RouteBase> hamburgerRoutes = [
   //     description:
   //         'Plan a public transport trip from A to B in the Netherlands.',
   //     parameters: const [
-  //       UIParameter(
+  //       SUIParameter(
   //         name: 'origin',
   //         description: 'origin address, train station or postal code.',
   //         required: true,
   //       ),
-  //       UIParameter(
+  //       SUIParameter(
   //         name: 'destination',
   //         description: 'destination address, train station or postal code.',
   //         required: true,
   //       ),
-  //       UIParameter(
+  //       SUIParameter(
   //         name: 'trip_date_time',
   //         description:
   //             'Requested DateTime for the departure or arrival of the trip in \'YYYY-MM-DDTHH:MM:SS+02:00\' format. The user will use a time in a 12 hour system, make an intelligent guess about what the user is most likely to mean in terms of a 24 hour system, e.g. not planning for the past.',
   //       ),
-  //       UIParameter(
+  //       SUIParameter(
   //         name: 'departure',
   //         description:
   //             'True to depart at the given time, False to arrive at the given time.',
   //         required: true,
   //       ),
-  //       UIParameter(
+  //       SUIParameter(
   //         name: 'language',
   //         description: 'Language of the input text',
   //         required: true,
@@ -215,9 +228,10 @@ List<RouteBase> navBarRoutes = [
                     "Show transactions of an account, and maybe filter them",
                 path: "${TransactionsScreen.name}",
                 parameters: const [
-                  UIParameter(
+                  SUIParameter(
                     name: 'filterString',
                     description: 'filter string for the list',
+                    key: filterStringKey,
                   ),
                 ],
                 builder: (context, state) => TransactionsScreen(
@@ -238,17 +252,19 @@ List<RouteBase> navBarRoutes = [
             description: "vergaar data over een gat of scheur in het schip",
             path: "/${AveryScreen.name}",
             parameters: const [
-              UIParameter(
+              SUIParameter(
                 name: 'bakboord_of_stuurboord',
                 description:
                     'of de averij zich bevindt aan bakboord- (linker) of stuurboordzijde (rechts) van het schip',
                 enumeration: ["bakboord", "stuurboord"],
+                key: bakboordOfStuurboordKey,
               ),
-              UIParameter(
+              SUIParameter(
                 name: 'voor_of_achter',
                 description:
                     'of de averij zich bevindt aan de voorkant of achterkant van het schip',
                 enumeration: ["voor", "achter"],
+                key: voorOfAchterKey,
               ),
             ],
             pageBuilder: (context, state) {
@@ -265,19 +281,22 @@ List<RouteBase> navBarRoutes = [
             description: "Make a bank transfer",
             path: "/${TransferScreen.name}",
             parameters: const [
-              UIParameter(
+              SUIParameter(
                 name: 'amount',
                 description: 'amount to transfer',
-                type: Type.number,
+                type: DataType.number,
+                key: amountKey,
               ),
-              UIParameter(
+              SUIParameter(
                 name: 'destinationName',
                 description: 'destination account name to transfer money to',
+                key: destinationNameKey,
               ),
-              UIParameter(
+              SUIParameter(
                 name: 'purpose',
                 description:
                     'Purpose of the transfer. Make sure the message formulation is directed toward the receiver, e.g. "donation for your Library" instead of "as a donation for his library".',
+                key: purposeKey,
               ),
             ],
             pageBuilder: (context, state) {
@@ -301,10 +320,11 @@ List<RouteBase> navBarRoutes = [
             description: "Show address book of contacts and maybe filter them",
             path: "/${ContactsScreen.name}",
             parameters: const [
-              UIParameter(
+              SUIParameter(
                 name: 'filterString',
                 description: 'string for filtering the list',
                 required: false,
+                key: filterStringKey,
               ),
             ],
             pageBuilder: (context, state) {
@@ -320,9 +340,9 @@ List<RouteBase> navBarRoutes = [
   ),
 ];
 
-List<RouteBase> routes = hamburgerRoutes + navBarRoutes;
+List<RouteBase> routesList = hamburgerRoutes + navBarRoutes;
 
-final goRouter = GoRouter(
+final routes = GoRouter(
   initialLocation: '/home',
   // * Passing a navigatorKey causes an issue on hot reload:
   // * https://github.com/flutter/flutter/issues/113757#issuecomment-1518421380
@@ -330,5 +350,5 @@ final goRouter = GoRouter(
   // * root on hot reload
   navigatorKey: _rootNavigatorKey,
   debugLogDiagnostics: true,
-  routes: routes,
+  routes: routesList,
 );

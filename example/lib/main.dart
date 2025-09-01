@@ -3,19 +3,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
-import 'package:langbar/ui/main_scaffolds.dart';
+import 'package:langbar_core/ui/langfield/langbar_states.dart';
+import 'package:langbar_core/platform_details.dart';
+import 'package:langbar_core/send_to_llm.dart';
+import 'package:langbar_core/ui/cubits/current_screen_cubit.dart';
+import 'package:langbar_core/utils/utils.dart';
 import 'package:langbar/ui/screens/models/BSMap.dart';
 import 'package:langbar/ui/screens/models/Space.dart';
+import 'package:langbar/ui/main_scaffolds.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'for_langbar_lib/langbar_states.dart';
-import 'for_langbar_lib/platform_details.dart';
-import 'routes.dart';
+import 'routes.dart' show routesList, routes;
 
 class GlobalContextService {
   static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 }
-// private navigators
+
+String systemPrompt = """**Role:**
+You are a smart assistant for a financial app that helps users navigate screens and perform actions. You always return tool calls to navigate in the GUI app.
+
+**Tasks:**
+1. Help users navigate to different screens and features.
+2. Process financial data and requests.
+3. Do not call the same tool in parallel.
+4. Only use parameters provided by the user, do not assume missing parameters.
+""";
 
 void main() async {
   // see: https://codewithandrea.com/articles/flutter-navigation-gorouter-go-vs-push/
@@ -23,6 +36,10 @@ void main() async {
   
   // Load environment variables from .env file (from assets)
   await dotenv.load();
+  
+  // Initialize langbar_core library
+  setRoutes(routesList);
+  setSystemPrompt(systemPrompt);
   
   GoRouter.optionURLReflectsImperativeAPIs = true;
   // turn off the # in the URLs on the web
@@ -51,6 +68,7 @@ class MyApp extends StatelessWidget {
             create: (context) => WidthChanged(),
             // child: const MyApp(),
           ),
+          BlocProvider(create: (context) => CurrentScreenCubit()),
           Provider(create: (context) => BSMap([])),
           // CartModel is implemented as a ChangeNotifier, which calls for the use
           // of ChangeNotifierProvider. Moreover, CartModel depends
@@ -74,7 +92,7 @@ class MyApp extends StatelessWidget {
             Provider.of<LangBarState>(context).screenheight =
                 constraints.maxHeight;
             return MaterialApp.router(
-              routerConfig: goRouter,
+              routerConfig: routes,
               debugShowCheckedModeBanner: false,
               theme: ThemeData(
                 primarySwatch: Colors.indigo,

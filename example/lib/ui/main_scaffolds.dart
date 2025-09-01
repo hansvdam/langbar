@@ -6,7 +6,7 @@ import 'package:langbar/ui/screens/default_appbar_scaffold.dart';
 import 'package:langbar/ui/utils.dart';
 import 'package:provider/provider.dart';
 
-import '../for_langbar_lib/langbar_wrapper.dart';
+import 'package:langbar_core/ui/langfield/langbar_wrapper.dart';
 
 const smallSpacing = 10.0;
 const defaultPadding = 16.0;

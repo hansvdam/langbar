@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
-import '../../for_langbar_lib/langbar_states.dart';
+import 'package:langbar_core/ui/langfield/langbar_states.dart';
 import '../../routes.dart';
 import '../main_scaffolds.dart';
 import '../utils.dart';
@@ -142,7 +143,7 @@ class DrawerItem extends StatelessWidget {
       title: Text(label),
       selected: _selectedIndex == 0,
       onTap: () {
-        goRouter.push(path);
+        GoRouter.of(context).push(path);
         Navigator.pop(context);
       },
     );

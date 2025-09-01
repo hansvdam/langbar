@@ -4,7 +4,7 @@ import 'package:image_network/image_network.dart';
 import 'package:langbar/ui/screens/dummy_screens/SampleScreenTemplate.dart';
 import 'package:provider/provider.dart';
 
-import '../../for_langbar_lib/langbar_states.dart';
+import 'package:langbar_core/ui/langfield/langbar_states.dart';
 import '../utils.dart';
 
 enum ActionOnCard {
