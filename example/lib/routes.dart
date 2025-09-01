@@ -13,6 +13,7 @@ import 'package:langbar_core/data/for_langchain.dart';
 import 'package:langbar_core/data/data_key.dart';
 import 'ui/main_scaffolds.dart';
 import 'ui/screens/CreditCardScreen.dart';
+import 'viewmodels/credit_card_screen_view_model.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigator1Key = GlobalKey<NavigatorState>(debugLabel: 'shell1');
