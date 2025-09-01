@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:langbar/ui/screens/AccountsScreen.dart';
-import 'package:langbar/ui/screens/AveryScreen.dart';
+import 'package:langbar/ui/screens/MapScreen.dart';
 import 'package:langbar/ui/screens/Contacts.dart';
 import 'package:langbar/ui/screens/TransactionsScreen.dart';
 import 'package:langbar/ui/screens/TransferScreen.dart';
@@ -27,8 +27,7 @@ final _shellNavigatorContactsKey =
 const DataKey limitKey = DataKey('limit');
 const DataKey actionKey = DataKey('action');
 const DataKey filterStringKey = DataKey('filterString');
-const DataKey bakboordOfStuurboordKey = DataKey('bakboord_of_stuurboord');
-const DataKey voorOfAchterKey = DataKey('voor_of_achter');
+const DataKey atmOrOfficeKey = DataKey('atmOrOffice');
 const DataKey amountKey = DataKey('amount');
 const DataKey destinationNameKey = DataKey('destinationName');
 const DataKey purposeKey = DataKey('purpose');
@@ -153,27 +152,24 @@ List<RouteBase> navBarRoutes = [
         navigatorKey: _shellNavigatorMapKey,
         routes: [
           DocumentedGoRoute(
-            name: AveryScreen.name,
-            description: "vergaar data over een gat of scheur in het schip",
-            path: "/${AveryScreen.name}",
+            name: MapScreen.name,
+            description: "Find ATMs or bank offices near you",
+            path: "/${MapScreen.name}",
             parameters: const [
               SUIParameter(
-                name: 'bakboord_of_stuurboord',
-                description:
-                    'of de averij zich bevindt aan bakboord- (linker) of stuurboordzijde (rechts) van het schip',
-                enumeration: ["bakboord", "stuurboord"],
-                key: bakboordOfStuurboordKey,
-              ),
-              SUIParameter(
-                name: 'voor_of_achter',
-                description:
-                    'of de averij zich bevindt aan de voorkant of achterkant van het schip',
-                enumeration: ["voor", "achter"],
-                key: voorOfAchterKey,
+                name: 'atmOrOffice',
+                description: 'Whether to show ATMs or bank offices',
+                enumeration: ["atms", "offices"],
+                key: atmOrOfficeKey,
               ),
             ],
             pageBuilder: (context, state) {
-              return NoTransitionPage(child: AveryScreen());
+              return NoTransitionPage(
+                child: MapScreen(
+                  label: 'ATM & Office Finder',
+                  atmOrOffice: state.uri.queryParameters['atmOrOffice'],
+                ),
+              );
             },
           ),
         ],
