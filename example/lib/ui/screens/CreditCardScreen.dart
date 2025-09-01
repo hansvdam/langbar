@@ -39,7 +39,7 @@ class CreditCardScreen extends StatelessWidget {
   }
 }
 
-class CreditCardScreenBody extends StatelessWidget {
+class CreditCardScreenBody extends StatefulWidget {
   final String label;
   final String imageSrc;
 
@@ -50,25 +50,46 @@ class CreditCardScreenBody extends StatelessWidget {
   });
 
   @override
+  State<CreditCardScreenBody> createState() => _CreditCardScreenBodyState();
+}
+
+class _CreditCardScreenBodyState extends State<CreditCardScreenBody> {
+  late final TextEditingController textEditingController;
+  late final TextEditingController actionController;
+
+  @override
+  void initState() {
+    super.initState();
+    textEditingController = TextEditingController();
+    actionController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    textEditingController.dispose();
+    actionController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocBuilder<CreditCardScreenViewModel, CreditCardScreenState>(
       builder: (context, state) {
-        final textEditingController = TextEditingController();
-        final actionController = TextEditingController();
-
         // Handle initial animation
         if (state.initial) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            context.read<CreditCardScreenViewModel>().markAsNotInitial();
-            if (state.action == ActionOnCard.none) {
-              actionController.text = state.action.name;
-            }
-            animateFieldContent((state.limit ?? '').toString(), textEditingController)
-                .then((_) {
-              if (state.action != ActionOnCard.none) {
-                animateFieldContent(state.action.name, actionController);
+            if (mounted) {
+              context.read<CreditCardScreenViewModel>().markAsNotInitial();
+              if (state.action == ActionOnCard.none) {
+                actionController.text = state.action.name;
               }
-            });
+              animateFieldContent((state.limit ?? '').toString(), textEditingController)
+                  .then((_) {
+                if (mounted && state.action != ActionOnCard.none) {
+                  animateFieldContent(state.action.name, actionController);
+                }
+              });
+            }
           });
         }
 
@@ -82,7 +103,7 @@ class CreditCardScreenBody extends StatelessWidget {
         List<Widget> children = [];
         children.add(Center(
             child: ImageNetwork(
-                image: imageSrc,
+                image: widget.imageSrc,
                 height: 150,
                 width: 300,
                 fitWeb: BoxFitWeb.contain,
@@ -127,7 +148,7 @@ class CreditCardScreenBody extends StatelessWidget {
             child: const Text('Submit')));
 
         return Scaffold(
-            appBar: createAppBar(context, label, () {
+            appBar: createAppBar(context, widget.label, () {
               var langbar = Provider.of<LangBarState>(context, listen: false);
               langbar.toggleLangbar();
             }, leadingHamburger: false),
