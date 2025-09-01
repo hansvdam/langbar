@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'default_appbar_scaffold.dart';
+import '../../viewmodels/front_screen_view_model.dart';
 
 const smallSpacing = 10.0;
 
@@ -40,14 +42,21 @@ class FrontScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultAppbarScaffold(
-        label: label,
-        body: const SafeArea(
-            child: Markdown(
-          // controller: controller,
-          selectable: true,
-          data: _markdownData,
-          imageDirectory: 'https://raw.githubusercontent.com',
-        )));
+    return BlocProvider(
+      create: (context) => FrontScreenViewModel(context: context),
+      child: BlocBuilder<FrontScreenViewModel, void>(
+        builder: (context, state) {
+          return DefaultAppbarScaffold(
+              label: label,
+              body: const SafeArea(
+                  child: Markdown(
+                // controller: controller,
+                selectable: true,
+                data: _markdownData,
+                imageDirectory: 'https://raw.githubusercontent.com',
+              )));
+        },
+      ),
+    );
   }
 }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../models/account.dart';
 import 'default_appbar_scaffold.dart';
+import '../../viewmodels/accounts_screen_view_model.dart';
 
 const smallSpacing = 10.0;
 const defaultPadding = 16.0;
@@ -13,7 +15,16 @@ class AccountsScreen extends DefaultAppbarScreen {
       Key? key,
       required Map<String, String> queryParameters,
       required detailsPath})
-      : super(body: AccountsList(detailsPath), key: key) {}
+      : super(
+            body: BlocProvider(
+              create: (context) => AccountsScreenViewModel(context: context),
+              child: BlocBuilder<AccountsScreenViewModel, void>(
+                builder: (context, state) {
+                  return AccountsList(detailsPath);
+                },
+              ),
+            ),
+            key: key) {}
 
   static const name = 'accounts';
 }
