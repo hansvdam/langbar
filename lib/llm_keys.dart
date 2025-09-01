@@ -1,46 +1,38 @@
-// use the follwing command to ignore the file from git (like a changelist)
-// git update-index --skip-worktree lib/llm_keys.dart
-// git update-index --no-skip-worktree <file>
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 
-String getOpenAIKey() => "";
+String getOpenAIKey() => dotenv.env['OPENAI_API_KEY'] ?? getSessionToken()!;
 
-String getOpenAIKey2() => "";
+String getOpenAIKey2() => dotenv.env['OPENAI_API_KEY_2'] ?? '';
 
-String getGroqApiKey() =>
-    "";
+String getGroqApiKey() => dotenv.env['GROQ_API_KEY'] ?? '';
 
-String getOpenRouterAPIKey() =>
-    "";
+String getOpenRouterAPIKey() => dotenv.env['OPENROUTER_API_KEY'] ?? '';
 
-String? getLlmBaseUrl2() => null;
+String? getLlmBaseUrl2() => dotenv.env['LLM_BASE_URL_2'];
 
-String getLlmBaseUrl() =>
-    // "http://216.155.217.219:40287/v1";
-    "";
+String? getLlmBaseUrl() => dotenv.env['LLM_BASE_URL'];
 
-String? getVectorStoreBaseUrl() =>
-    "";
+String? getVectorStoreBaseUrl() => dotenv.env['VECTOR_STORE_BASE_URL'];
 
 String? getSessionToken() {
   var timeInMillis = DateTime.now().millisecondsSinceEpoch;
-  var scrambled = ((timeInMillis + 234234) / 7).round();
+  var scrambled = ((timeInMillis + 10000000) / 7).round();
 
   final plainText = scrambled.toString();
-  final key = encrypt.Key.fromUtf8('dummy');
-  final iv = encrypt.IV.fromUtf8('dummy');
+  final key = encrypt.Key.fromUtf8(dotenv.env['ENCRYPTION_KEY']!);
+  final iv = encrypt.IV.fromUtf8(dotenv.env['ENCRYPTION_IV']!);
 
   final encrypter =
-      encrypt.Encrypter(encrypt.AES(key, mode: encrypt.AESMode.cbc));
+  encrypt.Encrypter(encrypt.AES(key, mode: encrypt.AESMode.cbc));
 
   final encrypted = encrypter.encrypt(plainText, iv: iv).base64;
 
   return encrypted;
 }
 
-String pineConeEnvironment() => "asia-southeast1-gcp-free";
+String pineConeEnvironment() => dotenv.env['PINECONE_ENVIRONMENT'] ?? "asia-southeast1-gcp-free";
 
-String pineConeIndexName() => '';
+String pineConeIndexName() => dotenv.env['PINECONE_INDEX_NAME'] ?? '';
 
-String getGeminiKey() => "";
+String getGeminiKey() => dotenv.env['GEMINI_API_KEY'] ?? '';
