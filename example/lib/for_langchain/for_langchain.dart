@@ -1,0 +1,53 @@
+import 'package:langchain/langchain.dart';
+
+enum Type { string, integer, number, boolean, object, array, enumeration }
+
+class UIParameter {
+  const UIParameter({
+    required this.name,
+    required this.description,
+    this.type = Type.string,
+    this.required = false,
+    this.enumeration,
+  });
+
+  final String name;
+  final String description;
+  final Type type;
+  final bool required;
+  final List<String>? enumeration;
+
+  Map<String, dynamic> asFunctionParam() {
+    Map<String, dynamic> map = {
+      'description': description,
+      'type': type.toString().split('.').last
+    };
+    if (enumeration != null) {
+      map['enum'] = enumeration!;
+    }
+    return {name: map};
+  }
+}
+
+abstract base class GenericTool<
+    Input extends Object,
+    Options extends ToolOptions,
+    Output extends Object> extends Tool<Input, Options, Output> {
+  GenericTool(
+      {required super.name,
+      required super.description,
+      required List<UIParameter> parameters,
+      super.returnDirect})
+      : super(
+          inputJsonSchema: {
+            'type': 'object',
+            'properties': {
+              for (var param in parameters) ...param.asFunctionParam(),
+            },
+            'required': parameters
+                .where((param) => param.required)
+                .map((param) => param.name)
+                .toList(),
+          },
+        );
+}

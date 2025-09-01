@@ -1,0 +1,92 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+Langbar Core is a Flutter library for natural language interface components that integrate with LLMs using LangChain.dart. The architecture follows MVVM pattern where ViewModels serve as orchestrators between GUI and LLM assistants.
+
+## Development Commands
+
+Standard Flutter commands apply:
+- `flutter pub get` - Install dependencies
+- `flutter analyze` - Run static analysis
+- `flutter test` - Run tests
+- `flutter pub deps` - Show dependency tree
+
+## Architecture
+
+### Core Components
+
+**MVVM Architecture**
+- `GenericScreenViewModel<State>` in `lib/ui/cubits/generic_screen_view_model.dart` - Base ViewModel that extends Cubit and mixes in SpeechEnabled
+- ViewModels register with `CurrentScreenCubit` for coordination
+- Uses flutter_bloc for state management
+
+**LLM Integration**
+- `send_to_llm.dart` - Main LLM orchestration with support for OpenAI, OpenRouter, Ollama, and Groq
+- `Service` enum defines available LLM providers
+- Global system prompt configuration via `setSystemPrompt()`
+- Route-based tool generation via `setRoutes()`
+
+**Natural Language Input**
+- `LangField` widget in `lib/ui/langfield/langfield.dart` - Primary input component
+- `LangBarState` provider manages input state
+- Speech-to-text integration via `speech.dart`
+
+**Tool System**
+- `GenericScreenTool` - Creates LLM tools from GoRouter routes
+- `RetrieverTool` - Vector database integration
+- Tools are auto-generated from router configuration
+
+### Key Directories
+
+- `lib/ui/` - UI components, cubits, and scaffolds
+- `lib/tools/` - LLM tool implementations
+- `lib/data/` - Data models and LangChain integration utilities
+- `lib/function_calling_v3/` - Latest function calling implementation
+- `lib/utils/` - General utilities and extensions
+
+## Important Files
+
+**Configuration**
+- `lib/llm_keys.dart` - API keys and provider configurations (git-ignored with skip-worktree)
+- `lib/documented_route.dart` - Route documentation for tool generation
+
+**Core Services**
+- `lib/send_to_llm.dart` - Main LLM service orchestrator
+- `lib/my_conversation_buffer_memory.dart` - Custom conversation memory implementation
+- `lib/langbar_history_storage.dart` - Persistent conversation history
+
+## Dependencies
+
+Key external dependencies:
+- `langchain: ^0.7.4` - Core LLM framework
+- `langchain_openai: ^0.7.0` - OpenAI integration
+- `langchain_ollama: ^0.3.0` - Local Ollama integration
+- `flutter_bloc: ^8.1.6` - State management
+- `go_router: ^14.2.3` - Navigation
+- `speech_to_text: ^7.0.0` - Voice input
+- `flutter_tts: ^4.1.0` - Text-to-speech output
+
+## Environment Setup
+
+**Required for LLM functionality:**
+1. Copy `.env.example` to `.env`: `cp .env.example .env`
+2. Fill in your API keys in the `.env` file
+3. Initialize dotenv in your app's main function:
+   ```dart
+   import 'package:flutter_dotenv/flutter_dotenv.dart';
+   
+   void main() async {
+     await dotenv.load();
+     // rest of main function
+   }
+   ```
+
+## Security Notes
+
+- API keys are now managed via `.env` file (git-ignored)
+- `.env.example` provides template for required environment variables
+- Encryption utilities in `llm_keys.dart` for session token generation
+- All sensitive data excluded from version control via `.gitignore`
