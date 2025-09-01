@@ -36,7 +36,8 @@ Thumbs.db
 /ios/Flutter/Flutter.framework
 /ios/Flutter/Generated.xcconfig
 /ios/Flutter/ephemeral/
-/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/Runner/GeneratedPluginRegistrant.*
+**/macos/Runner/GeneratedPluginRegistrant.*
 /linux/flutter/ephemeral/
 /macos/Flutter/ephemeral/
 /windows/flutter/ephemeral/
