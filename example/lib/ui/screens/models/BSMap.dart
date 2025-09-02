@@ -9,10 +9,10 @@ import 'Space.dart';
 class BSMap extends ChangeNotifier {
   /// The private field backing [currentSpace].
   late Space? _currentSpace;
-  late Ticket? _currentTicket = Avery();
+  late final Ticket _currentTicket = Avery();
 
   /// Internal, private state of the cart. Stores the ids of each item.
-  List<Space> _spaces = [];
+  final List<Space> _spaces;
 
   BSMap(this._spaces);
 

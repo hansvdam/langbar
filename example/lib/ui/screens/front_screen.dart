@@ -35,7 +35,7 @@ The system will then answer based on text from a scraped banking-website (using 
 
 class FrontScreen extends StatelessWidget {
   /// Creates a RootScreen
-  FrontScreen({required this.label, Key? key}) : super(key: key);
+  const FrontScreen({required this.label, super.key});
 
   /// The label
   final String label;

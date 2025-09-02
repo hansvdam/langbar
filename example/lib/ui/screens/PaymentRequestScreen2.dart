@@ -9,6 +9,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -27,8 +29,7 @@ class PaymentRequestScreen2 extends StatefulWidget {
   final double amount;
   final String? purpose;
 
-  PaymentRequestScreen2({Key? key, required this.amount, this.purpose})
-      : super(key: key);
+  const PaymentRequestScreen2({super.key, required this.amount, this.purpose});
 
   @override
   _PaymentRequestScreen2State createState() => _PaymentRequestScreen2State();

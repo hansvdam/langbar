@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:langbar/ui/screens/dummy_screens/suggestions.dart';
 import 'package:provider/provider.dart';
@@ -8,7 +7,7 @@ import '../../utils.dart';
 import 'SampleScreenTemplate.dart';
 
 class RoutePlanner extends SampleScreenTemplate {
-  RoutePlanner({required super.queryParameters})
+  const RoutePlanner({super.key, required super.queryParameters})
       : super(label: 'Route Planner');
 
   @override
@@ -48,9 +47,8 @@ class RoutePlannerRepairedEndPoints extends StatefulWidget {
   final String origin;
   final String destination;
 
-  RoutePlannerRepairedEndPoints(
-      {required this.origin, required this.destination})
-      : super();
+  const RoutePlannerRepairedEndPoints(
+      {super.key, required this.origin, required this.destination});
 
   @override
   State<RoutePlannerRepairedEndPoints> createState() =>

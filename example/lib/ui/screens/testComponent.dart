@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class Bla extends StatelessWidget {
+  const Bla({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -13,7 +15,7 @@ class Bla extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
+          SizedBox(
             width: 340,
             height: 23,
             child: Row(
@@ -21,7 +23,7 @@ class Bla extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
+                SizedBox(
                   width: 40,
                   height: 23,
                   child: Column(
@@ -47,7 +49,7 @@ class Bla extends StatelessWidget {
                     ],
                   ),
                 ),
-                Container(
+                SizedBox(
                   width: 44,
                   height: 17,
                   child: Row(
@@ -112,7 +114,7 @@ class Bla extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          Container(
+          SizedBox(
             width: 351,
             height: 696,
             child: Column(
@@ -145,7 +147,7 @@ class Bla extends StatelessWidget {
                     ],
                   ),
                 ),
-                Container(
+                SizedBox(
                   width: double.infinity,
                   height: 351,
                   child: Column(
@@ -177,7 +179,7 @@ class Bla extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Container(
+                                    SizedBox(
                                       width: 159,
                                       height: 80,
                                       child: Row(
@@ -284,7 +286,7 @@ class Bla extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Container(
+                                    SizedBox(
                                       width: 151,
                                       height: 80,
                                       child: Row(
@@ -302,7 +304,7 @@ class Bla extends StatelessWidget {
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                Container(
+                                                SizedBox(
                                                   width: 60,
                                                   height: 60,
                                                   child: Column(
@@ -377,7 +379,7 @@ class Bla extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Container(
+                                    SizedBox(
                                       width: 159,
                                       height: 80,
                                       child: Row(

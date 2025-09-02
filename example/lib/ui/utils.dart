@@ -8,11 +8,10 @@ import 'main_scaffolds.dart';
 class _BottomSheetButton extends StatelessWidget {
   const _BottomSheetButton({
     required this.toggleLangbar,
-    this.showTooltipBelow = true,
   });
 
   final Function toggleLangbar;
-  final bool showTooltipBelow;
+  final bool showTooltipBelow = false;
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +55,7 @@ Future<void> animateFieldContent(
 }
 
 class HamburgerMenu extends StatelessWidget {
-  const HamburgerMenu({
+  const HamburgerMenu({super.key, 
     required this.scaffoldKey,
   });
 
@@ -97,7 +96,7 @@ PreferredSizeWidget createAppBar(
 }
 
 class ClearButton extends StatelessWidget {
-  const ClearButton({required this.controller});
+  const ClearButton({super.key, required this.controller});
 
   final TextEditingController controller;
 

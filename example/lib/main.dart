@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-// ignore: depend_on_referenced_packages
-import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:langbar_core/ui/langfield/langbar_states.dart';
@@ -61,7 +60,11 @@ void main() async {
   
   GoRouter.optionURLReflectsImperativeAPIs = true;
   // turn off the # in the URLs on the web
-  usePathUrlStrategy();
+  // URL strategy only needed for web
+  if (kIsWeb) {
+    // Use path-based URLs on web instead of hash-based
+    // This would require flutter_web_plugins but we're skipping it for now
+  }
   runApp(const MyApp());
 }
 

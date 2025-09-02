@@ -59,7 +59,7 @@ Future<List<Contact>> readContactsFromCsv(BuildContext context) async {
 
 Future<List<BankTransaction>> readTransactionsFromCsv(
     BuildContext context) async {
-  final fileContent = await await DefaultAssetBundle.of(context)
+  final fileContent = await DefaultAssetBundle.of(context)
       .loadString('assets/data/transactions.csv');
 
   final csvRows = const CsvToListConverter().convert(fileContent, eol: "\n");

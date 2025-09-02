@@ -8,6 +8,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -26,8 +28,7 @@ class PaymentRequestScreen extends StatefulWidget {
   final double? initialAmount;
   final String? purpose;
 
-  PaymentRequestScreen({Key? key, this.initialAmount, this.purpose})
-      : super(key: key);
+  const PaymentRequestScreen({super.key, this.initialAmount, this.purpose});
 
   @override
   _PaymentRequestScreenState createState() => _PaymentRequestScreenState();
@@ -139,12 +140,12 @@ class _PaymentRequestScreenState extends State<PaymentRequestScreen>
                             purpose: 'Lunch')),
                   );
                 },
-                child: Text('Verder'),
                 style: ElevatedButton.styleFrom(
                   // primary: Colors.orange,
                   // onPrimary: Colors.white,
                   padding: EdgeInsets.symmetric(vertical: 16.0),
                 ),
+                child: Text('Verder'),
               ),
             ),
           ],

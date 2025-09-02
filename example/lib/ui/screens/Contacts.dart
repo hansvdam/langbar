@@ -5,14 +5,14 @@ import '../param_change_detecting_screens.dart';
 import 'default_appbar_scaffold.dart';
 
 class ContactsScreen extends DefaultAppbarScreen {
-  ContactsScreen({required super.label, Key? key, searchString})
-      : super(body: ContactList(searchString: searchString), key: key) {}
+  ContactsScreen({required super.label, super.key, searchString})
+      : super(body: ContactList(searchString: searchString));
 
   static const name = 'contacts';
 }
 
 class ContactList extends ChangeDetectingStatefulWidget {
-  ContactList({Key? key, this.searchString}) : super(key: key) {}
+  const ContactList({super.key, this.searchString});
 
   final String? searchString;
 
@@ -24,7 +24,7 @@ class ContactList extends ChangeDetectingStatefulWidget {
 }
 
 class _ContactListState extends UpdatingScreenState<ContactList> {
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   late Future<List<Contact>> _contacts;
 
   @override

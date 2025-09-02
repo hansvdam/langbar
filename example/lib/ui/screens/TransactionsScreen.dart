@@ -5,19 +5,16 @@ import '../models/account.dart';
 import 'default_appbar_scaffold.dart';
 
 class TransactionsScreen extends DefaultAppbarScreen {
-  TransactionsScreen({required super.label, Key? key, filterString, accountId})
+  TransactionsScreen({required super.label, super.key, filterString, accountId})
       : super(
             body: TransactionsList(
-                filterString: filterString, accountId: accountId = 1),
-            key: key, leadingHamburger: false) {}
+                filterString: filterString, accountId: accountId = 1), leadingHamburger: false);
 
   static const name = 'transactions';
 }
 
 class TransactionsList extends ChangeDetectingStatefulWidget {
-  TransactionsList({Key? key, this.filterString, required accountId})
-      : super(key: key) {
-  }
+  const TransactionsList({super.key, this.filterString, required accountId});
 
   final String? filterString;
 
@@ -29,7 +26,7 @@ class TransactionsList extends ChangeDetectingStatefulWidget {
 }
 
 class _TransactionsListState extends UpdatingScreenState<TransactionsList> {
-  TextEditingController _filterController = TextEditingController();
+  final TextEditingController _filterController = TextEditingController();
   late Future<List<BankTransaction>> _transactions;
 
   @override

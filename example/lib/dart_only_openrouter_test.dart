@@ -101,7 +101,7 @@ void test() async {
     HumanChatMessagePromptTemplate.fromTemplate('{input}'),
   ]);
 
-  var llm;
+  Object llm;
   var apiKey2 = getOpenAIKey2();
   var service = Service.groq;
   var baseUrl;
@@ -153,23 +153,23 @@ void test() async {
 
   final memory = ConversationBufferMemory(returnMessages: true);
 
-  const tools = const [tool];
+  const tools = [tool];
 
-  var llm_with_tools;
+  var llmWithTools;
   switch (service) {
     case Service.openai:
-      llm_with_tools = llm.bind(ChatOpenAIOptions(tools: tools));
+      llmWithTools = llm.bind(ChatOpenAIOptions(tools: tools));
       break;
     case Service.groq:
-      llm_with_tools = llm.bind(ChatOpenAIOptions(tools: tools));
+      llmWithTools = llm.bind(ChatOpenAIOptions(tools: tools));
       break;
     case Service.openrouter:
       break;
     case Service.ollama:
-      llm_with_tools = llm.bind(ChatOllamaOptions(tools: tools));
+      llmWithTools = llm.bind(ChatOllamaOptions(tools: tools));
       break;
   }
-  var bald_chain = Runnable.fromMap({
+  var baldChain = Runnable.fromMap({
         'input': Runnable.passthrough(),
         'history': Runnable.mapInput(
           (_) async {
@@ -179,8 +179,8 @@ void test() async {
         ),
       }) |
       promptTemplate1 |
-      llm_with_tools;
-  var chain = bald_chain | outputParser;
+      llmWithTools;
+  var chain = baldChain | outputParser;
 
 
 
@@ -188,11 +188,11 @@ void test() async {
   var result1 = await chain.invoke({input1});
   final List<ParsedToolCall> result = result1 as List<ParsedToolCall>;
 
-  result.forEach((element) {
+  for (var element in result) {
     var foundTool =
         tools.firstWhere((toolelement) => toolelement.name == element.name);
     print(foundTool.name);
-  });
+  }
 
   await memory.saveContext(
     inputValues: {'input': input1},
@@ -200,7 +200,7 @@ void test() async {
   );
 
   var messages = await memory.chatHistory.getChatMessages();
-  print("memory:\n" + messages.toString());
+  print("memory:\n$messages");
 
   var input2 = 'the president';
   final List<ParsedToolCall> result2 =

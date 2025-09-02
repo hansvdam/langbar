@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:langbar_core/ui/langfield/langbar_states.dart';
-import '../../routes.dart';
 import '../main_scaffolds.dart';
 import '../utils.dart';
 
@@ -14,12 +13,11 @@ class DefaultAppbarScreen extends StatelessWidget {
 
   final bool leadingHamburger;
 
-  DefaultAppbarScreen(
+  const DefaultAppbarScreen(
       {required this.label,
       required this.body,
-      Key? key,
-      this.leadingHamburger = true})
-      : super(key: key) {}
+      super.key,
+      this.leadingHamburger = true});
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +37,8 @@ class DefaultAppbarScaffold extends StatelessWidget {
 
   final bool leadingHamburger;
 
-  DefaultAppbarScaffold(
-      {required this.body, required this.label, this.leadingHamburger = true});
+  const DefaultAppbarScaffold(
+      {super.key, required this.body, required this.label, this.leadingHamburger = true});
 
   /// The label
   final String label;
@@ -53,12 +51,12 @@ class DefaultAppbarScaffold extends StatelessWidget {
           langbar.toggleLangbar();
         }, leadingHamburger: leadingHamburger),
         // drawer: DefaultDrawer(),
-        body: this.body);
+        body: body);
   }
 }
 
 class DefaultDrawer extends StatefulWidget {
-  DefaultDrawer({
+  const DefaultDrawer({
     super.key,
   });
 
@@ -67,7 +65,7 @@ class DefaultDrawer extends StatefulWidget {
 }
 
 class _DefaultDrawerState extends State<DefaultDrawer> {
-  int _selectedIndex = 0;
+  final int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +79,12 @@ class _DefaultDrawerState extends State<DefaultDrawer> {
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/drawer_background.jpg"),
+                fit: BoxFit.fill,
+              ),
+            ),
             child: Stack(
               children: [
                 Positioned(
@@ -89,17 +93,11 @@ class _DefaultDrawerState extends State<DefaultDrawer> {
                   child: Text(
                     "More",
                     style: TextStyle(
-                        color: Theme.of(context).colorScheme.onBackground,
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 20),
                   ),
                 )
               ],
-            ),
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("assets/images/drawer_background.jpg"),
-                fit: BoxFit.fill,
-              ),
             ),
           ),
           DrawerItem(

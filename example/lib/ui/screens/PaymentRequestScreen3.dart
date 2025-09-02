@@ -5,6 +5,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -23,7 +25,7 @@ class PaymentRequestScreen3 extends StatelessWidget {
   final double amount;
   final String purpose;
 
-  PaymentRequestScreen3({required this.amount, required this.purpose});
+  const PaymentRequestScreen3({super.key, required this.amount, required this.purpose});
 
   @override
   Widget build(BuildContext context) {
@@ -92,12 +94,12 @@ class PaymentRequestScreen3 extends StatelessWidget {
                 Navigator.pop(context);
               });
             },
-            child: Text('Deel betaalverzoek'),
             style: ElevatedButton.styleFrom(
               // primary: Colors.orange,
               // onPrimary: Colors.white,
               minimumSize: Size(double.infinity, 50),
             ),
+            child: Text('Deel betaalverzoek'),
           ),
           TextButton(
             onPressed: () {

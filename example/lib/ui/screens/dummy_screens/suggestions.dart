@@ -11,15 +11,15 @@ class Suggestions {
     if (json['locations'] != null) {
       locations = <Locations>[];
       json['locations'].forEach((v) {
-        locations!.add(new Locations.fromJson(v));
+        locations!.add(Locations.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.locations != null) {
-      data['locations'] = this.locations!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    if (locations != null) {
+      data['locations'] = locations!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -54,14 +54,14 @@ class Locations {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['Type'] = this.type;
-    data['CategoryTitle'] = this.categoryTitle;
-    data['Name'] = this.name;
-    data['Displayname'] = this.displayname;
-    data['SubType'] = this.subType;
-    data['Region'] = this.region;
-    data['Url'] = this.url;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['Type'] = type;
+    data['CategoryTitle'] = categoryTitle;
+    data['Name'] = name;
+    data['Displayname'] = displayname;
+    data['SubType'] = subType;
+    data['Region'] = region;
+    data['Url'] = url;
     return data;
   }
 }
@@ -77,7 +77,7 @@ Future<Suggestions> fetchSuggestions(String placeName) async {
     String endpoint = "suggest";
     Map<String, String> queryParams = {
       'locationType': 'AllLocationTypes',
-      'userInput': '${placeName}',
+      'userInput': placeName,
     };
 
     // for api explanation see: https://open-meteo.com/en/docs

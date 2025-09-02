@@ -10,12 +10,11 @@ const defaultPadding = 16.0;
 class SampleScreenTemplate extends StatelessWidget {
   final Map<String, String> queryParameters;
 
-  SampleScreenTemplate(
+  const SampleScreenTemplate(
       {required this.label,
-      Key? key,
+      super.key,
       required Map<String, String> queryParameters})
-      : queryParameters = queryParameters,
-        super(key: key) {}
+      : queryParameters = queryParameters;
 
   final String label;
 

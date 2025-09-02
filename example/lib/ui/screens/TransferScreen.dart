@@ -11,15 +11,14 @@ import 'default_appbar_scaffold.dart';
 
 class TransferScreen extends DefaultAppbarScreen {
   TransferScreen({required super.label,
-      Key? key,
+      super.key,
       fromAccountId = "1",
       amount,
       destinationName,
       description})
       : super(
             body: TransferMoneyScreen(
-                amount, destinationName, description, fromAccountId),
-            key: key) {}
+                amount, destinationName, description, fromAccountId));
 
   static const name = 'transfer_money';
 }
@@ -181,7 +180,7 @@ class TransferContentState extends UpdatingScreenState<TransferContentWidget> {
         Center(
             child: FilledButton(
               onPressed: () {
-                context.go("/" + TransferScreen.name);
+                context.go("/${TransferScreen.name}");
             var goRouter = GoRouter.of(context);
             // ugly trick, but we need to clear the Transfer screen first.
             // tried many things, but this is the only thing that works.

@@ -48,6 +48,13 @@ dependencies:
   csv: ^6.0.0
   flutter_dotenv: ^5.1.0
   flutter_bloc: ^8.1.6
+  collection: any
+  http: any
+  langchain: any
+  langchain_ollama: any
+  langchain_openai: any
+  encrypt: any
+  logger: any
 dependency_overrides: # try to remove the following overrides, is needed to support image_network: ^2.5.4+1 (used uuid 3.0.4) vs lanchain (used uuid 4.0.0)
   uuid: ^4.5.0
 

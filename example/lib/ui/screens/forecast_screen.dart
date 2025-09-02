@@ -13,13 +13,12 @@ class ForecastScreen extends StatefulWidget {
   late final String? place;
   late final int numDays;
 
-  ForecastScreen(
+  const ForecastScreen(
       {required this.label,
       required this.detailsPath,
-      Key? key,
+      super.key,
       this.place,
-      this.numDays = 1})
-      : super(key: key) {}
+      this.numDays = 1});
 
   final String label;
 
@@ -131,7 +130,7 @@ class _ForecastScreenState extends State<ForecastScreen> {
                   dailyData.time!.map((date) => DateTime.parse(date)).toList();
               List<double> temps = dailyData.temperature2mMax!;
               List<Widget> children = [
-                Text("max temp from today: " + temps.toString() + " °C")
+                Text("max temp from today: $temps °C")
               ];
               if (temps.length > 1) {
                 var bla = IterableZip([dateTimes, temps]).toList();

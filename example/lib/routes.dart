@@ -131,7 +131,7 @@ List<RouteBase> navBarRoutes = [
                 name: TransactionsScreen.name,
                 description:
                     "Show transactions of an account, and maybe filter them",
-                path: "${TransactionsScreen.name}",
+                path: TransactionsScreen.name,
                 parameters: const [
                   SUIParameter(
                     name: 'filterString',

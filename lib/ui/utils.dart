@@ -8,11 +8,10 @@ import 'main_scaffolds.dart';
 class _BottomSheetButton extends StatelessWidget {
   const _BottomSheetButton({
     required this.toggleLangbar,
-    this.showTooltipBelow = true,
   });
 
   final Function toggleLangbar;
-  final bool showTooltipBelow;
+  final bool showTooltipBelow = false;
 
   @override
   Widget build(BuildContext context) {

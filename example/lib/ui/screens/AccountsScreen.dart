@@ -12,7 +12,7 @@ const defaultPadding = 16.0;
 class AccountsScreen extends DefaultAppbarScreen {
   AccountsScreen(
       {required super.label,
-      Key? key,
+      super.key,
       required Map<String, String> queryParameters,
       required detailsPath})
       : super(
@@ -23,8 +23,7 @@ class AccountsScreen extends DefaultAppbarScreen {
                   return AccountsList(detailsPath);
                 },
               ),
-            ),
-            key: key) {}
+            ));
 
   static const name = 'accounts';
 }
@@ -39,7 +38,7 @@ var savingAccounts = accounts.values
 class AccountsList extends StatelessWidget {
   final String detailsPath;
 
-  AccountsList(this.detailsPath);
+  const AccountsList(this.detailsPath, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +67,7 @@ class AccountsList extends StatelessWidget {
         var account = accounts[index];
         return GestureDetector(
             onTap: () {
-              context.go(detailsPath + "?accountid=${account.id}");
+              context.go("$detailsPath?accountid=${account.id}");
             },
             child: Card(
                 child: AccountTile(

@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 /// For simplicity, the catalog is expected to be immutable (no products are
 /// expected to be added, removed or changed during the execution of the app).
 class Space extends ChangeNotifier {
-  List<Ticket> _tickets = [];
+  final List<Ticket> _tickets = [];
 
   void add(Ticket item) {
     _tickets.add(item);

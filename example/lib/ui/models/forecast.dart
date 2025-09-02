@@ -29,25 +29,25 @@ class Forecast {
     timezoneAbbreviation = json['timezone_abbreviation'];
     elevation = json['elevation'];
     dailyUnits = json['daily_units'] != null
-        ? new DailyUnits.fromJson(json['daily_units'])
+        ? DailyUnits.fromJson(json['daily_units'])
         : null;
-    daily = json['daily'] != null ? new Daily.fromJson(json['daily']) : null;
+    daily = json['daily'] != null ? Daily.fromJson(json['daily']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['latitude'] = this.latitude;
-    data['longitude'] = this.longitude;
-    data['generationtime_ms'] = this.generationtimeMs;
-    data['utc_offset_seconds'] = this.utcOffsetSeconds;
-    data['timezone'] = this.timezone;
-    data['timezone_abbreviation'] = this.timezoneAbbreviation;
-    data['elevation'] = this.elevation;
-    if (this.dailyUnits != null) {
-      data['daily_units'] = this.dailyUnits!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['latitude'] = latitude;
+    data['longitude'] = longitude;
+    data['generationtime_ms'] = generationtimeMs;
+    data['utc_offset_seconds'] = utcOffsetSeconds;
+    data['timezone'] = timezone;
+    data['timezone_abbreviation'] = timezoneAbbreviation;
+    data['elevation'] = elevation;
+    if (dailyUnits != null) {
+      data['daily_units'] = dailyUnits!.toJson();
     }
-    if (this.daily != null) {
-      data['daily'] = this.daily!.toJson();
+    if (daily != null) {
+      data['daily'] = daily!.toJson();
     }
     return data;
   }
@@ -65,9 +65,9 @@ class DailyUnits {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['time'] = this.time;
-    data['temperature_2m_max'] = this.temperature2mMax;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['time'] = time;
+    data['temperature_2m_max'] = temperature2mMax;
     return data;
   }
 }
@@ -84,9 +84,9 @@ class Daily {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['time'] = this.time;
-    data['temperature_2m_max'] = this.temperature2mMax;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['time'] = time;
+    data['temperature_2m_max'] = temperature2mMax;
     return data;
   }
 }
