@@ -3,12 +3,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'default_appbar_scaffold.dart';
 import '../../viewmodels/map_screen_view_model.dart';
+import 'package:langbar_core/utils/utils.dart';
 
 class MapScreen extends StatelessWidget {
   final String label;
   final String? atmOrOffice;
 
-  const MapScreen({required this.label, super.key, this.atmOrOffice});
+  MapScreen({required this.label, super.key, this.atmOrOffice}) {
+    langbarLogger.d('MapScreen constructor called with label: $label, atmOrOffice: $atmOrOffice');
+  }
 
   static const name = 'map';
 
