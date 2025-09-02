@@ -19,6 +19,7 @@ class GenericScreenViewModel<State> extends Cubit<State> with SpeechEnabled {
 
   @override
   Future<void> close() async {
+    clearChatMessageMemory(); // new context for parameter interpretation
     currentScreenCubit.removeCurrentCubit(this);
     return super.close();
   }
