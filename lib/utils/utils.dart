@@ -37,15 +37,26 @@ setGoRouter(GoRouter goRouterParam) {
 
 
 void activateUri(String navUri, bool openModal) {
+  langbarLogger.i('activateUri called with: $navUri, openModal: $openModal');
+  
   if (openModal) {
     var currentUri = goRouter.routeInformationProvider.value.uri;
+    langbarLogger.i('Current URI: $currentUri');
     if (currentUri.hasSamePathAs(navUri)) {
+      langbarLogger.i('Same path detected, popping then pushing');
       goRouter.pop();
       goRouter.push(navUri);
     } else {
+      langbarLogger.i('Pushing to: $navUri');
       goRouter.push(navUri);
     }
   } else {
-    goRouter.go(navUri);
+    langbarLogger.i('Going to: $navUri');
+    try {
+      goRouter.go(navUri);
+      langbarLogger.i('Navigation successful to: $navUri');
+    } catch (e) {
+      langbarLogger.e('Navigation failed: $e');
+    }
   }
 }

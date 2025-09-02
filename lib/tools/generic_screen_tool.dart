@@ -36,6 +36,7 @@ final class GenericScreenTool
   @override
   Future<String> invokeInternal(Map<String, dynamic> toolInput,
       {final ToolOptions? options}) async {
+    langbarLogger.i('GenericScreenTool.invokeInternal - name: $name, toolInput: $toolInput, push: $push');
     Map<String, String>? extraPathParameters =
         await hook?.call(toolInput, namedLocation: namedLocation);
     String? fullPath = goRouter.namedLocation(
@@ -44,6 +45,7 @@ final class GenericScreenTool
       queryParameters:
           toolInput.map((key, value) => MapEntry(key, value.toString())),
     );
+    langbarLogger.i('GenericScreenTool generated fullPath: $fullPath');
     activateUri(fullPath, push);
     return fullPath;
   }

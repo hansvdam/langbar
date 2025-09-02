@@ -17,13 +17,19 @@ class MapScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    langbarLogger.d('MapScreen build() called, about to create MapScreenViewModel with atmOrOffice: $atmOrOffice');
     return BlocProvider(
-      create: (context) => MapScreenViewModel(
-        context: context,
-        initialLocation: atmOrOffice,
-      ),
+      key: ValueKey('map_screen_$atmOrOffice'), // Force new instance when parameter changes
+      create: (context) {
+        langbarLogger.d('BlocProvider create() called for MapScreenViewModel');
+        return MapScreenViewModel(
+          context: context,
+          initialLocation: atmOrOffice,
+        );
+      },
       child: BlocBuilder<MapScreenViewModel, MapScreenState>(
         builder: (context, state) {
+          langbarLogger.d('BlocBuilder rebuilding with state.selectedLocation: ${state.selectedLocation}');
           return DefaultAppbarScaffold(
             label: label,
             body: SafeArea(
