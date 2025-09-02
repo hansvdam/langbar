@@ -11,6 +11,7 @@ import 'package:langbar_core/ui/langfield/langbar_wrapper.dart';
 import 'package:langbar_core/documented_route.dart';
 import 'package:langbar_core/data/for_langchain.dart';
 import 'package:langbar_core/data/data_key.dart';
+import 'package:langbar_core/utils/utils.dart';
 import 'ui/main_scaffolds.dart';
 import 'ui/screens/CreditCardScreen.dart';
 import 'viewmodels/credit_card_screen_view_model.dart';
@@ -57,6 +58,7 @@ List<RouteBase> hamburgerRoutes = [
       modal: true,
       parentNavigatorKey: _rootNavigatorKey,
       pageBuilder: (context, state) {
+        langbarLogger.d('CreditCardScreen query params: ${state.uri.queryParameters}');
         return MaterialPage(
             fullscreenDialog: true,
             child: LangBarWrapper(
