@@ -117,9 +117,9 @@ final _chatMessageMemory = MyConversationBufferWindowMemory(
 //     chatHistory: ChatMessageHistory(),
 //     returnMessages: true); // default window length is 5
 
-clearChatMessageMemory() async {
+clearChatMessageMemory({String caller = 'unknown'}) async {
   await _chatMessageMemory.clear();
-  print("chatMessageMemory cleared");
+  print("chatMessageMemory cleared by: $caller");
 }
 
 preserveLastMessageAndClearHistory() async {
@@ -139,6 +139,12 @@ preserveLastMessageAndClearHistory() async {
 
 addHumanChatMessage(String message) {
   _chatMessageMemory.chatHistory.addHumanChatMessage(message);
+}
+
+bool _historyWasIntentionallyCleared = false;
+
+void setHistoryCleared(bool cleared) {
+  _historyWasIntentionallyCleared = cleared;
 }
 
 printChatMessageMemory(String heading) async {
@@ -283,12 +289,13 @@ Future<void> sendToOpenai(BaseChatModel llm, BuildContext context,
       chatHistoryForUi
           .add(HistoryMessage(text: query, isHuman: true, navUri: lastResult));
 
+      print("string result from llm: " + lastResult);
       // make sure the chathistory is immune to clearing by closing cubits
       await liftChathistoryOverClearingsByGUI();
     }
   } catch (e) {
     print("error calling llm or parsing output: $e");
-    clearChatMessageMemory(); // make sure an error does not prevent the next query from being processed (strange things in the history may cause bad-request errors)
+    clearChatMessageMemory(caller: 'sendToOpenai_error_handler'); // make sure an error does not prevent the next query from being processed (strange things in the history may cause bad-request errors)
     langbarState.historyShowing = true;
     langbarState.sendingToOpenAI = false;
     chatHistoryForUi.add(
@@ -311,10 +318,17 @@ var repairingToolsOutputParser = RepairingToolsOutputParser();
 
 Future<void> liftChathistoryOverClearingsByGUI() async {
   // make sure the chathistory is immune to clearing by closing cubits
+  // BUT don't restore if we intentionally cleared it
+  if (_historyWasIntentionallyCleared) {
+    print("History was intentionally cleared, not restoring via PostFrameCallback");
+    _historyWasIntentionallyCleared = false; // reset
+    return;
+  }
+  
   List<ChatMessage> messages =
       await _chatMessageMemory.chatHistory.getChatMessages();
   WidgetsBinding.instance.addPostFrameCallback((_) async {
-    await clearChatMessageMemory();
+    await clearChatMessageMemory(caller: 'liftChathistoryOverClearingsByGUI');
     for (var message in messages) {
       await _chatMessageMemory.chatHistory.addChatMessage(message);
     }

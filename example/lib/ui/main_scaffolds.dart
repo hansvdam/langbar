@@ -39,7 +39,7 @@ class ScaffoldWithNestedNavigation extends StatelessWidget {
   
   void _clearHistoryForTabSwitch() {
     // Complete history clear for manual tab switches - fresh start
-    clearChatMessageMemory();
+    clearChatMessageMemory(caller: '_clearHistoryForTabSwitch');
   }
 
   bool? screenWiderThanPhone;
