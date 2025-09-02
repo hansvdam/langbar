@@ -122,6 +122,21 @@ clearChatMessageMemory() async {
   print("chatMessageMemory cleared");
 }
 
+preserveLastMessageAndClearHistory() async {
+  var messages = await _chatMessageMemory.chatHistory.getChatMessages();
+  ChatMessage? lastMessage = messages.lastOrNull;
+  
+  await _chatMessageMemory.clear();
+  
+  // Re-add the last message if it was a human message (the one that triggered navigation)
+  if (lastMessage != null && lastMessage is HumanChatMessage) {
+    await _chatMessageMemory.chatHistory.addChatMessage(lastMessage);
+    print("chatMessageMemory cleared but preserved last human message: ${lastMessage.content}");
+  } else {
+    print("chatMessageMemory cleared, no human message to preserve");
+  }
+}
+
 addHumanChatMessage(String message) {
   _chatMessageMemory.chatHistory.addHumanChatMessage(message);
 }

@@ -5,8 +5,10 @@ import 'package:go_router/go_router.dart';
 import 'package:langbar/ui/screens/default_appbar_scaffold.dart';
 import 'package:langbar/ui/utils.dart';
 import 'package:provider/provider.dart';
+// flutter_bloc import removed - not needed for this approach
 
 import 'package:langbar_core/ui/langfield/langbar_wrapper.dart';
+import 'package:langbar_core/send_to_llm.dart' show clearChatMessageMemory;
 
 const smallSpacing = 10.0;
 const defaultPadding = 16.0;
@@ -21,11 +23,23 @@ class ScaffoldWithNestedNavigation extends StatelessWidget {
             key: key ?? const ValueKey<String>('ScaffoldWithNestedNavigation'));
   final StatefulNavigationShell navigationShell;
 
-  void _goBranch(int index) {
+  void _goBranch(int index, [BuildContext? context]) {
+    // Only trigger history clearing if we're actually switching tabs
+    if (index != navigationShell.currentIndex && context != null) {
+      print('Tab navigation: switching from tab ${navigationShell.currentIndex} to tab $index - clearing chat history');
+      // Import the function directly since we know tab switches are screen changes
+      _clearHistoryForTabSwitch();
+    }
+    
     navigationShell.goBranch(
       index,
       initialLocation: index == navigationShell.currentIndex,
     );
+  }
+  
+  void _clearHistoryForTabSwitch() {
+    // Complete history clear for manual tab switches - fresh start
+    clearChatMessageMemory();
   }
 
   bool? screenWiderThanPhone;
@@ -42,7 +56,7 @@ class ScaffoldWithNestedNavigation extends StatelessWidget {
         return ScaffoldWithNavigationBar(
             body: navigationShell,
             selectedIndex: navigationShell.currentIndex,
-            onDestinationSelected: _goBranch);
+            onDestinationSelected: (index) => _goBranch(index, context));
       } else {
         if (screenWiderThanPhone = false) {
           screenWiderThanPhone = true;
@@ -51,7 +65,7 @@ class ScaffoldWithNestedNavigation extends StatelessWidget {
         return ScaffoldWithNavigationRail(
           body: navigationShell,
           selectedIndex: navigationShell.currentIndex,
-          onDestinationSelected: _goBranch,
+          onDestinationSelected: (index) => _goBranch(index, context),
         );
       }
     });

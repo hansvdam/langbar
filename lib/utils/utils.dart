@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
+import '../send_to_llm.dart' show clearChatMessageMemory, preserveLastMessageAndClearHistory;
 
 
 // filtering in logviewer:
@@ -39,8 +40,16 @@ setGoRouter(GoRouter goRouterParam) {
 void activateUri(String navUri, bool openModal) {
   langbarLogger.i('activateUri called with: $navUri, openModal: $openModal');
   
+  var currentUri = goRouter.routeInformationProvider.value.uri;
+  var targetUri = Uri.parse(navUri);
+  
+  // Clear chat memory if navigating to a different screen (different path)
+  if (currentUri.path != targetUri.path) {
+    langbarLogger.i('Screen change detected (${currentUri.path} -> ${targetUri.path}), clearing chat memory but preserving last message');
+    preserveLastMessageAndClearHistory();
+  }
+  
   if (openModal) {
-    var currentUri = goRouter.routeInformationProvider.value.uri;
     langbarLogger.i('Current URI: $currentUri');
     if (currentUri.hasSamePathAs(navUri)) {
       langbarLogger.i('Same path detected, popping then pushing');
