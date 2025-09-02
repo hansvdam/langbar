@@ -6,7 +6,7 @@ import 'package:langbar_core/ui/langfield/langbar_states.dart';
 import 'package:langbar_core/platform_details.dart';
 import 'package:langbar_core/send_to_llm.dart';
 import 'package:langbar_core/ui/cubits/current_screen_cubit.dart';
-import 'package:langbar_core/utils/utils.dart' show setGoRouter;
+import 'package:langbar_core/utils/utils.dart' show setGoRouter, langbarLogger;
 import 'package:langbar_core/documented_route.dart';
 import 'package:langbar/ui/screens/models/BSMap.dart';
 import 'package:langbar/ui/screens/models/Space.dart';
@@ -31,16 +31,11 @@ You are a smart assistant for a financial app that helps users navigate screens 
 """;
 
 // Simple create hook for the example app
-CreateHookFunction exampleCreateHook = 
+CreateHookFunction globalHook =
     (DocumentedGoRoute route, GoRouterState routerState) {
   return (Map<String, dynamic> toolInput, {String? namedLocation}) async {
-    // Simple hook that just passes through query parameters
-    final Uri currentUri = routerState.uri;
-    final queryParams = currentUri.queryParameters;
-    
-    // Add any query parameters to the tool input
-    toolInput.addAll(queryParams);
-    
+    // do nothing, but can be used to return some values to be added to the path parameters for the goRoute call (its a bit hacky)
+    langbarLogger.d('Global hook - Route: ${route.path}, toolInput: $toolInput, namedLocation: $namedLocation');
     return {};
   };
 };
@@ -53,7 +48,7 @@ void main() async {
   await dotenv.load();
   
   // Initialize langbar_core library
-  setGlobalCreateHook(exampleCreateHook);
+  setGlobalCreateHook(globalHook);
   setRoutes(routesList);
   setSystemPrompt(systemPrompt);
   setGoRouter(routes); // Set the GoRouter instance for the library
