@@ -24,8 +24,8 @@ class ChatHistory extends ChangeNotifier {
 
   init() async {
     if (!PlatformDetails().isWeb) {
-      // sqlite does not wrk on web (maybe move to sharedprefs at some point)
-      historyProvider = HistoryProvider();
+      // sqlite does not work on web (maybe move to sharedprefs at some point)
+      historyProvider = HistoryProvider.getInstance(); // Use singleton
       await historyProvider?.open();
       var historyItemsFromDatabase =
           await historyProvider?.getHistoryItems() ?? <HistoryMessage>[];
@@ -36,8 +36,16 @@ class ChatHistory extends ChangeNotifier {
 
   void add(HistoryMessage item) {
     items.add(item);
+    // Fire and forget database insert - don't await to avoid UI blocking
     historyProvider?.insert(item);
     notifyListeners();
+  }
+  
+  @override
+  void dispose() {
+    // Close database connection when ChatHistory is disposed
+    historyProvider?.close();
+    super.dispose();
   }
 }
 
