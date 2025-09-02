@@ -8,8 +8,6 @@ import 'package:langbar_core/send_to_llm.dart';
 import 'package:langbar_core/ui/cubits/current_screen_cubit.dart';
 import 'package:langbar_core/utils/utils.dart' show setGoRouter, langbarLogger;
 import 'package:langbar_core/documented_route.dart';
-import 'package:langbar/ui/screens/models/BSMap.dart';
-import 'package:langbar/ui/screens/models/Space.dart';
 import 'package:langbar/ui/main_scaffolds.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -82,22 +80,6 @@ class MyApp extends StatelessWidget {
             create: (context) => WidthChanged(),
           ),
           BlocProvider(create: (context) => CurrentScreenCubit()),
-          Provider(create: (context) => BSMap([])),
-          // CartModel is implemented as a ChangeNotifier, which calls for the use
-          // of ChangeNotifierProvider. Moreover, CartModel depends
-          // on CatalogModel, so a ProxyProvider is needed.
-          ChangeNotifierProxyProvider<BSMap, Space?>(
-            create: (context) => null,
-            update: (context, bsMap, previousSpace) {
-              return bsMap.currentSpace;
-            },
-          ),
-          ChangeNotifierProxyProvider2<BSMap, Space?, Ticket?>(
-            create: (context) => null,
-            update: (context, bsMap, currentSpace, previousTicket) {
-              return bsMap.currentTicket;
-            },
-          ),
         ],
         child: Consumer<ChatHistory>(builder: (context, cart, child) {
           return LayoutBuilder(builder: (context, constraints) {
