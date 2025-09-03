@@ -8,57 +8,75 @@ import '../models/account.dart';
 import '../../viewmodels/transfer_screen_view_model.dart';
 import 'default_appbar_scaffold.dart';
 
-class TransferScreen extends StatelessWidget {
+class TransferScreen extends DefaultAppbarScreen {
   final double? amount;
   final String? destinationName;
   final String? description;
   final String fromAccountId;
-  final String label;
   
-  const TransferScreen({
-      required this.label,
+  TransferScreen({
+      required super.label,
       super.key,
       this.fromAccountId = "1",
       this.amount,
       this.destinationName,
-      this.description});
+      this.description})
+      : super(
+          body: _TransferScreenBody(
+            amount: amount,
+            destinationName: destinationName,
+            description: description,
+            fromAccountId: fromAccountId,
+          ),
+        );
 
   static const name = 'transfer_money';
+}
+
+class _TransferScreenBody extends StatelessWidget {
+  final double? amount;
+  final String? destinationName;
+  final String? description;
+  final String fromAccountId;
+
+  const _TransferScreenBody({
+    required this.amount,
+    required this.destinationName,
+    required this.description,
+    required this.fromAccountId,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return DefaultAppbarScaffold(
-      label: label,
-      body: BlocProvider<TransferScreenViewModel>(
-        key: ValueKey('${amount}_${destinationName}_${description}_${fromAccountId}'),
-        create: (context) => TransferScreenViewModel(
-          context: context,
-          amount: amount,
-          destinationName: destinationName,
-          description: description,
-          fromAccountId: fromAccountId,
-        ),
-        child: BlocBuilder<TransferScreenViewModel, TransferScreenState>(
-          builder: (context, state) {
-            return FutureBuilder<Contact?>(
-                future: state.mostLikelyDestinationContactFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    var mostLikelyDestinationContact = snapshot.data;
-                    return TransferContentWidget(
-                        state.amount,
-                        mostLikelyDestinationContact,
-                        state.description,
-                        state.fromAccount!,
-                        viewModel: context.read<TransferScreenViewModel>());
-                  }
-                });
-          },
-        ),
+    return BlocProvider<TransferScreenViewModel>(
+      key: ValueKey('${amount}_${destinationName}_${description}_${fromAccountId}'),
+      create: (context) => TransferScreenViewModel(
+        context: context,
+        amount: amount,
+        destinationName: destinationName,
+        description: description,
+        fromAccountId: fromAccountId,
+      ),
+      child: BlocBuilder<TransferScreenViewModel, TransferScreenState>(
+        builder: (context, state) {
+          return FutureBuilder<Contact?>(
+              future: state.mostLikelyDestinationContactFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  var mostLikelyDestinationContact = snapshot.data;
+                  return TransferContentWidget(
+                      state.amount,
+                      mostLikelyDestinationContact,
+                      state.description,
+                      state.fromAccount!,
+                      viewModel: context.read<TransferScreenViewModel>());
+                }
+              });
+        },
       ),
     );
   }
