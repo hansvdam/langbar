@@ -8,126 +8,63 @@ import '../models/account.dart';
 import '../../viewmodels/transfer_screen_view_model.dart';
 import 'default_appbar_scaffold.dart';
 
-class TransferScreen extends DefaultAppbarScreen {
+class TransferScreen extends StatelessWidget {
   final double? amount;
   final String? destinationName;
   final String? description;
   final String fromAccountId;
+  final String label;
   
-  TransferScreen({required super.label,
+  const TransferScreen({
+      required this.label,
       super.key,
       this.fromAccountId = "1",
       this.amount,
       this.destinationName,
-      this.description})
-      : super(
-            body: _TransferScreenProvider(
-              amount: amount,
-              destinationName: destinationName,
-              description: description,
-              fromAccountId: fromAccountId,
-            ));
+      this.description});
 
   static const name = 'transfer_money';
-}
-
-class _TransferScreenProvider extends StatefulWidget {
-  final double? amount;
-  final String? destinationName;
-  final String? description;
-  final String fromAccountId;
-
-  const _TransferScreenProvider({
-    required this.amount,
-    required this.destinationName,
-    required this.description,
-    required this.fromAccountId,
-  });
-
-  @override
-  _TransferScreenProviderState createState() => _TransferScreenProviderState();
-}
-
-class _TransferScreenProviderState extends State<_TransferScreenProvider> {
-  TransferScreenViewModel? _viewModel;
-
-  @override
-  void initState() {
-    super.initState();
-    _createOrUpdateViewModel();
-  }
-
-  @override
-  void didUpdateWidget(_TransferScreenProvider oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.amount != widget.amount ||
-        oldWidget.destinationName != widget.destinationName ||
-        oldWidget.description != widget.description ||
-        oldWidget.fromAccountId != widget.fromAccountId) {
-      _updateExistingViewModel();
-    }
-  }
-
-  void _createOrUpdateViewModel() {
-    _viewModel = TransferScreenViewModel(
-      context: context,
-      amount: widget.amount,
-      destinationName: widget.destinationName,
-      description: widget.description,
-      fromAccountId: widget.fromAccountId,
-    );
-  }
-
-  void _updateExistingViewModel() {
-    if (_viewModel != null) {
-      _viewModel!.updateFromRouteParams(
-        amount: widget.amount,
-        destinationName: widget.destinationName,
-        description: widget.description,
-        fromAccountId: widget.fromAccountId,
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<TransferScreenViewModel>.value(
-      value: _viewModel!,
-      child: TransferMoneyScreen(),
+    return DefaultAppbarScaffold(
+      label: label,
+      body: BlocProvider<TransferScreenViewModel>(
+        key: ValueKey('${amount}_${destinationName}_${description}_${fromAccountId}'),
+        create: (context) => TransferScreenViewModel(
+          context: context,
+          amount: amount,
+          destinationName: destinationName,
+          description: description,
+          fromAccountId: fromAccountId,
+        ),
+        child: BlocBuilder<TransferScreenViewModel, TransferScreenState>(
+          builder: (context, state) {
+            return FutureBuilder<Contact?>(
+                future: state.mostLikelyDestinationContactFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else {
+                    var mostLikelyDestinationContact = snapshot.data;
+                    return TransferContentWidget(
+                        state.amount,
+                        mostLikelyDestinationContact,
+                        state.description,
+                        state.fromAccount!,
+                        viewModel: context.read<TransferScreenViewModel>());
+                  }
+                });
+          },
+        ),
+      ),
     );
   }
 }
 
-class TransferMoneyScreen extends StatelessWidget {
-  const TransferMoneyScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<TransferScreenViewModel, TransferScreenState>(
-      builder: (context, state) {
-        return FutureBuilder<Contact?>(
-            future: state.mostLikelyDestinationContactFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                var mostLikelyDestinationContact = snapshot.data;
-                return TransferContentWidget(
-                    state.amount,
-                    mostLikelyDestinationContact,
-                    state.description,
-                    state.fromAccount!,
-                    viewModel: context.read<TransferScreenViewModel>());
-              }
-            });
-      },
-    );
-  }
-}
-
-class TransferContentWidget extends StatefulWidget {
+class TransferContentWidget extends StatelessWidget {
   final double? amount;
   final Contact? destinationContact;
   final String? description;
@@ -144,16 +81,9 @@ class TransferContentWidget extends StatefulWidget {
   });
 
   @override
-  TransferContentState createState() => TransferContentState();
-}
-
-class TransferContentState extends State<TransferContentWidget> {
-  // No TextEditingControllers needed - using controlled fields
-
-  @override
   Widget build(BuildContext context) {
     return BlocBuilder<TransferScreenViewModel, TransferScreenState>(
-      bloc: widget.viewModel,
+      bloc: viewModel,
       builder: (context, state) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,16 +92,16 @@ class TransferContentState extends State<TransferContentWidget> {
             Text("from:"),
             ListTile(
               title: Text(
-                widget.fromAccount.name,
+                fromAccount.name,
               ),
               subtitle: Text(
-                widget.fromAccount.number,
+                fromAccount.number,
               ),
             ),
             TextFormField(
               key: ValueKey('amount_${state.amountText}'),
               initialValue: state.amountText,
-              onChanged: (value) => widget.viewModel.updateAmountText(value),
+              onChanged: (value) => viewModel.updateAmountText(value),
               decoration: const InputDecoration(
                 labelText: 'Amount',
                 prefixText: '€ ',
@@ -180,19 +110,19 @@ class TransferContentState extends State<TransferContentWidget> {
             TextFormField(
               key: ValueKey('destinationName_${state.destinationAccountNameText}'),
               initialValue: state.destinationAccountNameText,
-              onChanged: (value) => widget.viewModel.updateDestinationAccountNameText(value),
+              onChanged: (value) => viewModel.updateDestinationAccountNameText(value),
               decoration: const InputDecoration(labelText: 'To'),
             ),
             TextFormField(
               key: ValueKey('accountNumber_${state.destinationAccountNumberText}'),
               initialValue: state.destinationAccountNumberText,
-              onChanged: (value) => widget.viewModel.updateDestinationAccountNumberText(value),
+              onChanged: (value) => viewModel.updateDestinationAccountNumberText(value),
               decoration: const InputDecoration(labelText: 'Account Number'),
             ),
             TextFormField(
               key: ValueKey('description_${state.descriptionText}'),
               initialValue: state.descriptionText,
-              onChanged: (value) => widget.viewModel.updateDescriptionText(value),
+              onChanged: (value) => viewModel.updateDescriptionText(value),
               decoration: const InputDecoration(labelText: 'Description'),
             ),
             SizedBox(height: 20),
