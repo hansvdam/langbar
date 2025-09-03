@@ -1,80 +1,169 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../utils/name_matcher.dart';
 import '../models/account.dart';
 import '../param_change_detecting_screens.dart';
 import '../utils.dart';
+import '../../viewmodels/transfer_screen_view_model.dart';
 import 'default_appbar_scaffold.dart';
 
 class TransferScreen extends DefaultAppbarScreen {
+  final double? amount;
+  final String? destinationName;
+  final String? description;
+  final String fromAccountId;
+  
   TransferScreen({required super.label,
       super.key,
-      fromAccountId = "1",
-      amount,
-      destinationName,
-      description})
+      this.fromAccountId = "1",
+      this.amount,
+      this.destinationName,
+      this.description})
       : super(
-            body: TransferMoneyScreen(
-                amount, destinationName, description, fromAccountId));
+            body: _TransferScreenProvider(
+              amount: amount,
+              destinationName: destinationName,
+              description: description,
+              fromAccountId: fromAccountId,
+            ));
 
   static const name = 'transfer_money';
 }
 
-class TransferMoneyScreen extends ChangeDetectingStatefulWidget {
+class _TransferScreenProvider extends StatefulWidget {
   final double? amount;
-
   final String? destinationName;
   final String? description;
-
   final String fromAccountId;
 
-  const TransferMoneyScreen(this.amount, this.destinationName, this.description, this.fromAccountId,
-      {super.key});
+  const _TransferScreenProvider({
+    required this.amount,
+    required this.destinationName,
+    required this.description,
+    required this.fromAccountId,
+  });
 
   @override
-  _TheFutureState createState() => _TheFutureState();
-
-  @override
-  String value() =>
-      (amount.toString() ?? '') + (destinationName ?? '') + (description ?? '');
+  _TransferScreenProviderState createState() => _TransferScreenProviderState();
 }
 
-class _TheFutureState extends UpdatingScreenState<TransferMoneyScreen> {
-  late Future<Contact?> mostLikelyDestinationAccountFuture;
-  late BankAccount fromAccount;
+class _TransferScreenProviderState extends State<_TransferScreenProvider> {
+  TransferScreenViewModel? _viewModel;
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<Contact?>(
-        future: mostLikelyDestinationAccountFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
-          } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          } else {
-            var mostLikelyDestinationAccount = snapshot.data;
-            return TransferContentWidget(
-                widget.amount,
-                mostLikelyDestinationAccount,
-                widget.description,
-                widget.fromAccountId);
-          }
-        });
+  void initState() {
+    super.initState();
+    _createOrUpdateViewModel();
   }
 
   @override
+  void didUpdateWidget(_TransferScreenProvider oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.amount != widget.amount ||
+        oldWidget.destinationName != widget.destinationName ||
+        oldWidget.description != widget.description ||
+        oldWidget.fromAccountId != widget.fromAccountId) {
+      print('_TransferScreenProvider: Parameters changed, updating ViewModel');
+      _updateExistingViewModel();
+    }
+  }
+
+  void _createOrUpdateViewModel() {
+    print('_TransferScreenProvider: Creating new TransferScreenViewModel with amount: ${widget.amount}, destinationName: ${widget.destinationName}, description: ${widget.description}');
+    _viewModel = TransferScreenViewModel(
+      context: context,
+      amount: widget.amount,
+      destinationName: widget.destinationName,
+      description: widget.description,
+      fromAccountId: widget.fromAccountId,
+    );
+  }
+
+  void _updateExistingViewModel() {
+    if (_viewModel != null) {
+      print('_TransferScreenProvider: Updating existing ViewModel with new parameters');
+      _viewModel!.updateFromRouteParams(
+        amount: widget.amount,
+        destinationName: widget.destinationName,
+        description: widget.description,
+        fromAccountId: widget.fromAccountId,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<TransferScreenViewModel>.value(
+      value: _viewModel!,
+      child: TransferMoneyScreen(),
+    );
+  }
+}
+
+class TransferMoneyScreen extends StatefulWidget {
+  const TransferMoneyScreen({super.key});
+
+  @override
+  _TransferMoneyScreenState createState() => _TransferMoneyScreenState();
+}
+
+class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
+  late Future<Contact?> mostLikelyDestinationAccountFuture;
+  late BankAccount fromAccount;
+  late TransferScreenViewModel viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    viewModel = context.read<TransferScreenViewModel>();
+    initOrUpdateWidgetParams();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<TransferScreenViewModel, TransferScreenState>(
+      builder: (context, state) {
+        // Update the Future whenever the destinationName changes in the state
+        if (state.destinationName != null) {
+          mostLikelyDestinationAccountFuture =
+              findMostlikelyDestinationContact(state.destinationName!);
+        } else {
+          mostLikelyDestinationAccountFuture = Future(() => null);
+        }
+        
+        return FutureBuilder<Contact?>(
+            future: mostLikelyDestinationAccountFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                var mostLikelyDestinationAccount = snapshot.data;
+                return TransferContentWidget(
+                    state.amount,
+                    mostLikelyDestinationAccount,
+                    state.description,
+                    state.fromAccountId,
+                    viewModel: viewModel);
+              }
+            });
+      },
+    );
+  }
+
   void initOrUpdateWidgetParams() {
-    if (widget.destinationName != null) {
+    if (viewModel.state.destinationName != null) {
       mostLikelyDestinationAccountFuture =
-          findMostlikelyDestinationContact(widget.destinationName!);
+          findMostlikelyDestinationContact(viewModel.state.destinationName!);
     } else {
       mostLikelyDestinationAccountFuture = Future(() => null);
     }
-    fromAccount = accounts[widget.fromAccountId]!;
+    fromAccount = accounts[viewModel.state.fromAccountId]!;
   }
 
   Future<Contact?> findMostlikelyDestinationContact(String s) async {
@@ -84,30 +173,27 @@ class _TheFutureState extends UpdatingScreenState<TransferMoneyScreen> {
   }
 }
 
-class TransferContentWidget extends ChangeDetectingStatefulWidget {
+class TransferContentWidget extends StatefulWidget {
   final double? amount;
-
   final Contact? destinationContact;
-
   final String? description;
-
   final String fromAccountId;
+  final TransferScreenViewModel viewModel;
 
-  const TransferContentWidget(this.amount, this.destinationContact,
-      this.description, this.fromAccountId,
-      {super.key});
+  const TransferContentWidget(
+    this.amount, 
+    this.destinationContact,
+    this.description, 
+    this.fromAccountId, {
+    required this.viewModel,
+    super.key,
+  });
 
   @override
   TransferContentState createState() => TransferContentState();
-
-  @override
-  String value() =>
-      (amount.toString() ?? '') +
-          (destinationContact?.name ?? '') +
-          (description ?? '');
 }
 
-class TransferContentState extends UpdatingScreenState<TransferContentWidget> {
+class TransferContentState extends State<TransferContentWidget> {
   final TextEditingController _destinationaccountNumberController =
   TextEditingController();
   final TextEditingController _destinationAccountNameController =
@@ -117,21 +203,54 @@ class TransferContentState extends UpdatingScreenState<TransferContentWidget> {
 
   late BankAccount fromAccount;
 
+  bool _isUpdatingFromViewModel = false;
+
   @override
   void initState() {
     super.initState();
     initOrUpdateWidgetParams();
+    
+    // Add listeners to update ViewModel when text fields change
+    _amountController.addListener(() {
+      if (_isUpdatingFromViewModel) return; // Prevent circular updates
+      double? amount = double.tryParse(_amountController.text);
+      widget.viewModel.updateAmount(amount);
+    });
+    
+    _destinationAccountNameController.addListener(() {
+      if (_isUpdatingFromViewModel) return; // Prevent circular updates
+      widget.viewModel.updateDestinationName(_destinationAccountNameController.text);
+    });
+    
+    _descriptionController.addListener(() {
+      if (_isUpdatingFromViewModel) return; // Prevent circular updates
+      widget.viewModel.updateDescription(_descriptionController.text);
+    });
   }
 
   @override
+  void didUpdateWidget(TransferContentWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update text fields when widget parameters change (e.g., from ViewModel state updates)
+    if (oldWidget.amount != widget.amount ||
+        oldWidget.destinationContact != widget.destinationContact ||
+        oldWidget.description != widget.description) {
+      initOrUpdateWidgetParams();
+    }
+  }
+
   void initOrUpdateWidgetParams() {
+    _isUpdatingFromViewModel = true; // Prevent circular updates
+    
     animateFieldContent(widget.amount?.toStringAsFixed(2), _amountController)
         .then((_) => animateFieldContent(
             widget.destinationContact?.name, _destinationAccountNameController))
         .then((_) => animateFieldContent(widget.destinationContact?.iban,
             _destinationaccountNumberController))
         .then((_) =>
-            animateFieldContent(widget.description, _descriptionController));
+            animateFieldContent(widget.description, _descriptionController))
+        .then((_) => _isUpdatingFromViewModel = false); // Re-enable listeners
+        
     fromAccount = accounts[widget.fromAccountId]!;
   }
 
