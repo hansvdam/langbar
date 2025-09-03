@@ -12,6 +12,12 @@ class TransferScreenState {
   final String fromAccountId;
   final BankAccount? fromAccount;
   final Future<Contact?>? mostLikelyDestinationContactFuture;
+  
+  // UI field values
+  final String amountText;
+  final String destinationAccountNameText;
+  final String destinationAccountNumberText;
+  final String descriptionText;
 
   TransferScreenState({
     this.amount,
@@ -20,6 +26,10 @@ class TransferScreenState {
     required this.fromAccountId,
     this.fromAccount,
     this.mostLikelyDestinationContactFuture,
+    this.amountText = '',
+    this.destinationAccountNameText = '',
+    this.destinationAccountNumberText = '',
+    this.descriptionText = '',
   });
 
   TransferScreenState copyWith({
@@ -29,6 +39,10 @@ class TransferScreenState {
     String? fromAccountId,
     BankAccount? fromAccount,
     Future<Contact?>? mostLikelyDestinationContactFuture,
+    String? amountText,
+    String? destinationAccountNameText,
+    String? destinationAccountNumberText,
+    String? descriptionText,
   }) {
     return TransferScreenState(
       amount: amount ?? this.amount,
@@ -37,6 +51,10 @@ class TransferScreenState {
       fromAccountId: fromAccountId ?? this.fromAccountId,
       fromAccount: fromAccount ?? this.fromAccount,
       mostLikelyDestinationContactFuture: mostLikelyDestinationContactFuture ?? this.mostLikelyDestinationContactFuture,
+      amountText: amountText ?? this.amountText,
+      destinationAccountNameText: destinationAccountNameText ?? this.destinationAccountNameText,
+      destinationAccountNumberText: destinationAccountNumberText ?? this.destinationAccountNumberText,
+      descriptionText: descriptionText ?? this.descriptionText,
     );
   }
 }
@@ -58,6 +76,9 @@ class TransferScreenViewModel extends GenericScreenViewModel<TransferScreenState
             fromAccountId: fromAccountId,
             fromAccount: accounts[fromAccountId], // Initialize fromAccount from accounts map
             mostLikelyDestinationContactFuture: destinationName != null ? null : Future(() => null), // Will be set properly in _updateContactFuture
+            amountText: amount?.toStringAsFixed(2) ?? '',
+            destinationAccountNameText: destinationName ?? '',
+            descriptionText: description ?? '',
           ),
           context: context,
         ) {
@@ -67,18 +88,27 @@ class TransferScreenViewModel extends GenericScreenViewModel<TransferScreenState
 
   void updateAmount(double? amount) {
     langbarLogger.i('TransferScreenViewModel updating amount from ${state.amount} to $amount');
-    emit(state.copyWith(amount: amount));
+    emit(state.copyWith(
+      amount: amount,
+      amountText: amount?.toStringAsFixed(2) ?? '',
+    ));
   }
 
   void updateDestinationName(String? destinationName) {
     langbarLogger.i('TransferScreenViewModel updating destinationName from ${state.destinationName} to $destinationName');
-    emit(state.copyWith(destinationName: destinationName));
+    emit(state.copyWith(
+      destinationName: destinationName,
+      destinationAccountNameText: destinationName ?? '',
+    ));
     _updateContactFuture();
   }
 
   void updateDescription(String? description) {
     langbarLogger.i('TransferScreenViewModel updating description from ${state.description} to $description');
-    emit(state.copyWith(description: description));
+    emit(state.copyWith(
+      description: description,
+      descriptionText: description ?? '',
+    ));
   }
 
   void updateFromAccountId(String fromAccountId) {
@@ -104,8 +134,39 @@ class TransferScreenViewModel extends GenericScreenViewModel<TransferScreenState
       description: description,
       fromAccountId: fromAccountId,
       fromAccount: fromAccountId != null ? accounts[fromAccountId] : null,
+      amountText: amount?.toStringAsFixed(2) ?? '',
+      destinationAccountNameText: destinationName ?? '',
+      descriptionText: description ?? '',
     ));
     _updateContactFuture();
+  }
+
+  /// Update text field values directly (for user input)
+  void updateAmountText(String text) {
+    double? amount = double.tryParse(text);
+    emit(state.copyWith(
+      amountText: text,
+      amount: amount,
+    ));
+  }
+
+  void updateDestinationAccountNameText(String text) {
+    emit(state.copyWith(
+      destinationAccountNameText: text,
+      destinationName: text.isEmpty ? null : text,
+    ));
+    _updateContactFuture();
+  }
+
+  void updateDestinationAccountNumberText(String text) {
+    emit(state.copyWith(destinationAccountNumberText: text));
+  }
+
+  void updateDescriptionText(String text) {
+    emit(state.copyWith(
+      descriptionText: text,
+      description: text.isEmpty ? null : text,
+    ));
   }
 
   @override
@@ -125,8 +186,17 @@ class TransferScreenViewModel extends GenericScreenViewModel<TransferScreenState
     if (state.destinationName != null) {
       final future = _findMostLikelyDestinationContact(_context, state.destinationName!);
       emit(state.copyWith(mostLikelyDestinationContactFuture: future));
+      // Update the destination account number when we get the contact
+      future.then((contact) {
+        if (contact != null) {
+          emit(state.copyWith(destinationAccountNumberText: contact.iban));
+        }
+      });
     } else {
-      emit(state.copyWith(mostLikelyDestinationContactFuture: Future(() => null)));
+      emit(state.copyWith(
+        mostLikelyDestinationContactFuture: Future(() => null),
+        destinationAccountNumberText: '',
+      ));
     }
   }
 

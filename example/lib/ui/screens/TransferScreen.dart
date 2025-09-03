@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models/account.dart';
-import '../utils.dart';
 import '../../viewmodels/transfer_screen_view_model.dart';
 import 'default_appbar_scaffold.dart';
 
@@ -149,118 +148,70 @@ class TransferContentWidget extends StatefulWidget {
 }
 
 class TransferContentState extends State<TransferContentWidget> {
-  final TextEditingController _destinationaccountNumberController =
-  TextEditingController();
-  final TextEditingController _destinationAccountNameController =
-  TextEditingController();
-  final TextEditingController _amountController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
-
-  bool _isUpdatingFromViewModel = false;
-
-  @override
-  void initState() {
-    super.initState();
-    initOrUpdateWidgetParams();
-    
-    // Add listeners to update ViewModel when text fields change
-    _amountController.addListener(() {
-      if (_isUpdatingFromViewModel) return; // Prevent circular updates
-      double? amount = double.tryParse(_amountController.text);
-      widget.viewModel.updateAmount(amount);
-    });
-    
-    _destinationAccountNameController.addListener(() {
-      if (_isUpdatingFromViewModel) return; // Prevent circular updates
-      widget.viewModel.updateDestinationName(_destinationAccountNameController.text);
-    });
-    
-    _descriptionController.addListener(() {
-      if (_isUpdatingFromViewModel) return; // Prevent circular updates
-      widget.viewModel.updateDescription(_descriptionController.text);
-    });
-  }
-
-  @override
-  void didUpdateWidget(TransferContentWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Update text fields when widget parameters change (e.g., from ViewModel state updates)
-    if (oldWidget.amount != widget.amount ||
-        oldWidget.destinationContact != widget.destinationContact ||
-        oldWidget.description != widget.description) {
-      initOrUpdateWidgetParams();
-    }
-  }
-
-  void initOrUpdateWidgetParams() {
-    _isUpdatingFromViewModel = true; // Prevent circular updates
-    
-    animateFieldContent(widget.amount?.toStringAsFixed(2), _amountController)
-        .then((_) => animateFieldContent(
-            widget.destinationContact?.name, _destinationAccountNameController))
-        .then((_) => animateFieldContent(widget.destinationContact?.iban,
-            _destinationaccountNumberController))
-        .then((_) =>
-            animateFieldContent(widget.description, _descriptionController))
-        .then((_) => _isUpdatingFromViewModel = false); // Re-enable listeners
-  }
-
-  void clear() {
-    _amountController.clear();
-    _destinationAccountNameController.clear();
-    _destinationaccountNumberController.clear();
-    _descriptionController.clear();
-  }
+  // No TextEditingControllers needed - using controlled fields
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text("from:"),
-        ListTile(
-          title: Text(
-            widget.fromAccount.name,
-          ),
-          subtitle: Text(
-            widget.fromAccount.number,
-          ),
-        ),
-        TextField(
-          controller: _amountController,
-          decoration: const InputDecoration(
-            labelText: 'Amount',
-            prefixText: '€ ',
-          ),
-        ),
-        TextField(
-          controller: _destinationAccountNameController,
-          decoration: const InputDecoration(labelText: 'To'),
-        ),
-        TextField(
-          controller: _destinationaccountNumberController,
-          decoration: const InputDecoration(labelText: 'Account Number'),
-        ),
-        TextField(
-          controller: _descriptionController,
-          decoration: const InputDecoration(labelText: 'Description'),
-        ),
-        SizedBox(height: 20),
-        Center(
-            child: FilledButton(
-              onPressed: () {
-                context.go("/${TransferScreen.name}");
-            var goRouter = GoRouter.of(context);
-            // ugly trick, but we need to clear the Transfer screen first.
-            // tried many things, but this is the only thing that works.
-            Future.delayed(Duration(milliseconds: 50), () {
-              goRouter.go("/home");
-            });
-          },
-              child: const Text('Transfer'),
-            )),
-      ],
+    return BlocBuilder<TransferScreenViewModel, TransferScreenState>(
+      bloc: widget.viewModel,
+      builder: (context, state) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("from:"),
+            ListTile(
+              title: Text(
+                widget.fromAccount.name,
+              ),
+              subtitle: Text(
+                widget.fromAccount.number,
+              ),
+            ),
+            TextFormField(
+              key: ValueKey('amount_${state.amountText}'),
+              initialValue: state.amountText,
+              onChanged: (value) => widget.viewModel.updateAmountText(value),
+              decoration: const InputDecoration(
+                labelText: 'Amount',
+                prefixText: '€ ',
+              ),
+            ),
+            TextFormField(
+              key: ValueKey('destinationName_${state.destinationAccountNameText}'),
+              initialValue: state.destinationAccountNameText,
+              onChanged: (value) => widget.viewModel.updateDestinationAccountNameText(value),
+              decoration: const InputDecoration(labelText: 'To'),
+            ),
+            TextFormField(
+              key: ValueKey('accountNumber_${state.destinationAccountNumberText}'),
+              initialValue: state.destinationAccountNumberText,
+              onChanged: (value) => widget.viewModel.updateDestinationAccountNumberText(value),
+              decoration: const InputDecoration(labelText: 'Account Number'),
+            ),
+            TextFormField(
+              key: ValueKey('description_${state.descriptionText}'),
+              initialValue: state.descriptionText,
+              onChanged: (value) => widget.viewModel.updateDescriptionText(value),
+              decoration: const InputDecoration(labelText: 'Description'),
+            ),
+            SizedBox(height: 20),
+            Center(
+                child: FilledButton(
+                  onPressed: () {
+                    context.go("/${TransferScreen.name}");
+                var goRouter = GoRouter.of(context);
+                // ugly trick, but we need to clear the Transfer screen first.
+                // tried many things, but this is the only thing that works.
+                Future.delayed(Duration(milliseconds: 50), () {
+                  goRouter.go("/home");
+                });
+              },
+                  child: const Text('Transfer'),
+                )),
+          ],
+        );
+      },
     );
   }
 }
