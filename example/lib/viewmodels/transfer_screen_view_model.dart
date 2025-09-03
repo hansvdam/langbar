@@ -10,6 +10,7 @@ class TransferScreenState {
   final String? destinationName;
   final String? description;
   final String fromAccountId;
+  final BankAccount? fromAccount;
   final Future<Contact?>? mostLikelyDestinationContactFuture;
 
   TransferScreenState({
@@ -17,6 +18,7 @@ class TransferScreenState {
     this.destinationName,
     this.description,
     required this.fromAccountId,
+    this.fromAccount,
     this.mostLikelyDestinationContactFuture,
   });
 
@@ -25,6 +27,7 @@ class TransferScreenState {
     String? destinationName,
     String? description,
     String? fromAccountId,
+    BankAccount? fromAccount,
     Future<Contact?>? mostLikelyDestinationContactFuture,
   }) {
     return TransferScreenState(
@@ -32,6 +35,7 @@ class TransferScreenState {
       destinationName: destinationName ?? this.destinationName,
       description: description ?? this.description,
       fromAccountId: fromAccountId ?? this.fromAccountId,
+      fromAccount: fromAccount ?? this.fromAccount,
       mostLikelyDestinationContactFuture: mostLikelyDestinationContactFuture ?? this.mostLikelyDestinationContactFuture,
     );
   }
@@ -52,6 +56,7 @@ class TransferScreenViewModel extends GenericScreenViewModel<TransferScreenState
             destinationName: destinationName,
             description: description,
             fromAccountId: fromAccountId,
+            fromAccount: accounts[fromAccountId], // Initialize fromAccount from accounts map
             mostLikelyDestinationContactFuture: destinationName != null ? null : Future(() => null), // Will be set properly in _updateContactFuture
           ),
           context: context,
@@ -78,7 +83,10 @@ class TransferScreenViewModel extends GenericScreenViewModel<TransferScreenState
 
   void updateFromAccountId(String fromAccountId) {
     langbarLogger.i('TransferScreenViewModel updating fromAccountId from ${state.fromAccountId} to $fromAccountId');
-    emit(state.copyWith(fromAccountId: fromAccountId));
+    emit(state.copyWith(
+      fromAccountId: fromAccountId,
+      fromAccount: accounts[fromAccountId],
+    ));
   }
 
   /// Update the ViewModel with new route parameters
@@ -95,6 +103,7 @@ class TransferScreenViewModel extends GenericScreenViewModel<TransferScreenState
       destinationName: destinationName,
       description: description,
       fromAccountId: fromAccountId,
+      fromAccount: fromAccountId != null ? accounts[fromAccountId] : null,
     ));
     _updateContactFuture();
   }

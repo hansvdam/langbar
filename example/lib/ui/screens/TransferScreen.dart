@@ -119,7 +119,7 @@ class TransferMoneyScreen extends StatelessWidget {
                     state.amount,
                     mostLikelyDestinationContact,
                     state.description,
-                    state.fromAccountId,
+                    state.fromAccount!,
                     viewModel: context.read<TransferScreenViewModel>());
               }
             });
@@ -132,14 +132,14 @@ class TransferContentWidget extends StatefulWidget {
   final double? amount;
   final Contact? destinationContact;
   final String? description;
-  final String fromAccountId;
+  final BankAccount fromAccount;
   final TransferScreenViewModel viewModel;
 
   const TransferContentWidget(
     this.amount, 
     this.destinationContact,
     this.description, 
-    this.fromAccountId, {
+    this.fromAccount, {
     required this.viewModel,
     super.key,
   });
@@ -155,8 +155,6 @@ class TransferContentState extends State<TransferContentWidget> {
   TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-
-  late BankAccount fromAccount;
 
   bool _isUpdatingFromViewModel = false;
 
@@ -205,8 +203,6 @@ class TransferContentState extends State<TransferContentWidget> {
         .then((_) =>
             animateFieldContent(widget.description, _descriptionController))
         .then((_) => _isUpdatingFromViewModel = false); // Re-enable listeners
-        
-    fromAccount = accounts[widget.fromAccountId]!;
   }
 
   void clear() {
@@ -225,10 +221,10 @@ class TransferContentState extends State<TransferContentWidget> {
         Text("from:"),
         ListTile(
           title: Text(
-            fromAccount.name,
+            widget.fromAccount.name,
           ),
           subtitle: Text(
-            fromAccount.number,
+            widget.fromAccount.number,
           ),
         ),
         TextField(
