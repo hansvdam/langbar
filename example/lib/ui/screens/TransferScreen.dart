@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../utils/name_matcher.dart';
 import '../models/account.dart';
-import '../param_change_detecting_screens.dart';
 import '../utils.dart';
 import '../../viewmodels/transfer_screen_view_model.dart';
 import 'default_appbar_scaffold.dart';
@@ -67,13 +65,11 @@ class _TransferScreenProviderState extends State<_TransferScreenProvider> {
         oldWidget.destinationName != widget.destinationName ||
         oldWidget.description != widget.description ||
         oldWidget.fromAccountId != widget.fromAccountId) {
-      print('_TransferScreenProvider: Parameters changed, updating ViewModel');
       _updateExistingViewModel();
     }
   }
 
   void _createOrUpdateViewModel() {
-    print('_TransferScreenProvider: Creating new TransferScreenViewModel with amount: ${widget.amount}, destinationName: ${widget.destinationName}, description: ${widget.description}');
     _viewModel = TransferScreenViewModel(
       context: context,
       amount: widget.amount,
@@ -85,7 +81,6 @@ class _TransferScreenProviderState extends State<_TransferScreenProvider> {
 
   void _updateExistingViewModel() {
     if (_viewModel != null) {
-      print('_TransferScreenProvider: Updating existing ViewModel with new parameters');
       _viewModel!.updateFromRouteParams(
         amount: widget.amount,
         destinationName: widget.destinationName,
@@ -104,72 +99,32 @@ class _TransferScreenProviderState extends State<_TransferScreenProvider> {
   }
 }
 
-class TransferMoneyScreen extends StatefulWidget {
+class TransferMoneyScreen extends StatelessWidget {
   const TransferMoneyScreen({super.key});
-
-  @override
-  _TransferMoneyScreenState createState() => _TransferMoneyScreenState();
-}
-
-class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
-  late Future<Contact?> mostLikelyDestinationAccountFuture;
-  late BankAccount fromAccount;
-  late TransferScreenViewModel viewModel;
-
-  @override
-  void initState() {
-    super.initState();
-    viewModel = context.read<TransferScreenViewModel>();
-    initOrUpdateWidgetParams();
-  }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<TransferScreenViewModel, TransferScreenState>(
       builder: (context, state) {
-        // Update the Future whenever the destinationName changes in the state
-        if (state.destinationName != null) {
-          mostLikelyDestinationAccountFuture =
-              findMostlikelyDestinationContact(state.destinationName!);
-        } else {
-          mostLikelyDestinationAccountFuture = Future(() => null);
-        }
-        
         return FutureBuilder<Contact?>(
-            future: mostLikelyDestinationAccountFuture,
+            future: state.mostLikelyDestinationContactFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return CircularProgressIndicator();
               } else if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
               } else {
-                var mostLikelyDestinationAccount = snapshot.data;
+                var mostLikelyDestinationContact = snapshot.data;
                 return TransferContentWidget(
                     state.amount,
-                    mostLikelyDestinationAccount,
+                    mostLikelyDestinationContact,
                     state.description,
                     state.fromAccountId,
-                    viewModel: viewModel);
+                    viewModel: context.read<TransferScreenViewModel>());
               }
             });
       },
     );
-  }
-
-  void initOrUpdateWidgetParams() {
-    if (viewModel.state.destinationName != null) {
-      mostLikelyDestinationAccountFuture =
-          findMostlikelyDestinationContact(viewModel.state.destinationName!);
-    } else {
-      mostLikelyDestinationAccountFuture = Future(() => null);
-    }
-    fromAccount = accounts[viewModel.state.fromAccountId]!;
-  }
-
-  Future<Contact?> findMostlikelyDestinationContact(String s) async {
-    var contacts = await readContactsFromCsv(context);
-    // insert a dummy iban if contact not in list; just for demo purposes (better than empty field):
-    return findMatchingContact(contacts, s) ?? Contact(s, "GB33BUKB202015555");
   }
 }
 
