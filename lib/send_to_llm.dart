@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'speech_enabled.dart';
-import 'ui/swichable_screen.dart';
+import 'ui/switchable_screen.dart';
 import 'utils/utils.dart';
 import 'package:langchain/langchain.dart';
 import 'package:langchain_ollama/langchain_ollama.dart';
