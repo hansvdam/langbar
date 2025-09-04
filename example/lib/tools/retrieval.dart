@@ -4,7 +4,7 @@ import 'package:langchain_google/langchain_google.dart';
 import 'package:langchain_ollama/langchain_ollama.dart';
 import 'package:langchain_openai/langchain_openai.dart';
 
-import '../llm_keys.dart';
+import 'package:langbar_core/llm_keys.dart';
 import '../pinecone/pinecone.dart';
 
 var geminiModel = ChatGoogleGenerativeAI(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'speech_enabled.dart';
-import 'tools/retriever_tool.dart';
 import 'ui/swichable_screen.dart';
 import 'utils/utils.dart';
 import 'package:langchain/langchain.dart';
@@ -170,9 +169,6 @@ Future<void> sendToOpenai(BaseChatModel llm, BuildContext context,
     tools = parseRouters(GoRouter.of(context), globalRoutes, context: context);
   }
 
-  var tool = RetrieverTool();
-
-  tools.add(tool);
   if (currentViewmodel is SpeechEnabled) {
     List<ChatMessage> messages =
         await _chatMessageMemory.chatHistory.getChatMessages();
@@ -375,9 +371,11 @@ Future<void> replaceRetrieverFunctionCallWithAssistantResponseInHistory(
   var chatHistoryLLM = _chatMessageMemory.chatHistory;
   var chatHistoryLLMItems = await chatHistoryLLM.getChatMessages();
   ChatMessage? lastChatMessage = chatHistoryLLMItems.lastOrNull;
+  // Check if the last message was a retriever tool call
+  // This logic can be customized based on your application's needs
   if (lastChatMessage is AIChatMessage &&
       lastChatMessage.toolCalls.isNotEmpty &&
-      lastChatMessage.toolCalls.first.name == retriever_name) {
+      lastChatMessage.toolCalls.first.name == "beantwoord_algemene_vraag") {
     await chatHistoryLLM.removeLast();
     await chatHistoryLLM.addAIChatMessage(response);
   }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:langbar_core/ui/cubits/generic_screen_view_model.dart';
+import 'app_generic_screen_view_model.dart';
 
 enum ActionOnCard {
   cancel,
@@ -37,7 +37,7 @@ class CreditCardScreenState {
 }
 
 class CreditCardScreenViewModel
-    extends GenericScreenViewModel<CreditCardScreenState> {
+    extends AppGenericScreenViewModel<CreditCardScreenState> {
   CreditCardScreenViewModel({
     required BuildContext context,
     ActionOnCard? initialAction,

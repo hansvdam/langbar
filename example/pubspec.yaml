@@ -53,6 +53,10 @@ dependencies:
   langchain: any
   langchain_ollama: any
   langchain_openai: any
+  langchain_google: any
+  langchain_pinecone: any
+  langchain_core: any
+  pinecone: any
   encrypt: any
   logger: any
 dependency_overrides: # try to remove the following overrides, is needed to support image_network: ^2.5.4+1 (used uuid 3.0.4) vs lanchain (used uuid 4.0.0)

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:langbar_core/ui/cubits/generic_screen_view_model.dart';
+import 'app_generic_screen_view_model.dart';
 import 'package:langbar_core/utils/utils.dart';
 
 class MapScreenState {
@@ -14,7 +14,7 @@ class MapScreenState {
   }
 }
 
-class MapScreenViewModel extends GenericScreenViewModel<MapScreenState> {
+class MapScreenViewModel extends AppGenericScreenViewModel<MapScreenState> {
   MapScreenViewModel({required BuildContext context, String? initialLocation})
       : super(MapScreenState(selectedLocation: initialLocation ?? 'atms'),
             context: context) {

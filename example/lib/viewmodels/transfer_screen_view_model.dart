@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:langbar_core/ui/cubits/generic_screen_view_model.dart';
+import 'app_generic_screen_view_model.dart';
 import 'package:langbar_core/utils/utils.dart';
 import 'package:langbar_core/send_to_llm.dart';
 import '../utils/name_matcher.dart';
@@ -63,7 +63,7 @@ class TransferScreenState {
 }
 
 class TransferScreenViewModel
-    extends GenericScreenViewModel<TransferScreenState> {
+    extends AppGenericScreenViewModel<TransferScreenState> {
   final BuildContext _context;
 
   TransferScreenViewModel({

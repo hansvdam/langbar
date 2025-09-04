@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import '../data/data_key.dart';
+import 'package:langbar_core/data/data_key.dart';
 import 'retrieval.dart';
 import 'package:langchain/langchain.dart';
 
-import '../data/for_langchain.dart';
+import 'package:langbar_core/data/for_langchain.dart';
 
 const retriever_name = "beantwoord_algemene_vraag";
 
