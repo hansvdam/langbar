@@ -1,6 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
-import '../send_to_llm.dart' show clearChatMessageMemory, preserveLastMessageAndClearHistory, setHistoryCleared;
+import '../send_to_llm.dart' show preserveLastMessageAndClearHistory, setHistoryCleared;
 import '../ui/cubits/current_screen_cubit.dart';
 
 

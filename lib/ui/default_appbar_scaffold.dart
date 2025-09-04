@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:langbar_core/ui/utils.dart';
 import 'package:provider/provider.dart';
 
-import '../dummy_screens/SampleScreenTemplate.dart';
 import '../utils/utils.dart';
 import 'langfield/langbar_states.dart';
 
@@ -27,7 +26,7 @@ class DefaultAppbarScreen extends StatelessWidget {
         body: SafeArea(
             child: Padding(
                 padding: const EdgeInsets.only(
-                    top: smallSpacing, left: smallSpacing, right: smallSpacing),
+                    top: 16.0, left: 16.0, right: 16.0),
                 child: body)));
   }
 }
