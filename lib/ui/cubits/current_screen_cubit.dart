@@ -4,8 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 typedef ScreenVM = Cubit<dynamic>;
 
 class CurrentScreenState {
-  final String? currentPath;                 // e.g. "/inbox/42"
-  final Map<String, ScreenVM> vmByPath;      // persistent mapping
+  final String? currentPath; // e.g. "/inbox/42"
+  final Map<String, ScreenVM> vmByPath; // persistent mapping
 
   const CurrentScreenState({
     this.currentPath,

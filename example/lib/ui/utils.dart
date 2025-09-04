@@ -55,7 +55,8 @@ Future<void> animateFieldContent(
 }
 
 class HamburgerMenu extends StatelessWidget {
-  const HamburgerMenu({super.key, 
+  const HamburgerMenu({
+    super.key,
     required this.scaffoldKey,
   });
 

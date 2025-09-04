@@ -1,12 +1,11 @@
-
 import 'dart:math';
 
 import '../ui/models/account.dart';
 
 double levenshtein(String a, String b) {
   final int lenA = a.length, lenB = b.length;
-  final List<List<int>> dp = List.generate(lenA + 1,
-          (_) => List.generate(lenB + 1, (_) => 0, growable: false),
+  final List<List<int>> dp = List.generate(
+      lenA + 1, (_) => List.generate(lenB + 1, (_) => 0, growable: false),
       growable: false);
 
   for (int i = 0; i <= lenA; i++) {
@@ -51,7 +50,7 @@ Contact? findMatchingContact(List<Contact> contacts, String searchString) {
       distance += levenshtein(part, searchTerm);
     }
     distance /= searchTerms.length;
-    if(distance < smallestDistance) {
+    if (distance < smallestDistance) {
       smallestDistance = distance;
       matchingContacts.clear();
       matchingContacts.add(contact);
@@ -60,7 +59,7 @@ Contact? findMatchingContact(List<Contact> contacts, String searchString) {
     }
   }
   print("smallest distance: $smallestDistance");
-  if(smallestDistance >= 2) {
+  if (smallestDistance >= 2) {
     matchingContacts.clear();
   }
   return matchingContacts.firstOrNull;

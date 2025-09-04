@@ -17,13 +17,13 @@ class AccountsScreen extends DefaultAppbarScreen {
       required detailsPath})
       : super(
             body: BlocProvider(
-              create: (context) => AccountsScreenViewModel(context: context),
-              child: BlocBuilder<AccountsScreenViewModel, void>(
-                builder: (context, state) {
-                  return AccountsList(detailsPath);
-                },
-              ),
-            ));
+          create: (context) => AccountsScreenViewModel(context: context),
+          child: BlocBuilder<AccountsScreenViewModel, void>(
+            builder: (context, state) {
+              return AccountsList(detailsPath);
+            },
+          ),
+        ));
 
   static const name = 'accounts';
 }

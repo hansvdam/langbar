@@ -25,8 +25,8 @@ class DefaultAppbarScreen extends StatelessWidget {
         leadingHamburger: leadingHamburger,
         body: SafeArea(
             child: Padding(
-                padding: const EdgeInsets.only(
-                    top: 16.0, left: 16.0, right: 16.0),
+                padding:
+                    const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
                 child: body)));
   }
 }

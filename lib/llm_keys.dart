@@ -24,14 +24,15 @@ String? getSessionToken() {
   final iv = encrypt.IV.fromUtf8(dotenv.env['ENCRYPTION_IV']!);
 
   final encrypter =
-  encrypt.Encrypter(encrypt.AES(key, mode: encrypt.AESMode.cbc));
+      encrypt.Encrypter(encrypt.AES(key, mode: encrypt.AESMode.cbc));
 
   final encrypted = encrypter.encrypt(plainText, iv: iv).base64;
 
   return encrypted;
 }
 
-String pineConeEnvironment() => dotenv.env['PINECONE_ENVIRONMENT'] ?? "asia-southeast1-gcp-free";
+String pineConeEnvironment() =>
+    dotenv.env['PINECONE_ENVIRONMENT'] ?? "asia-southeast1-gcp-free";
 
 String pineConeIndexName() => dotenv.env['PINECONE_INDEX_NAME'] ?? '';
 

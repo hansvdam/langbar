@@ -37,18 +37,18 @@ class HistoryProvider {
   Database? db;
   static HistoryProvider? _instance;
   bool _isOperationInProgress = false;
-  
+
   // Singleton pattern to prevent multiple database connections
   static HistoryProvider getInstance() {
     _instance ??= HistoryProvider._internal();
     return _instance!;
   }
-  
+
   HistoryProvider._internal();
 
   Future open() async {
     if (db?.isOpen == true) return; // Already open
-    
+
     WidgetsFlutterBinding.ensureInitialized();
     db = await openDatabase(
       // Set the path to the database. Note: Using the `join` function from the
@@ -78,7 +78,7 @@ class HistoryProvider {
   insert(HistoryMessage historyMessage) async {
     await _waitForPreviousOperation();
     _isOperationInProgress = true;
-    
+
     try {
       await open(); // Ensure database is open
       await db?.transaction((txn) async {
@@ -95,7 +95,7 @@ class HistoryProvider {
   Future<List<HistoryMessage>> getHistoryItems() async {
     await _waitForPreviousOperation();
     _isOperationInProgress = true;
-    
+
     try {
       await open(); // Ensure database is open
       final List<Map> maps = await db?.query(tableHistory, columns: [
@@ -123,12 +123,13 @@ class HistoryProvider {
   Future<int> delete(int id) async {
     await _waitForPreviousOperation();
     _isOperationInProgress = true;
-    
+
     try {
       await open(); // Ensure database is open
       int result = 0;
       await db?.transaction((txn) async {
-        result = await txn.delete(tableHistory, where: '$columnId = ?', whereArgs: [id]);
+        result = await txn
+            .delete(tableHistory, where: '$columnId = ?', whereArgs: [id]);
       });
       return result;
     } catch (e) {
@@ -142,7 +143,7 @@ class HistoryProvider {
   Future<int> clear() async {
     await _waitForPreviousOperation();
     _isOperationInProgress = true;
-    
+
     try {
       await open(); // Ensure database is open
       int result = 0;

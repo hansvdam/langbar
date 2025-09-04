@@ -13,9 +13,9 @@ class TransferScreen extends DefaultAppbarScreen {
   final String? destinationName;
   final String? description;
   final String fromAccountId;
-  
-  TransferScreen({
-      required super.label,
+
+  TransferScreen(
+      {required super.label,
       super.key,
       this.fromAccountId = "1",
       this.amount,
@@ -57,40 +57,38 @@ class _TransferScreenBody extends StatelessWidget {
         description: description,
         fromAccountId: fromAccountId,
       ),
-      child: Builder(
-        builder: (context) {
-          // Update ViewModel when parameters change
-          context.read<TransferScreenViewModel>().updateFromConstructorParams(
-            amount: amount,
-            destinationName: destinationName,
-            description: description,
-            fromAccountId: fromAccountId,
-          );
-          
-          return BlocBuilder<TransferScreenViewModel, TransferScreenState>(
-            builder: (context, state) {
-              print("blabieb: ${state.amount}, $amount");
-              return FutureBuilder<Contact?>(
-                  future: state.mostLikelyDestinationContactFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator();
-                    } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else {
-                      var mostLikelyDestinationContact = snapshot.data;
-                      return TransferContentWidget(
-                          state.amount,
-                          mostLikelyDestinationContact,
-                          state.description,
-                          state.fromAccount!,
-                          viewModel: context.read<TransferScreenViewModel>());
-                    }
-                  });
-            },
-          );
-        }
-      ),
+      child: Builder(builder: (context) {
+        // Update ViewModel when parameters change
+        context.read<TransferScreenViewModel>().updateFromConstructorParams(
+              amount: amount,
+              destinationName: destinationName,
+              description: description,
+              fromAccountId: fromAccountId,
+            );
+
+        return BlocBuilder<TransferScreenViewModel, TransferScreenState>(
+          builder: (context, state) {
+            print("blabieb: ${state.amount}, $amount");
+            return FutureBuilder<Contact?>(
+                future: state.mostLikelyDestinationContactFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else {
+                    var mostLikelyDestinationContact = snapshot.data;
+                    return TransferContentWidget(
+                        state.amount,
+                        mostLikelyDestinationContact,
+                        state.description,
+                        state.fromAccount!,
+                        viewModel: context.read<TransferScreenViewModel>());
+                  }
+                });
+          },
+        );
+      }),
     );
   }
 }
@@ -103,9 +101,9 @@ class TransferContentWidget extends StatelessWidget {
   final TransferScreenViewModel viewModel;
 
   const TransferContentWidget(
-    this.amount, 
+    this.amount,
     this.destinationContact,
-    this.description, 
+    this.description,
     this.fromAccount, {
     required this.viewModel,
     super.key,
@@ -139,15 +137,19 @@ class TransferContentWidget extends StatelessWidget {
               ),
             ),
             TextFormField(
-              key: ValueKey('destinationName_${state.destinationAccountNameText}'),
+              key: ValueKey(
+                  'destinationName_${state.destinationAccountNameText}'),
               initialValue: state.destinationAccountNameText,
-              onChanged: (value) => viewModel.updateDestinationAccountNameText(value),
+              onChanged: (value) =>
+                  viewModel.updateDestinationAccountNameText(value),
               decoration: const InputDecoration(labelText: 'To'),
             ),
             TextFormField(
-              key: ValueKey('accountNumber_${state.destinationAccountNumberText}'),
+              key: ValueKey(
+                  'accountNumber_${state.destinationAccountNumberText}'),
               initialValue: state.destinationAccountNumberText,
-              onChanged: (value) => viewModel.updateDestinationAccountNumberText(value),
+              onChanged: (value) =>
+                  viewModel.updateDestinationAccountNumberText(value),
               decoration: const InputDecoration(labelText: 'Account Number'),
             ),
             TextFormField(
@@ -159,8 +161,8 @@ class TransferContentWidget extends StatelessWidget {
             SizedBox(height: 20),
             Center(
                 child: FilledButton(
-                  onPressed: () {
-                    context.go("/${TransferScreen.name}");
+              onPressed: () {
+                context.go("/${TransferScreen.name}");
                 var goRouter = GoRouter.of(context);
                 // ugly trick, but we need to clear the Transfer screen first.
                 // tried many things, but this is the only thing that works.
@@ -168,8 +170,8 @@ class TransferContentWidget extends StatelessWidget {
                   goRouter.go("/home");
                 });
               },
-                  child: const Text('Transfer'),
-                )),
+              child: const Text('Transfer'),
+            )),
           ],
         );
       },

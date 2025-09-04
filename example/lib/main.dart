@@ -6,8 +6,8 @@ import 'package:langbar/routes.dart' show routesList, router;
 import 'package:langbar_core/ui/langfield/langbar_states.dart';
 import 'package:langbar_core/platform_details.dart';
 import 'package:langbar_core/send_to_llm.dart';
-import 'package:langbar_core/ui/cubits/current_screen_cubit.dart';
-import 'package:langbar_core/utils/utils.dart' show setGoRouter, setcurrentScreenCubit, langbarLogger, currentScreenCubit;
+import 'package:langbar_core/utils/utils.dart'
+    show setGoRouter, setcurrentScreenCubit, langbarLogger, currentScreenCubit;
 import 'package:langbar_core/documented_route.dart';
 import 'package:langbar/ui/main_scaffolds.dart';
 import 'package:provider/provider.dart';
@@ -32,7 +32,8 @@ CreateHookFunction globalHook =
     (DocumentedGoRoute route, GoRouterState routerState) {
   return (Map<String, dynamic> toolInput, {String? namedLocation}) async {
     // do nothing, but can be used to return some values to be added to the path parameters for the goRoute call (its a bit hacky)
-    langbarLogger.d('Global hook - Route: ${route.path}, toolInput: $toolInput, namedLocation: $namedLocation');
+    langbarLogger.d(
+        'Global hook - Route: ${route.path}, toolInput: $toolInput, namedLocation: $namedLocation');
     return {};
   };
 };
@@ -40,10 +41,10 @@ CreateHookFunction globalHook =
 void main() async {
   // see: https://codewithandrea.com/articles/flutter-navigation-gorouter-go-vs-push/
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Load environment variables from .env file (from assets)
   await dotenv.load();
-  
+
   // Initialize langbar_core library
   setGlobalCreateHook(globalHook);
   setRoutes(routesList);

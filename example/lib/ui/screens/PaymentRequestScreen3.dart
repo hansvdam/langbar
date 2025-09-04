@@ -25,7 +25,8 @@ class PaymentRequestScreen3 extends StatelessWidget {
   final double amount;
   final String purpose;
 
-  const PaymentRequestScreen3({super.key, required this.amount, required this.purpose});
+  const PaymentRequestScreen3(
+      {super.key, required this.amount, required this.purpose});
 
   @override
   Widget build(BuildContext context) {

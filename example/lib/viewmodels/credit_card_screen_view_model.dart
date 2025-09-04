@@ -36,7 +36,8 @@ class CreditCardScreenState {
   }
 }
 
-class CreditCardScreenViewModel extends GenericScreenViewModel<CreditCardScreenState> {
+class CreditCardScreenViewModel
+    extends GenericScreenViewModel<CreditCardScreenState> {
   CreditCardScreenViewModel({
     required BuildContext context,
     ActionOnCard? initialAction,

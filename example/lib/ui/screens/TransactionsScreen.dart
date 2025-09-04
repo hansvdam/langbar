@@ -8,7 +8,8 @@ class TransactionsScreen extends DefaultAppbarScreen {
   TransactionsScreen({required super.label, super.key, filterString, accountId})
       : super(
             body: TransactionsList(
-                filterString: filterString, accountId: accountId = 1), leadingHamburger: false);
+                filterString: filterString, accountId: accountId = 1),
+            leadingHamburger: false);
 
   static const name = 'transactions';
 }

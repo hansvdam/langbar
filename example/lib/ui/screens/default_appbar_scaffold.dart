@@ -38,7 +38,10 @@ class DefaultAppbarScaffold extends StatelessWidget {
   final bool leadingHamburger;
 
   const DefaultAppbarScaffold(
-      {super.key, required this.body, required this.label, this.leadingHamburger = true});
+      {super.key,
+      required this.body,
+      required this.label,
+      this.leadingHamburger = true});
 
   /// The label
   final String label;

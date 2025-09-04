@@ -26,17 +26,18 @@ class ScaffoldWithNestedNavigation extends StatelessWidget {
   void _goBranch(int index, [BuildContext? context]) {
     // Only trigger history clearing if we're actually switching tabs
     if (index != navigationShell.currentIndex && context != null) {
-      print('Tab navigation: switching from tab ${navigationShell.currentIndex} to tab $index - clearing chat history');
+      print(
+          'Tab navigation: switching from tab ${navigationShell.currentIndex} to tab $index - clearing chat history');
       // Import the function directly since we know tab switches are screen changes
       _clearHistoryForTabSwitch();
     }
-    
+
     navigationShell.goBranch(
       index,
       initialLocation: index == navigationShell.currentIndex,
     );
   }
-  
+
   void _clearHistoryForTabSwitch() {
     // Complete history clear for manual tab switches - fresh start
     clearChatMessageMemory(caller: '_clearHistoryForTabSwitch');

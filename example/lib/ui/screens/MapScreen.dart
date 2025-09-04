@@ -10,16 +10,19 @@ class MapScreen extends StatelessWidget {
   final String? atmOrOffice;
 
   MapScreen({required this.label, super.key, this.atmOrOffice}) {
-    langbarLogger.d('MapScreen constructor called with label: $label, atmOrOffice: $atmOrOffice');
+    langbarLogger.d(
+        'MapScreen constructor called with label: $label, atmOrOffice: $atmOrOffice');
   }
 
   static const name = 'map';
 
   @override
   Widget build(BuildContext context) {
-    langbarLogger.d('MapScreen build() called, about to create MapScreenViewModel with atmOrOffice: $atmOrOffice');
+    langbarLogger.d(
+        'MapScreen build() called, about to create MapScreenViewModel with atmOrOffice: $atmOrOffice');
     return BlocProvider(
-      key: ValueKey('map_screen_$atmOrOffice'), // Force new instance when parameter changes
+      key: ValueKey(
+          'map_screen_$atmOrOffice'), // Force new instance when parameter changes
       create: (context) {
         langbarLogger.d('BlocProvider create() called for MapScreenViewModel');
         return MapScreenViewModel(
@@ -29,7 +32,8 @@ class MapScreen extends StatelessWidget {
       },
       child: BlocBuilder<MapScreenViewModel, MapScreenState>(
         builder: (context, state) {
-          langbarLogger.d('BlocBuilder rebuilding with state.selectedLocation: ${state.selectedLocation}');
+          langbarLogger.d(
+              'BlocBuilder rebuilding with state.selectedLocation: ${state.selectedLocation}');
           return DefaultAppbarScaffold(
             label: label,
             body: SafeArea(
@@ -46,7 +50,9 @@ class MapScreen extends StatelessWidget {
                           groupValue: state.selectedLocation,
                           onChanged: (String? value) {
                             if (value != null) {
-                              context.read<MapScreenViewModel>().updateSelectedLocation(value);
+                              context
+                                  .read<MapScreenViewModel>()
+                                  .updateSelectedLocation(value);
                             }
                           },
                         ),
@@ -58,7 +64,9 @@ class MapScreen extends StatelessWidget {
                           groupValue: state.selectedLocation,
                           onChanged: (String? value) {
                             if (value != null) {
-                              context.read<MapScreenViewModel>().updateSelectedLocation(value);
+                              context
+                                  .read<MapScreenViewModel>()
+                                  .updateSelectedLocation(value);
                             }
                           },
                         ),
@@ -68,8 +76,7 @@ class MapScreen extends StatelessWidget {
                   Expanded(
                     child: Image(
                       image: AssetImage(
-                        "assets/images/${state.selectedLocation == "atms" ? "atms.jpg" : "offices.jpg"}"
-                      ),
+                          "assets/images/${state.selectedLocation == "atms" ? "atms.jpg" : "offices.jpg"}"),
                     ),
                   ),
                 ],

@@ -9,6 +9,7 @@ import '../data/for_langchain.dart';
 const retriever_name = "beantwoord_algemene_vraag";
 
 const String user_question_key = 'user_question';
+
 /// {@template forecasting_tool}
 /// A for forecasting the weather from an api.
 /// {@endtemplate}

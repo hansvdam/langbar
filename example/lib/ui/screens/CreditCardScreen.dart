@@ -83,7 +83,8 @@ class _CreditCardScreenBodyState extends State<CreditCardScreenBody> {
               if (state.action == ActionOnCard.none) {
                 actionController.text = state.action.name;
               }
-              animateFieldContent((state.limit ?? '').toString(), textEditingController)
+              animateFieldContent(
+                      (state.limit ?? '').toString(), textEditingController)
                   .then((_) {
                 if (mounted && state.action != ActionOnCard.none) {
                   animateFieldContent(state.action.name, actionController);
@@ -96,8 +97,8 @@ class _CreditCardScreenBodyState extends State<CreditCardScreenBody> {
         final List<DropdownMenuEntry<ActionOnCard>> actionEntries =
             <DropdownMenuEntry<ActionOnCard>>[];
         for (final ActionOnCard action in ActionOnCard.values) {
-          actionEntries.add(
-              DropdownMenuEntry<ActionOnCard>(value: action, label: action.name));
+          actionEntries.add(DropdownMenuEntry<ActionOnCard>(
+              value: action, label: action.name));
         }
 
         List<Widget> children = [];
@@ -123,7 +124,9 @@ class _CreditCardScreenBodyState extends State<CreditCardScreenBody> {
                     FilteringTextInputFormatter.digitsOnly
                   ],
                   onChanged: (value) {
-                    context.read<CreditCardScreenViewModel>().updateLimit(int.tryParse(value));
+                    context
+                        .read<CreditCardScreenViewModel>()
+                        .updateLimit(int.tryParse(value));
                   },
                 )),
             DropdownMenu<ActionOnCard>(
@@ -132,7 +135,9 @@ class _CreditCardScreenBodyState extends State<CreditCardScreenBody> {
                 dropdownMenuEntries: actionEntries,
                 onSelected: (action) {
                   if (action != null) {
-                    context.read<CreditCardScreenViewModel>().updateAction(action);
+                    context
+                        .read<CreditCardScreenViewModel>()
+                        .updateAction(action);
                   }
                 }),
           ],

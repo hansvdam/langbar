@@ -40,7 +40,7 @@ class ChatHistory extends ChangeNotifier {
     historyProvider?.insert(item);
     notifyListeners();
   }
-  
+
   @override
   void dispose() {
     // Close database connection when ChatHistory is disposed

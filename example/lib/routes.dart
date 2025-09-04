@@ -9,7 +9,6 @@ import 'package:langbar/ui/screens/front_screen.dart';
 import 'package:langbar_core/data/data_key.dart';
 import 'package:langbar_core/data/for_langchain.dart';
 import 'package:langbar_core/documented_route.dart';
-import 'package:langbar_core/ui/cubits/current_screen_cubit.dart';
 import 'package:langbar_core/ui/langfield/langbar_wrapper.dart';
 import 'package:langbar_core/utils/utils.dart';
 
@@ -59,7 +58,8 @@ List<RouteBase> hamburgerRoutes = [
       modal: true,
       parentNavigatorKey: _rootNavigatorKey,
       pageBuilder: (context, state) {
-        langbarLogger.d('CreditCardScreen query params: ${state.uri.queryParameters}');
+        langbarLogger
+            .d('CreditCardScreen query params: ${state.uri.queryParameters}');
         return MaterialPage(
             fullscreenDialog: true,
             child: LangBarWrapper(
@@ -207,7 +207,7 @@ List<RouteBase> navBarRoutes = [
             pageBuilder: (context, state) {
               return NoTransitionPage(
                   child: TransferScreen(
-                    label: 'Bank Transfer',
+                label: 'Bank Transfer',
                 amount:
                     double.tryParse(state.uri.queryParameters['amount'] ?? ''),
                 destinationName: state.uri.queryParameters['destinationName'],
@@ -248,13 +248,12 @@ List<RouteBase> navBarRoutes = [
 List<RouteBase> routesList = hamburgerRoutes + navBarRoutes;
 
 final router = GoRouter(
-  initialLocation: '/home',
-  // * Passing a navigatorKey causes an issue on hot reload:
-  // * https://github.com/flutter/flutter/issues/113757#issuecomment-1518421380
-  // * However it's still necessary otherwise the navigator pops back to
-  // * root on hot reload
-  navigatorKey: _rootNavigatorKey,
-  debugLogDiagnostics: true,
-  routes: routesList,
-  observers: []
-);
+    initialLocation: '/home',
+    // * Passing a navigatorKey causes an issue on hot reload:
+    // * https://github.com/flutter/flutter/issues/113757#issuecomment-1518421380
+    // * However it's still necessary otherwise the navigator pops back to
+    // * root on hot reload
+    navigatorKey: _rootNavigatorKey,
+    debugLogDiagnostics: true,
+    routes: routesList,
+    observers: []);

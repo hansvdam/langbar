@@ -12,7 +12,7 @@ class TransferScreenState {
   final String fromAccountId;
   final BankAccount? fromAccount;
   final Future<Contact?>? mostLikelyDestinationContactFuture;
-  
+
   // UI field values
   final String amountText;
   final String destinationAccountNameText;
@@ -50,16 +50,20 @@ class TransferScreenState {
       description: description ?? this.description,
       fromAccountId: fromAccountId ?? this.fromAccountId,
       fromAccount: fromAccount ?? this.fromAccount,
-      mostLikelyDestinationContactFuture: mostLikelyDestinationContactFuture ?? this.mostLikelyDestinationContactFuture,
+      mostLikelyDestinationContactFuture: mostLikelyDestinationContactFuture ??
+          this.mostLikelyDestinationContactFuture,
       amountText: amountText ?? this.amountText,
-      destinationAccountNameText: destinationAccountNameText ?? this.destinationAccountNameText,
-      destinationAccountNumberText: destinationAccountNumberText ?? this.destinationAccountNumberText,
+      destinationAccountNameText:
+          destinationAccountNameText ?? this.destinationAccountNameText,
+      destinationAccountNumberText:
+          destinationAccountNumberText ?? this.destinationAccountNumberText,
       descriptionText: descriptionText ?? this.descriptionText,
     );
   }
 }
 
-class TransferScreenViewModel extends GenericScreenViewModel<TransferScreenState> {
+class TransferScreenViewModel
+    extends GenericScreenViewModel<TransferScreenState> {
   final BuildContext _context;
 
   TransferScreenViewModel({
@@ -68,26 +72,33 @@ class TransferScreenViewModel extends GenericScreenViewModel<TransferScreenState
     String? destinationName,
     String? description,
     String fromAccountId = "1",
-  }) : _context = context, super(
+  })  : _context = context,
+        super(
           TransferScreenState(
             amount: amount,
             destinationName: destinationName,
             description: description,
             fromAccountId: fromAccountId,
-            fromAccount: accounts[fromAccountId], // Initialize fromAccount from accounts map
-            mostLikelyDestinationContactFuture: destinationName != null ? null : Future(() => null), // Will be set properly in _updateContactFuture
+            fromAccount: accounts[
+                fromAccountId], // Initialize fromAccount from accounts map
+            mostLikelyDestinationContactFuture: destinationName != null
+                ? null
+                : Future(
+                    () => null), // Will be set properly in _updateContactFuture
             amountText: amount?.toStringAsFixed(2) ?? '',
             destinationAccountNameText: destinationName ?? '',
             descriptionText: description ?? '',
           ),
           context: context,
         ) {
-    langbarLogger.i('TransferScreenViewModel created with amount: $amount, destinationName: $destinationName, description: $description, fromAccountId: $fromAccountId');
+    langbarLogger.i(
+        'TransferScreenViewModel created with amount: $amount, destinationName: $destinationName, description: $description, fromAccountId: $fromAccountId');
     _updateContactFuture();
   }
 
   void updateAmount(double? amount) {
-    langbarLogger.i('TransferScreenViewModel updating amount from ${state.amount} to $amount');
+    langbarLogger.i(
+        'TransferScreenViewModel updating amount from ${state.amount} to $amount');
     emit(state.copyWith(
       amount: amount,
       amountText: amount?.toStringAsFixed(2) ?? '',
@@ -95,7 +106,8 @@ class TransferScreenViewModel extends GenericScreenViewModel<TransferScreenState
   }
 
   void updateDestinationName(String? destinationName) {
-    langbarLogger.i('TransferScreenViewModel updating destinationName from ${state.destinationName} to $destinationName');
+    langbarLogger.i(
+        'TransferScreenViewModel updating destinationName from ${state.destinationName} to $destinationName');
     emit(state.copyWith(
       destinationName: destinationName,
       destinationAccountNameText: destinationName ?? '',
@@ -104,7 +116,8 @@ class TransferScreenViewModel extends GenericScreenViewModel<TransferScreenState
   }
 
   void updateDescription(String? description) {
-    langbarLogger.i('TransferScreenViewModel updating description from ${state.description} to $description');
+    langbarLogger.i(
+        'TransferScreenViewModel updating description from ${state.description} to $description');
     emit(state.copyWith(
       description: description,
       descriptionText: description ?? '',
@@ -112,7 +125,8 @@ class TransferScreenViewModel extends GenericScreenViewModel<TransferScreenState
   }
 
   void updateFromAccountId(String fromAccountId) {
-    langbarLogger.i('TransferScreenViewModel updating fromAccountId from ${state.fromAccountId} to $fromAccountId');
+    langbarLogger.i(
+        'TransferScreenViewModel updating fromAccountId from ${state.fromAccountId} to $fromAccountId');
     emit(state.copyWith(
       fromAccountId: fromAccountId,
       fromAccount: accounts[fromAccountId],
@@ -126,8 +140,9 @@ class TransferScreenViewModel extends GenericScreenViewModel<TransferScreenState
     String? description,
     String? fromAccountId,
   }) {
-    langbarLogger.i('TransferScreenViewModel updating from constructor params: amount=$amount, destinationName=$destinationName, description=$description, fromAccountId=$fromAccountId');
-    
+    langbarLogger.i(
+        'TransferScreenViewModel updating from constructor params: amount=$amount, destinationName=$destinationName, description=$description, fromAccountId=$fromAccountId');
+
     emit(state.copyWith(
       amount: amount,
       destinationName: destinationName,
@@ -184,7 +199,8 @@ class TransferScreenViewModel extends GenericScreenViewModel<TransferScreenState
   /// Update the contact lookup Future based on current destinationName
   void _updateContactFuture() {
     if (state.destinationName != null) {
-      final future = _findMostLikelyDestinationContact(_context, state.destinationName!);
+      final future =
+          _findMostLikelyDestinationContact(_context, state.destinationName!);
       emit(state.copyWith(mostLikelyDestinationContactFuture: future));
       // Update the destination account number when we get the contact
       future.then((contact) {
@@ -201,7 +217,8 @@ class TransferScreenViewModel extends GenericScreenViewModel<TransferScreenState
   }
 
   /// Find the most likely destination contact for a given name
-  Future<Contact?> _findMostLikelyDestinationContact(BuildContext context, String s) async {
+  Future<Contact?> _findMostLikelyDestinationContact(
+      BuildContext context, String s) async {
     var contacts = await readContactsFromCsv(context);
     // insert a dummy iban if contact not in list; just for demo purposes (better than empty field)
     return findMatchingContact(contacts, s) ?? Contact(s, "GB33BUKB202015555");

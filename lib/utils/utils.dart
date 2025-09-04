@@ -1,8 +1,8 @@
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
-import '../send_to_llm.dart' show preserveLastMessageAndClearHistory, setHistoryCleared;
+import '../send_to_llm.dart'
+    show preserveLastMessageAndClearHistory, setHistoryCleared;
 import '../ui/cubits/current_screen_cubit.dart';
-
 
 // filtering in logviewer:
 // -kind:flutter.frame,gc,provider:provider_changed,provider:provider_list_changed,debugger,Flutter.FrameworkInitialization,Flutter.FirstFrame
@@ -44,38 +44,38 @@ bool _routeListenerSetup = false;
 void _trySetupRouteListener() {
   // Only setup once and only when both goRouter and currentScreenCubit are available
   if (_routeListenerSetup) return;
-  
+
   _routeListenerSetup = true;
-  
+
   // Set initial path
   final initialUri = goRouter.routeInformationProvider.value.uri;
   final initialPath = initialUri.path;
   langbarLogger.d('Initial route: $initialPath');
-  currentScreenCubit!.setCurrentPath(initialPath);
-  
+  currentScreenCubit.setCurrentPath(initialPath);
+
   // Listen to route changes
   goRouter.routeInformationProvider.addListener(() {
     final currentUri = goRouter.routeInformationProvider.value.uri;
     final path = currentUri.path;
     langbarLogger.d('Route changed to: $path');
-    currentScreenCubit?.setCurrentPath(path);
+    currentScreenCubit.setCurrentPath(path);
   });
 }
 
-
 void activateUri(String navUri, bool openModal) {
   langbarLogger.i('activateUri called with: $navUri, openModal: $openModal');
-  
+
   var currentUri = goRouter.routeInformationProvider.value.uri;
   var targetUri = Uri.parse(navUri);
-  
+
   // Clear chat memory if navigating to a different screen (different path)
   if (currentUri.path != targetUri.path) {
-    langbarLogger.i('Screen change detected (${currentUri.path} -> ${targetUri.path}), clearing chat memory but preserving last message');
+    langbarLogger.i(
+        'Screen change detected (${currentUri.path} -> ${targetUri.path}), clearing chat memory but preserving last message');
     setHistoryCleared(true);
     preserveLastMessageAndClearHistory();
   }
-  
+
   if (openModal) {
     langbarLogger.i('Current URI: $currentUri');
     if (currentUri.hasSamePathAs(navUri)) {

@@ -9,7 +9,6 @@ import 'package:langchain/langchain.dart';
 import 'package:langchain_ollama/langchain_ollama.dart';
 import 'package:langchain_openai/langchain_openai.dart';
 import 'package:provider/provider.dart';
-import 'package:provider/provider.dart';
 
 import 'documented_route.dart';
 import 'my_conversation_buffer_memory.dart';
@@ -106,7 +105,8 @@ void submitToLLM(BuildContext context) {
   }
   // model: 'gpt-3.5-turbo');
   langbarState.sendingToOpenAI = true;
-  final currentViewmodel = context.read<CurrentScreenCubit>().state.currentViewModel;
+  final currentViewmodel =
+      context.read<CurrentScreenCubit>().state.currentViewModel;
   final chatHistory = Provider.of<ChatHistory>(context, listen: false);
   sendToOpenai(llm, context, chatHistory, currentViewmodel);
 }
@@ -126,13 +126,14 @@ clearChatMessageMemory({String caller = 'unknown'}) async {
 preserveLastMessageAndClearHistory() async {
   var messages = await _chatMessageMemory.chatHistory.getChatMessages();
   ChatMessage? lastMessage = messages.lastOrNull;
-  
+
   await _chatMessageMemory.clear();
-  
+
   // Re-add the last message if it was a human message (the one that triggered navigation)
   if (lastMessage != null && lastMessage is HumanChatMessage) {
     await _chatMessageMemory.chatHistory.addChatMessage(lastMessage);
-    print("chatMessageMemory cleared but preserved last human message: ${lastMessage.content}");
+    print(
+        "chatMessageMemory cleared but preserved last human message: ${lastMessage.content}");
   } else {
     print("chatMessageMemory cleared, no human message to preserve");
   }
@@ -291,13 +292,15 @@ Future<void> sendToOpenai(BaseChatModel llm, BuildContext context,
       chatHistoryForUi
           .add(HistoryMessage(text: query, isHuman: true, navUri: lastResult));
 
-      print("string result from llm: " + lastResult);
+      print("string result from llm: $lastResult");
       // make sure the chathistory is immune to clearing by closing cubits
       await liftChathistoryOverClearingsByGUI();
     }
   } catch (e) {
     print("error calling llm or parsing output: $e");
-    clearChatMessageMemory(caller: 'sendToOpenai_error_handler'); // make sure an error does not prevent the next query from being processed (strange things in the history may cause bad-request errors)
+    clearChatMessageMemory(
+        caller:
+            'sendToOpenai_error_handler'); // make sure an error does not prevent the next query from being processed (strange things in the history may cause bad-request errors)
     langbarState.historyShowing = true;
     langbarState.sendingToOpenAI = false;
     chatHistoryForUi.add(
@@ -322,11 +325,12 @@ Future<void> liftChathistoryOverClearingsByGUI() async {
   // make sure the chathistory is immune to clearing by closing cubits
   // BUT don't restore if we intentionally cleared it
   if (_historyWasIntentionallyCleared) {
-    print("History was intentionally cleared, not restoring via PostFrameCallback");
+    print(
+        "History was intentionally cleared, not restoring via PostFrameCallback");
     _historyWasIntentionallyCleared = false; // reset
     return;
   }
-  
+
   List<ChatMessage> messages =
       await _chatMessageMemory.chatHistory.getChatMessages();
   WidgetsBinding.instance.addPostFrameCallback((_) async {

@@ -16,16 +16,17 @@ class MapScreenState {
 
 class MapScreenViewModel extends GenericScreenViewModel<MapScreenState> {
   MapScreenViewModel({required BuildContext context, String? initialLocation})
-      : super(
-          MapScreenState(selectedLocation: initialLocation ?? 'atms'), 
-          context: context
-        ) {
-    langbarLogger.i('MapScreenViewModel created with initialLocation: $initialLocation, final selectedLocation: ${state.selectedLocation}');
+      : super(MapScreenState(selectedLocation: initialLocation ?? 'atms'),
+            context: context) {
+    langbarLogger.i(
+        'MapScreenViewModel created with initialLocation: $initialLocation, final selectedLocation: ${state.selectedLocation}');
   }
 
   void updateSelectedLocation(String location) {
-    langbarLogger.i('MapScreenViewModel updating selectedLocation from ${state.selectedLocation} to $location');
+    langbarLogger.i(
+        'MapScreenViewModel updating selectedLocation from ${state.selectedLocation} to $location');
     emit(state.copyWith(selectedLocation: location));
-    langbarLogger.i('MapScreenViewModel new state selectedLocation: ${state.selectedLocation}');
+    langbarLogger.i(
+        'MapScreenViewModel new state selectedLocation: ${state.selectedLocation}');
   }
 }

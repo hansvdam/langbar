@@ -56,7 +56,6 @@ Future<List<Contact>> readContactsFromCsv(BuildContext context) async {
   return list;
 }
 
-
 Future<List<BankTransaction>> readTransactionsFromCsv(
     BuildContext context) async {
   final fileContent = await DefaultAssetBundle.of(context)
