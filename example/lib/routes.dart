@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:langbar/ui/screens/AccountsScreen.dart';
-import 'package:langbar/ui/screens/MapScreen.dart';
 import 'package:langbar/ui/screens/Contacts.dart';
+import 'package:langbar/ui/screens/MapScreen.dart';
 import 'package:langbar/ui/screens/TransactionsScreen.dart';
 import 'package:langbar/ui/screens/TransferScreen.dart';
 import 'package:langbar/ui/screens/front_screen.dart';
-
-import 'package:langbar_core/ui/langfield/langbar_wrapper.dart';
-import 'package:langbar_core/documented_route.dart';
-import 'package:langbar_core/data/for_langchain.dart';
 import 'package:langbar_core/data/data_key.dart';
+import 'package:langbar_core/data/for_langchain.dart';
+import 'package:langbar_core/documented_route.dart';
+import 'package:langbar_core/ui/cubits/current_screen_cubit.dart';
+import 'package:langbar_core/ui/langfield/langbar_wrapper.dart';
 import 'package:langbar_core/utils/utils.dart';
+
 import 'ui/main_scaffolds.dart';
 import 'ui/screens/CreditCardScreen.dart';
 import 'viewmodels/credit_card_screen_view_model.dart';
@@ -245,6 +246,7 @@ List<RouteBase> navBarRoutes = [
 ];
 
 List<RouteBase> routesList = hamburgerRoutes + navBarRoutes;
+var appLocalcurrentScreenCubit = CurrentScreenCubit();
 
 final router = GoRouter(
   initialLocation: '/home',
@@ -255,4 +257,5 @@ final router = GoRouter(
   navigatorKey: _rootNavigatorKey,
   debugLogDiagnostics: true,
   routes: routesList,
+  observers: []
 );

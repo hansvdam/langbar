@@ -1,43 +1,63 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../send_to_llm.dart' show clearChatMessageMemory, preserveLastMessageAndClearHistory;
 
-class CurrentScreenCubit extends Cubit<Cubit?> {
-  CurrentScreenCubit() : super(null);
+/// If you have a base class for your screen VMs, prefer using it instead of Cubit.
+typedef ScreenVM = Cubit<dynamic>;
 
-  List<Cubit> cubitsStack = [];
+class CurrentScreenState {
+  final String? currentPath;                 // e.g. "/inbox/42"
+  final Map<String, ScreenVM> vmByPath;      // persistent mapping
 
-  void pushCurrentCubit(Cubit cubit) {
-    // Check if we're switching to a different screen type
-    Cubit? previousCubit = cubitsStack.isNotEmpty ? cubitsStack.last : null;
-    
-    if (previousCubit != null && previousCubit.runtimeType != cubit.runtimeType) {
-      print('Screen type change detected: ${previousCubit.runtimeType} -> ${cubit.runtimeType}, clearing chat memory but preserving last message');
-      preserveLastMessageAndClearHistory();
-    }
-    
-    cubitsStack.add(cubit);
-    emit(cubit);
+  const CurrentScreenState({
+    this.currentPath,
+    this.vmByPath = const {},
+  });
+
+  /// Convenience: the VM for the currentPath (if any)
+  ScreenVM? get currentViewModel =>
+      (currentPath == null) ? null : vmByPath[currentPath!];
+
+  CurrentScreenState copyWith({
+    String? currentPath,
+    Map<String, ScreenVM>? vmByPath,
+  }) =>
+      CurrentScreenState(
+        currentPath: currentPath ?? this.currentPath,
+        vmByPath: vmByPath ?? this.vmByPath,
+      );
+}
+
+class CurrentScreenCubit extends Cubit<CurrentScreenState> {
+  CurrentScreenCubit() : super(const CurrentScreenState());
+
+  /// Called by your Navigator/GoRouter observer on push/pop/replace.
+  void setCurrentPath(String? path) {
+    print("setting current path to ${path ?? '(null)'}");
+    // Do NOT drop the map; just update the path. currentViewModel resolves via getter.
+    emit(state.copyWith(currentPath: path));
   }
 
-  void setActiveCubit(Cubit cubit) {
-    // For tab navigation - switch to an existing cubit in the stack
-    Cubit? previousCubit = state;
-    
-    if (previousCubit != null && previousCubit.runtimeType != cubit.runtimeType) {
-      print('Tab navigation detected: ${previousCubit.runtimeType} -> ${cubit.runtimeType}, clearing chat memory but preserving last message');
-      preserveLastMessageAndClearHistory();
-    }
-    
-    emit(cubit);
+  /// Attach/register a VM for a path. Safe to call multiple times.
+  void registerVmForPath(String path, ScreenVM viewModel) {
+    final next = Map<String, ScreenVM>.from(state.vmByPath)..[path] = viewModel;
+    emit(state.copyWith(vmByPath: next));
   }
 
-  void removeCurrentCubit(Cubit cubit) {
-    print('removing cubit: $cubit');
-    cubitsStack.remove(cubit);
-    if (cubitsStack.isEmpty) {
-      emit(null);
-    } else {
-      emit(cubitsStack.last);
-    }
+  /// Remove a VM when its screen is disposed/popped.
+  void unregisterVm(ScreenVM viewModel) {
+    final next = Map<String, ScreenVM>.from(state.vmByPath)
+      ..removeWhere((k, v) => identical(v, viewModel));
+    emit(state.copyWith(vmByPath: next));
   }
+
+  // ---- Backward-compatible API (matches your error messages) ----
+  void pushCurrentCubit(ScreenVM vm, {required String path}) {
+    registerVmForPath(path, vm);
+  }
+
+  void removeCurrentCubit(ScreenVM vm) {
+    unregisterVm(vm);
+  }
+
+  /// Optional helper if callers want the VM directly.
+  ScreenVM? get currentCubit => state.currentViewModel;
 }

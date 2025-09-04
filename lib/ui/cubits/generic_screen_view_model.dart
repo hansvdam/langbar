@@ -14,13 +14,13 @@ class GenericScreenViewModel<State> extends Cubit<State> with SpeechEnabled {
   GenericScreenViewModel(super.initialState, {required BuildContext context})
       : currentScreenCubit = BlocProvider.of<CurrentScreenCubit>(context) {
     // Register as current view model
-    context.read<CurrentScreenCubit>().pushCurrentCubit(this);
+    // context.read<CurrentScreenCubit>().pushCurrentCubit(this);
   }
 
   @override
   Future<void> close() async {
     clearChatMessageMemory(caller: 'GenericScreenViewModel.close'); // new context for parameter interpretation
-    currentScreenCubit.removeCurrentCubit(this);
+    // currentScreenCubit.removeCurrentCubit(this);
     return super.close();
   }
 

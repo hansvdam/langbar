@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 import '../send_to_llm.dart' show clearChatMessageMemory, preserveLastMessageAndClearHistory, setHistoryCleared;
+import '../ui/cubits/current_screen_cubit.dart';
 
 
 // filtering in logviewer:
@@ -31,9 +32,39 @@ extension UriExtension on Uri {
 const String LOCAL_ACTION_HANDLED = "LocalActionHandled";
 
 late GoRouter goRouter;
+CurrentScreenCubit? currentScreenCubit;
 
 setGoRouter(GoRouter goRouterParam) {
   goRouter = goRouterParam;
+  _trySetupRouteListener();
+}
+
+setcurrentScreenCubit(CurrentScreenCubit currentScreenCubitParam) {
+  currentScreenCubit = currentScreenCubitParam;
+  _trySetupRouteListener();
+}
+
+bool _routeListenerSetup = false;
+
+void _trySetupRouteListener() {
+  // Only setup once and only when both goRouter and currentScreenCubit are available
+  if (_routeListenerSetup || currentScreenCubit == null) return;
+  
+  _routeListenerSetup = true;
+  
+  // Set initial path
+  final initialUri = goRouter.routeInformationProvider.value.uri;
+  final initialPath = initialUri.path;
+  langbarLogger.d('Initial route: $initialPath');
+  currentScreenCubit!.setCurrentPath(initialPath);
+  
+  // Listen to route changes
+  goRouter.routeInformationProvider.addListener(() {
+    final currentUri = goRouter.routeInformationProvider.value.uri;
+    final path = currentUri.path;
+    langbarLogger.d('Route changed to: $path');
+    currentScreenCubit?.setCurrentPath(path);
+  });
 }
 
 

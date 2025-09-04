@@ -9,6 +9,7 @@ import 'package:langchain/langchain.dart';
 import 'package:langchain_ollama/langchain_ollama.dart';
 import 'package:langchain_openai/langchain_openai.dart';
 import 'package:provider/provider.dart';
+import 'package:provider/provider.dart';
 
 import 'documented_route.dart';
 import 'my_conversation_buffer_memory.dart';
@@ -105,7 +106,7 @@ void submitToLLM(BuildContext context) {
   }
   // model: 'gpt-3.5-turbo');
   langbarState.sendingToOpenAI = true;
-  final currentViewmodel = context.read<CurrentScreenCubit>().state;
+  final currentViewmodel = context.read<CurrentScreenCubit>().state.currentViewModel;
   final chatHistory = Provider.of<ChatHistory>(context, listen: false);
   sendToOpenai(llm, context, chatHistory, currentViewmodel);
 }
@@ -156,6 +157,7 @@ Future<void> sendToOpenai(BaseChatModel llm, BuildContext context,
     ChatHistory chatHistoryForUi, Cubit? currentViewmodel) async {
   // final forecastTool = ForecastScreen.getTool(GoRouter.of(context));
   // final creditCardTool = CreditCardScreen.getTool(GoRouter.of(context));
+  print("currentViewmodel in sendToOpenai: $currentViewmodel");
   var langbarState = Provider.of<LangBarState>(context, listen: false);
   List<Tool> tools = [];
   List<KeyWordtrigger> keyWordHandlers = [];

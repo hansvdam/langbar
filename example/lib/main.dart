@@ -2,17 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
+import 'package:langbar/routes.dart' show routesList, router;
 import 'package:langbar_core/ui/langfield/langbar_states.dart';
 import 'package:langbar_core/platform_details.dart';
 import 'package:langbar_core/send_to_llm.dart';
 import 'package:langbar_core/ui/cubits/current_screen_cubit.dart';
-import 'package:langbar_core/utils/utils.dart' show setGoRouter, langbarLogger;
+import 'package:langbar_core/utils/utils.dart' show setGoRouter, setcurrentScreenCubit, langbarLogger, currentScreenCubit;
 import 'package:langbar_core/documented_route.dart';
 import 'package:langbar/ui/main_scaffolds.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'routes.dart' show routesList, router;
 
 class GlobalContextService {
   static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -50,7 +49,9 @@ void main() async {
   setRoutes(routesList);
   setSystemPrompt(systemPrompt);
   setGoRouter(router); // Set the GoRouter instance for the library
-  
+  var currentScreenCubit = CurrentScreenCubit();
+  setcurrentScreenCubit(currentScreenCubit);
+
   GoRouter.optionURLReflectsImperativeAPIs = true;
   // turn off the # in the URLs on the web
   // URL strategy only needed for web
@@ -79,7 +80,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(
             create: (context) => WidthChanged(),
           ),
-          BlocProvider(create: (context) => CurrentScreenCubit()),
+          BlocProvider(create: (context) => currentScreenCubit!),
         ],
         child: Consumer<ChatHistory>(builder: (context, cart, child) {
           return LayoutBuilder(builder: (context, constraints) {
