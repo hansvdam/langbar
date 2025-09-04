@@ -16,15 +16,15 @@ dependencies:
   #  ollama_dart: ^0.0.2
   langchain_ollama: ^0.3.0
   langchain_pinecone: ^0.1.0+7
-  go_router: ^14.2.3
+  go_router: ^16.2.1
   flutter_tts: ^4.1.0
   sqflite: ^2.3.3+1
-  flutter_bloc: ^8.1.6  # Use the latest version available
+  flutter_bloc: ^9.1.1  # Use the latest version available
   encrypt: ^5.0.3
   speech_to_text: ^7.0.0
   logger: ^2.4.0
   equatable: ^2.0.5  # Add this line
-  flutter_dotenv: ^5.1.0
+  flutter_dotenv: ^6.0.0
 
   provider: ^6.1.5
   langchain_core: any
@@ -36,7 +36,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^6.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
