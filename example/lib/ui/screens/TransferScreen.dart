@@ -49,7 +49,7 @@ class _TransferScreenBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<TransferScreenViewModel>(
-      key: ValueKey('${amount}_${destinationName}_${description}_${fromAccountId}'),
+      key: ValueKey('1'),
       create: (context) => TransferScreenViewModel(
         context: context,
         amount: amount,
@@ -57,26 +57,39 @@ class _TransferScreenBody extends StatelessWidget {
         description: description,
         fromAccountId: fromAccountId,
       ),
-      child: BlocBuilder<TransferScreenViewModel, TransferScreenState>(
-        builder: (context, state) {
-          return FutureBuilder<Contact?>(
-              future: state.mostLikelyDestinationContactFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else {
-                  var mostLikelyDestinationContact = snapshot.data;
-                  return TransferContentWidget(
-                      state.amount,
-                      mostLikelyDestinationContact,
-                      state.description,
-                      state.fromAccount!,
-                      viewModel: context.read<TransferScreenViewModel>());
-                }
-              });
-        },
+      child: Builder(
+        builder: (context) {
+          // Update ViewModel when parameters change
+          context.read<TransferScreenViewModel>().updateFromConstructorParams(
+            amount: amount,
+            destinationName: destinationName,
+            description: description,
+            fromAccountId: fromAccountId,
+          );
+          
+          return BlocBuilder<TransferScreenViewModel, TransferScreenState>(
+            builder: (context, state) {
+              print("blabieb: ${state.amount}, $amount");
+              return FutureBuilder<Contact?>(
+                  future: state.mostLikelyDestinationContactFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else {
+                      var mostLikelyDestinationContact = snapshot.data;
+                      return TransferContentWidget(
+                          state.amount,
+                          mostLikelyDestinationContact,
+                          state.description,
+                          state.fromAccount!,
+                          viewModel: context.read<TransferScreenViewModel>());
+                    }
+                  });
+            },
+          );
+        }
       ),
     );
   }

@@ -119,14 +119,14 @@ class TransferScreenViewModel extends GenericScreenViewModel<TransferScreenState
     ));
   }
 
-  /// Update the ViewModel with new route parameters
-  void updateFromRouteParams({
+  /// Update the ViewModel with new constructor parameters
+  void updateFromConstructorParams({
     double? amount,
     String? destinationName,
     String? description,
     String? fromAccountId,
   }) {
-    langbarLogger.i('TransferScreenViewModel updating from route params: amount=$amount, destinationName=$destinationName, description=$description, fromAccountId=$fromAccountId');
+    langbarLogger.i('TransferScreenViewModel updating from constructor params: amount=$amount, destinationName=$destinationName, description=$description, fromAccountId=$fromAccountId');
     
     emit(state.copyWith(
       amount: amount,
