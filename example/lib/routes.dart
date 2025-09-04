@@ -246,7 +246,7 @@ List<RouteBase> navBarRoutes = [
 
 List<RouteBase> routesList = hamburgerRoutes + navBarRoutes;
 
-final routes = GoRouter(
+final router = GoRouter(
   initialLocation: '/home',
   // * Passing a navigatorKey causes an issue on hot reload:
   // * https://github.com/flutter/flutter/issues/113757#issuecomment-1518421380

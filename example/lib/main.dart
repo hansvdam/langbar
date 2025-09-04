@@ -12,7 +12,7 @@ import 'package:langbar/ui/main_scaffolds.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'routes.dart' show routesList, routes;
+import 'routes.dart' show routesList, router;
 
 class GlobalContextService {
   static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -49,7 +49,7 @@ void main() async {
   setGlobalCreateHook(globalHook);
   setRoutes(routesList);
   setSystemPrompt(systemPrompt);
-  setGoRouter(routes); // Set the GoRouter instance for the library
+  setGoRouter(router); // Set the GoRouter instance for the library
   
   GoRouter.optionURLReflectsImperativeAPIs = true;
   // turn off the # in the URLs on the web
@@ -86,7 +86,7 @@ class MyApp extends StatelessWidget {
             Provider.of<LangBarState>(context).screenheight =
                 constraints.maxHeight;
             return MaterialApp.router(
-              routerConfig: routes,
+              routerConfig: router,
               debugShowCheckedModeBanner: false,
               theme: ThemeData(
                 primarySwatch: Colors.indigo,
