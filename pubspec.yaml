@@ -18,12 +18,12 @@ dependencies:
   langchain_pinecone: ^0.1.0+7
   go_router: ^16.2.1
   flutter_tts: ^4.1.0
-  sqflite: ^2.3.3+1
-  flutter_bloc: ^9.1.1  # Use the latest version available
+  sqflite: ^2.3.3
+  flutter_bloc: ^9.1.1
   encrypt: ^5.0.3
   speech_to_text: ^7.0.0
   logger: ^2.4.0
-  equatable: ^2.0.5  # Add this line
+  equatable: ^2.0.5
   flutter_dotenv: ^6.0.0
 
   provider: ^6.1.5
