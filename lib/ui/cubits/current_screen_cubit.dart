@@ -38,6 +38,7 @@ class CurrentScreenCubit extends Cubit<CurrentScreenState> {
 
   /// Attach/register a VM for a path. Safe to call multiple times.
   void registerVmForPath(String path, ScreenVM viewModel) {
+    print("setting current path to ${path ?? '(null)'}");
     final next = Map<String, ScreenVM>.from(state.vmByPath)..[path] = viewModel;
     emit(state.copyWith(vmByPath: next));
   }
@@ -50,8 +51,8 @@ class CurrentScreenCubit extends Cubit<CurrentScreenState> {
   }
 
   // ---- Backward-compatible API (matches your error messages) ----
-  void pushCurrentCubit(ScreenVM vm, {required String path}) {
-    registerVmForPath(path, vm);
+  void pushCurrentCubit(ScreenVM vm) {
+    registerVmForPath(state.currentPath ?? '/', vm);
   }
 
   void removeCurrentCubit(ScreenVM vm) {

@@ -32,15 +32,10 @@ extension UriExtension on Uri {
 const String LOCAL_ACTION_HANDLED = "LocalActionHandled";
 
 late GoRouter goRouter;
-CurrentScreenCubit? currentScreenCubit;
+CurrentScreenCubit currentScreenCubit = CurrentScreenCubit();
 
 setGoRouter(GoRouter goRouterParam) {
   goRouter = goRouterParam;
-  _trySetupRouteListener();
-}
-
-setcurrentScreenCubit(CurrentScreenCubit currentScreenCubitParam) {
-  currentScreenCubit = currentScreenCubitParam;
   _trySetupRouteListener();
 }
 
@@ -48,7 +43,7 @@ bool _routeListenerSetup = false;
 
 void _trySetupRouteListener() {
   // Only setup once and only when both goRouter and currentScreenCubit are available
-  if (_routeListenerSetup || currentScreenCubit == null) return;
+  if (_routeListenerSetup) return;
   
   _routeListenerSetup = true;
   

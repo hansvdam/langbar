@@ -49,8 +49,6 @@ void main() async {
   setRoutes(routesList);
   setSystemPrompt(systemPrompt);
   setGoRouter(router); // Set the GoRouter instance for the library
-  var currentScreenCubit = CurrentScreenCubit();
-  setcurrentScreenCubit(currentScreenCubit);
 
   GoRouter.optionURLReflectsImperativeAPIs = true;
   // turn off the # in the URLs on the web
@@ -80,7 +78,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(
             create: (context) => WidthChanged(),
           ),
-          BlocProvider(create: (context) => currentScreenCubit!),
+          BlocProvider(create: (context) => currentScreenCubit),
         ],
         child: Consumer<ChatHistory>(builder: (context, cart, child) {
           return LayoutBuilder(builder: (context, constraints) {

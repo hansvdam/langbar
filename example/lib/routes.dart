@@ -246,7 +246,6 @@ List<RouteBase> navBarRoutes = [
 ];
 
 List<RouteBase> routesList = hamburgerRoutes + navBarRoutes;
-var appLocalcurrentScreenCubit = CurrentScreenCubit();
 
 final router = GoRouter(
   initialLocation: '/home',
