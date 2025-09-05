@@ -383,7 +383,12 @@ typedef CreateHookFunction = HookCreator? Function(
     DocumentedGoRoute route, GoRouterState routerState);
 
 // Global variable to store the hook creation function
-late CreateHookFunction globalCreateHook;
+CreateHookFunction globalCreateHook = (DocumentedGoRoute route, GoRouterState routerState) {
+  return (Map<String, dynamic> toolInput, {String? namedLocation}) async {
+    // do nothing, but can be used to return some values to be added to the path parameters for the goRoute call (its a bit hacky)
+    return {};
+  };
+};
 
 void setGlobalCreateHook(CreateHookFunction newHook) {
   globalCreateHook = newHook;
