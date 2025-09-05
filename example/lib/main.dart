@@ -43,13 +43,19 @@ CreateHookFunction globalHook =
   };
 };
 
-void setupLLMDependencyInjection(Service service, {String? externalModel, String? baseUrl}) {
+void setupLLMDependencyInjection(Service service, {String? externalModel, String? baseUrl, required String systemPrompt}) {
   final getIt = GetIt.instance;
   
   // Unregister if already registered
   if (getIt.isRegistered<BaseChatModel>()) {
     getIt.unregister<BaseChatModel>();
   }
+  
+  // Register system prompt
+  if (getIt.isRegistered<String>(instanceName: 'systemPrompt')) {
+    getIt.unregister<String>(instanceName: 'systemPrompt');
+  }
+  getIt.registerSingleton<String>(systemPrompt, instanceName: 'systemPrompt');
   
   BaseChatModel llm;
   
@@ -110,12 +116,11 @@ void main() async {
   // Initialize langbar_core library
   setGlobalCreateHook(globalHook);
   setRoutes(routesList);
-  setSystemPrompt(systemPrompt);
   setGoRouter(router); // Set the GoRouter instance for the library
   
-  // Setup LLM dependency injection
+  // Setup LLM and system prompt dependency injection
   // You can change the service here: Service.openai, Service.openrouter, Service.ollama, Service.groq
-  setupLLMDependencyInjection(Service.openai);
+  setupLLMDependencyInjection(Service.openai, systemPrompt: systemPrompt);
 
   GoRouter.optionURLReflectsImperativeAPIs = true;
   // turn off the # in the URLs on the web

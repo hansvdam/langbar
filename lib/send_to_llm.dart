@@ -29,10 +29,14 @@ setRoutes(List<RouteBase> routes) {
   globalRoutes = routes;
 }
 
-late String systemPrompt;
-
+@Deprecated('Use dependency injection with get_it instead. '
+    'Register systemPrompt as: getIt.registerSingleton<String>(prompt, instanceName: \'systemPrompt\')')
 void setSystemPrompt(String prompt) {
-  systemPrompt = prompt;
+  // Register the system prompt with get_it for backward compatibility
+  if (getIt.isRegistered<String>(instanceName: 'systemPrompt')) {
+    getIt.unregister<String>(instanceName: 'systemPrompt');
+  }
+  getIt.registerSingleton<String>(prompt, instanceName: 'systemPrompt');
 }
 
 final GetIt getIt = GetIt.instance;
@@ -118,6 +122,9 @@ Future<void> sendToOpenai(BaseChatModel llm, BuildContext context,
         "messages after maybeAddInitialMessageToChatHistory");
   }
 
+  // Get systemPrompt from dependency injection
+  final systemPrompt = getIt<String>(instanceName: 'systemPrompt');
+  
   final promptTemplate = ChatPromptTemplate.fromPromptMessages([
     SystemChatMessagePromptTemplate.fromTemplate(
       systemPrompt,

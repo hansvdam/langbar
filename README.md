@@ -34,9 +34,9 @@ Standard Flutter commands apply:
 **LLM Integration**
 - `send_to_llm.dart` - Main LLM orchestration with support for OpenAI, OpenRouter, Ollama, and Groq
 - `Service` enum defines available LLM providers
-- Global system prompt configuration via `setSystemPrompt()`
+- System prompt configuration via dependency injection
 - Route-based tool generation via `setRoutes()`
-- Dependency injection using get_it for LLM instance management
+- Dependency injection using get_it for LLM instance and configuration management
 
 **Natural Language Input**
 - `LangField` widget in `lib/ui/langfield/langfield.dart` - Primary input component
@@ -96,15 +96,26 @@ Key external dependencies:
    void main() async {
      await dotenv.load();
      
-     // Setup LLM dependency injection
-     setupLLMDependencyInjection(Service.openai);
+     // Define your system prompt
+     String systemPrompt = "You are a helpful AI assistant...";
+     
+     // Setup LLM and system prompt dependency injection
+     setupLLMDependencyInjection(Service.openai, systemPrompt: systemPrompt);
      
      // rest of main function
    }
    
-   void setupLLMDependencyInjection(Service service, {String? externalModel, String? baseUrl}) {
+   void setupLLMDependencyInjection(Service service, 
+       {String? externalModel, String? baseUrl, required String systemPrompt}) {
      final getIt = GetIt.instance;
      
+     // Register system prompt
+     if (getIt.isRegistered<String>(instanceName: 'systemPrompt')) {
+       getIt.unregister<String>(instanceName: 'systemPrompt');
+     }
+     getIt.registerSingleton<String>(systemPrompt, instanceName: 'systemPrompt');
+     
+     // Register LLM
      if (getIt.isRegistered<BaseChatModel>()) {
        getIt.unregister<BaseChatModel>();
      }
