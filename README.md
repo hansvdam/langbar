@@ -36,6 +36,7 @@ Standard Flutter commands apply:
 - `Service` enum defines available LLM providers
 - Global system prompt configuration via `setSystemPrompt()`
 - Route-based tool generation via `setRoutes()`
+- Dependency injection using get_it for LLM instance management
 
 **Natural Language Input**
 - `LangField` widget in `lib/ui/langfield/langfield.dart` - Primary input component
@@ -76,19 +77,63 @@ Key external dependencies:
 - `go_router: ^14.2.3` - Navigation
 - `speech_to_text: ^7.0.0` - Voice input
 - `flutter_tts: ^4.1.0` - Text-to-speech output
+- `get_it: ^7.7.0` - Dependency injection
 
 ## Environment Setup
 
 **Required for LLM functionality:**
 1. Copy `.env.example` to `.env`: `cp .env.example .env`
 2. Fill in your API keys in the `.env` file
-3. Initialize dotenv in your app's main function:
+3. Initialize dotenv and dependency injection in your app's main function:
    ```dart
    import 'package:flutter_dotenv/flutter_dotenv.dart';
+   import 'package:get_it/get_it.dart';
+   import 'package:langchain/langchain.dart';
+   import 'package:langchain_openai/langchain_openai.dart';
+   import 'package:langbar_core/send_to_llm.dart';
+   import 'package:langbar_core/llm_keys.dart';
    
    void main() async {
      await dotenv.load();
+     
+     // Setup LLM dependency injection
+     setupLLMDependencyInjection(Service.openai);
+     
      // rest of main function
+   }
+   
+   void setupLLMDependencyInjection(Service service, {String? externalModel, String? baseUrl}) {
+     final getIt = GetIt.instance;
+     
+     if (getIt.isRegistered<BaseChatModel>()) {
+       getIt.unregister<BaseChatModel>();
+     }
+     
+     BaseChatModel llm;
+     
+     switch (service) {
+       case Service.openai:
+         llm = ChatOpenAI(
+             apiKey: getOpenAIKey2(),
+             defaultOptions: const ChatOpenAIOptions(
+                 temperature: 0.0,
+                 model: 'gpt-4o',
+                 toolChoice: ChatToolChoice.required));
+         break;
+       case Service.openrouter:
+         const model = 'meta-llama/llama-3.1-405b-instruct';
+         llm = ChatOpenAI(
+             apiKey: getOpenRouterAPIKey(),
+             baseUrl: "https://openrouter.ai/api/v1",
+             defaultOptions: const ChatOpenAIOptions(
+                 temperature: 0.0,
+                 model: model,
+                 toolChoice: ChatToolChoice.required));
+         break;
+       // Add other cases as needed
+     }
+     
+     getIt.registerSingleton<BaseChatModel>(llm);
    }
    ```
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:langbar/routes.dart' show routesList, router;
 import 'package:langbar_core/ui/langfield/langbar_states.dart';
@@ -12,6 +13,10 @@ import 'package:langbar_core/documented_route.dart';
 import 'package:langbar/ui/main_scaffolds.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:langchain/langchain.dart';
+import 'package:langchain_ollama/langchain_ollama.dart';
+import 'package:langchain_openai/langchain_openai.dart';
+import 'package:langbar_core/llm_keys.dart';
 
 class GlobalContextService {
   static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -38,6 +43,63 @@ CreateHookFunction globalHook =
   };
 };
 
+void setupLLMDependencyInjection(Service service, {String? externalModel, String? baseUrl}) {
+  final getIt = GetIt.instance;
+  
+  // Unregister if already registered
+  if (getIt.isRegistered<BaseChatModel>()) {
+    getIt.unregister<BaseChatModel>();
+  }
+  
+  BaseChatModel llm;
+  
+  switch (service) {
+    case Service.openai:
+      llm = ChatOpenAI(
+          apiKey: getOpenAIKey2(),
+          defaultOptions: const ChatOpenAIOptions(
+              temperature: 0.0,
+              model: 'gpt-4o',
+              toolChoice: ChatToolChoice.required));
+      break;
+    case Service.openrouter:
+      const model = 'meta-llama/llama-3.1-405b-instruct';
+      llm = ChatOpenAI(
+          apiKey: getOpenRouterAPIKey(),
+          baseUrl: "https://openrouter.ai/api/v1",
+          defaultOptions: const ChatOpenAIOptions(
+              temperature: 0.0,
+              model: model,
+              toolChoice: ChatToolChoice.required));
+      break;
+    case Service.ollama:
+      llm = baseUrl != null
+          ? ChatOllama(
+              baseUrl: baseUrl,
+              defaultOptions: ChatOllamaOptions(
+                  temperature: 0.0,
+                  model: externalModel ?? 'llama3.3:70b-instruct-q8_0',
+                  toolChoice: ChatToolChoice.required))
+          : ChatOllama(
+              defaultOptions: ChatOllamaOptions(
+                  temperature: 0.0,
+                  model: externalModel ?? 'llama3.3:70b-instruct-q8_0',
+                  toolChoice: ChatToolChoice.required));
+      break;
+    case Service.groq:
+      llm = ChatOpenAI(
+          apiKey: getGroqApiKey(),
+          baseUrl: "https://api.groq.com/openai/v1",
+          defaultOptions: const ChatOpenAIOptions(
+              temperature: 0.0,
+              model: 'llama-3.3-70b-versatile',
+              toolChoice: ChatToolChoice.required));
+      break;
+  }
+  
+  getIt.registerSingleton<BaseChatModel>(llm);
+}
+
 void main() async {
   // see: https://codewithandrea.com/articles/flutter-navigation-gorouter-go-vs-push/
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,6 +112,10 @@ void main() async {
   setRoutes(routesList);
   setSystemPrompt(systemPrompt);
   setGoRouter(router); // Set the GoRouter instance for the library
+  
+  // Setup LLM dependency injection
+  // You can change the service here: Service.openai, Service.openrouter, Service.ollama, Service.groq
+  setupLLMDependencyInjection(Service.openai);
 
   GoRouter.optionURLReflectsImperativeAPIs = true;
   // turn off the # in the URLs on the web

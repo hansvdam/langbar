@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'speech_enabled.dart';
 import 'ui/switchable_screen.dart';
@@ -34,76 +35,14 @@ void setSystemPrompt(String prompt) {
   systemPrompt = prompt;
 }
 
-var service = Service.openai;
-String? externalModel;
-String? baseUrl;
+final GetIt getIt = GetIt.instance;
 
-// uses langchain and langchain_openai, and implicitly uses openai_dart
 void submitToLLM(BuildContext context) {
+  final llm = getIt<BaseChatModel>();
+  
   var langbarState = Provider.of<LangBarState>(context, listen: false);
-  // var apiKey2 = getOpenAIKey();
-  var groqApiKey = getGroqApiKey();
-  var openRouterAPIKey = getOpenRouterAPIKey();
-
-  // var baseUrl;
-  // var baseUrl = getLlmBaseUrl();
-  BaseChatModel llm;
-
-  // var service = Service.ollama;
-  switch (service) {
-    case Service.openai:
-      llm = ChatOpenAI(
-          // nu met de tools moet aan assistant.tool-calls gevolgd worden door iets anders (verplicht, anders is er een bad request)
-          apiKey: getOpenAIKey2(),
-          // baseUrl: baseUrl ?? 'https://api.openai.com/v1',
-          defaultOptions: const ChatOpenAIOptions(
-              temperature: 0.0,
-              model: 'gpt-4o',
-              toolChoice:
-                  ChatToolChoice.required)); // model: 'gpt-4-1106-preview');
-      break;
-    case Service.openrouter:
-      const model = 'meta-llama/llama-3.1-405b-instruct';
-      // const model = 'meta-llama/llama-3.1-70b-instruct';
-      // const model = 'gpt-4o';
-      llm = ChatOpenAI(
-          apiKey: openRouterAPIKey,
-          baseUrl: "https://openrouter.ai/api/v1",
-          defaultOptions: const ChatOpenAIOptions(
-              temperature: 0.0,
-              model: model,
-              toolChoice:
-                  ChatToolChoice.required)); // model: 'gpt-4-1106-preview');
-      break;
-    case Service.ollama:
-      llm = baseUrl != null
-          ? ChatOllama(
-              baseUrl: baseUrl!,
-              defaultOptions: ChatOllamaOptions(
-                  temperature: 0.0,
-                  model: externalModel ?? 'llama3.3:70b-instruct-q8_0',
-                  toolChoice: ChatToolChoice.required))
-          : ChatOllama(
-              defaultOptions: ChatOllamaOptions(
-                  temperature: 0.0,
-                  model: externalModel ?? 'llama3.3:70b-instruct-q8_0',
-                  toolChoice: ChatToolChoice.required));
-      break;
-    case Service.groq:
-      llm = ChatOpenAI(
-          apiKey: groqApiKey,
-          baseUrl: "https://api.groq.com/openai/v1",
-          defaultOptions: const ChatOpenAIOptions(
-              temperature: 0.0,
-              // versatile lijkt het alleen te doen bij beperkt aantal functies
-              model: 'llama-3.3-70b-versatile',
-              // model: 'llama-3.1-8b-instant',
-              toolChoice:
-                  ChatToolChoice.required)); // model: 'gpt-4-1106-preview');
-      break;
-  }
-  // model: 'gpt-3.5-turbo');
   langbarState.sendingToOpenAI = true;
+  
   final currentViewmodel =
       context.read<CurrentScreenCubit>().state.currentViewModel;
   final chatHistory = Provider.of<ChatHistory>(context, listen: false);
