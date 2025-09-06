@@ -4,6 +4,8 @@ import 'package:integration_test/integration_test.dart';
 import 'package:langbar/main.dart' as app;
 import 'package:langbar_core/ui/langfield/langfield.dart';
 import 'package:langbar/ui/screens/transfer_screen.dart';
+import 'package:langbar/viewmodels/transfer_screen_view_model.dart';
+import 'package:langbar_core/utils/utils.dart' show currentScreenCubit;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -60,6 +62,20 @@ void main() {
         // Verify the Transfer screen has the correct values
         expect(transferScreenFinder, findsOneWidget, 
           reason: 'Should navigate to Transfer screen');
+          
+        // Verify that currentScreenCubit is set to TransferScreenViewModel
+        final currentViewModel = currentScreenCubit.state.currentViewModel;
+        expect(currentViewModel, isNotNull,
+          reason: 'Current screen cubit should have a current ViewModel');
+        expect(currentViewModel, isA<TransferScreenViewModel>(), 
+          reason: 'Current screen cubit should be set to TransferScreenViewModel');
+        
+        // Additional verification: check the ViewModel has the correct values
+        final transferViewModel = currentViewModel as TransferScreenViewModel;
+        expect(transferViewModel.state.amount, equals(40.0),
+          reason: 'TransferScreenViewModel should have amount = 40.0');
+        expect(transferViewModel.state.destinationName, equals('robert'),
+          reason: 'TransferScreenViewModel should have destinationName = robert');
         
         // Check for amount field with "40"
         final amountTextFields = find.descendant(
@@ -90,7 +106,7 @@ void main() {
         expect(foundDestinationField, isTrue, 
           reason: 'Transfer screen should have destination field filled with "robert"');
         
-        print('✓ Test passed: Successfully navigated to Transfer screen with correct values');
+        print('✓ Test passed: Successfully navigated to Transfer screen with correct values and currentScreenCubit set to TransferScreenViewModel');
       } else {
         // If we didn't find the Transfer screen, let's see what screens are available
         final allWidgets = find.byType(Widget);
