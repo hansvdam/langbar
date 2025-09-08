@@ -94,24 +94,51 @@ class TransferScreenViewModel
     langbarLogger.i(
         'TransferScreenViewModel created with amount: $amount, destinationName: $destinationName, description: $description, fromAccountId: $fromAccountId');
     _updateContactFuture();
+    
+    // Speak initial values that were provided
+    List<String> initialValues = [];
+    if (amount != null) {
+      initialValues.add('bedrag ${amount.toStringAsFixed(2)} euro');
+    }
+    if (destinationName != null && destinationName.isNotEmpty) {
+      initialValues.add('begunstigde $destinationName');
+    }
+    if (description != null && description.isNotEmpty) {
+      initialValues.add('omschrijving $description');
+    }
+    if (initialValues.isNotEmpty) {
+      // Small delay to ensure TTS is initialized
+      Future.delayed(const Duration(milliseconds: 500), () {
+        speakConfirmation(initialValues.join(', '));
+      });
+    }
   }
 
   void updateAmount(double? amount) {
     langbarLogger.i(
         'TransferScreenViewModel updating amount from ${state.amount} to $amount');
+    final previousAmount = state.amount;
     emit(state.copyWith(
       amount: amount,
       amountText: amount?.toStringAsFixed(2) ?? '',
     ));
     // Speak confirmation of amount update
     if (amount != null) {
-      speakConfirmation('bedrag ${amount.toStringAsFixed(2)} euro');
+      if (previousAmount != null && previousAmount != amount) {
+        // Correction of existing value
+        speakConfirmation('bedrag gecorrigeerd naar ${amount.toStringAsFixed(2)} euro');
+      } else if (previousAmount == null) {
+        // New value
+        speakConfirmation('bedrag ${amount.toStringAsFixed(2)} euro');
+      }
+      // If value is the same, don't speak
     }
   }
 
   void updateDestinationName(String? destinationName) {
     langbarLogger.i(
         'TransferScreenViewModel updating destinationName from ${state.destinationName} to $destinationName');
+    final previousName = state.destinationName;
     emit(state.copyWith(
       destinationName: destinationName,
       destinationAccountNameText: destinationName ?? '',
@@ -119,20 +146,35 @@ class TransferScreenViewModel
     _updateContactFuture();
     // Speak confirmation of destination name update
     if (destinationName != null && destinationName.isNotEmpty) {
-      speakConfirmation('begunstigde $destinationName');
+      if (previousName != null && previousName.isNotEmpty && previousName != destinationName) {
+        // Correction of existing value
+        speakConfirmation('begunstigde gecorrigeerd naar $destinationName');
+      } else if (previousName == null || previousName.isEmpty) {
+        // New value
+        speakConfirmation('begunstigde $destinationName');
+      }
+      // If value is the same, don't speak
     }
   }
 
   void updateDescription(String? description) {
     langbarLogger.i(
         'TransferScreenViewModel updating description from ${state.description} to $description');
+    final previousDescription = state.description;
     emit(state.copyWith(
       description: description,
       descriptionText: description ?? '',
     ));
     // Speak confirmation of description update
     if (description != null && description.isNotEmpty) {
-      speakConfirmation('omschrijving $description');
+      if (previousDescription != null && previousDescription.isNotEmpty && previousDescription != description) {
+        // Correction of existing value
+        speakConfirmation('omschrijving gecorrigeerd naar $description');
+      } else if (previousDescription == null || previousDescription.isEmpty) {
+        // New value
+        speakConfirmation('omschrijving $description');
+      }
+      // If value is the same, don't speak
     }
   }
 
@@ -155,32 +197,70 @@ class TransferScreenViewModel
     langbarLogger.i(
         'TransferScreenViewModel updating from constructor params: amount=$amount, destinationName=$destinationName, description=$description, fromAccountId=$fromAccountId');
 
+    // Store previous values before updating
+    final previousAmount = state.amount;
+    final previousName = state.destinationName;
+    final previousDescription = state.description;
+
+    // Use existing state values if new values are not provided
+    final newAmount = amount ?? state.amount;
+    final newDestinationName = destinationName ?? state.destinationName;
+    final newDescription = description ?? state.description;
+    final newFromAccountId = fromAccountId ?? state.fromAccountId;
+
     emit(state.copyWith(
-      amount: amount,
-      destinationName: destinationName,
-      description: description,
-      fromAccountId: fromAccountId,
-      fromAccount: fromAccountId != null ? accounts[fromAccountId] : null,
-      amountText: amount?.toStringAsFixed(2) ?? '',
-      destinationAccountNameText: destinationName ?? '',
-      descriptionText: description ?? '',
+      amount: newAmount,
+      destinationName: newDestinationName,
+      description: newDescription,
+      fromAccountId: newFromAccountId,
+      fromAccount: accounts[newFromAccountId],
+      amountText: newAmount?.toStringAsFixed(2) ?? '',
+      destinationAccountNameText: newDestinationName ?? '',
+      descriptionText: newDescription ?? '',
     ));
     _updateContactFuture();
     
-    // Speak confirmation of all parameters
-    List<String> confirmations = [];
+    // Build smart confirmations based on what changed
+    // Only speak about parameters that were explicitly passed (not null in the method call)
+    List<String> newValues = [];
+    List<String> corrections = [];
+    
+    // Check amount - only if explicitly passed
     if (amount != null) {
-      confirmations.add('bedrag ${amount.toStringAsFixed(2)} euro');
+      if (previousAmount != null && previousAmount != amount) {
+        corrections.add('bedrag gecorrigeerd naar ${amount.toStringAsFixed(2)} euro');
+      } else if (previousAmount == null) {
+        newValues.add('bedrag ${amount.toStringAsFixed(2)} euro');
+      }
     }
-    if (destinationName != null && destinationName.isNotEmpty) {
-      confirmations.add('begunstigde $destinationName');
+    
+    // Check destination name - only if explicitly passed
+    if (destinationName != null) {
+      if (destinationName.isNotEmpty) {
+        if (previousName != null && previousName.isNotEmpty && previousName != destinationName) {
+          corrections.add('begunstigde gecorrigeerd naar $destinationName');
+        } else if (previousName == null || previousName.isEmpty) {
+          newValues.add('begunstigde $destinationName');
+        }
+      }
     }
-    if (description != null && description.isNotEmpty) {
-      confirmations.add('omschrijving $description');
+    
+    // Check description - only if explicitly passed
+    if (description != null) {
+      if (description.isNotEmpty) {
+        if (previousDescription != null && previousDescription.isNotEmpty && previousDescription != description) {
+          corrections.add('omschrijving gecorrigeerd naar $description');
+        } else if (previousDescription == null || previousDescription.isEmpty) {
+          newValues.add('omschrijving $description');
+        }
+      }
     }
-    if (confirmations.isNotEmpty) {
-      print("speaking confirmations");
-      speakConfirmation(confirmations.join(', '));
+    
+    // Speak corrections first, then new values
+    List<String> allConfirmations = [...corrections, ...newValues];
+    if (allConfirmations.isNotEmpty) {
+      langbarLogger.d("Speaking confirmations: ${allConfirmations.join(', ')}");
+      speakConfirmation(allConfirmations.join(', '));
     }
   }
 
