@@ -24,11 +24,18 @@ void main() {
       // Submit query using helper function
       await LangFieldTestHelpers.submitLangFieldQuery(tester, '40 to robert');
       
-      // Check if we navigated to the Transfer screen
-      // Look for Transfer screen indicators
-      final transferScreenFinder = find.byType(TransferScreen);
+      // Wait for both Transfer screen and TransferScreenViewModel with early exit
+      final navigationSuccessful = await LangFieldTestHelpers.waitForScreenAndViewModel(
+        tester, 
+        TransferScreen, 
+        TransferScreenViewModel,
+        timeout: const Duration(seconds: 10),
+        pollInterval: const Duration(milliseconds: 300)
+      );
       
-      if (transferScreenFinder.evaluate().isNotEmpty) {
+      if (navigationSuccessful) {
+        // Get the finder now that we know navigation succeeded
+        final transferScreenFinder = find.byType(TransferScreen);
         // We found the Transfer screen, now check if the values are filled correctly
         
         // Verify the Transfer screen has the correct values
@@ -96,10 +103,18 @@ void main() {
       // Submit query using helper function
       await LangFieldTestHelpers.submitLangFieldQuery(tester, 'find bank offices near me');
       
-      // Check if we navigated to the Map screen
-      final mapScreenFinder = find.byType(MapScreen);
+      // Wait for both Map screen and MapScreenViewModel with early exit
+      final navigationSuccessful2 = await LangFieldTestHelpers.waitForScreenAndViewModel(
+        tester, 
+        MapScreen, 
+        MapScreenViewModel,
+        timeout: const Duration(seconds: 10),
+        pollInterval: const Duration(milliseconds: 300)
+      );
       
-      if (mapScreenFinder.evaluate().isNotEmpty) {
+      if (navigationSuccessful2) {
+        // Get the finder now that we know navigation succeeded
+        final mapScreenFinder = find.byType(MapScreen);
         // Verify the Map screen is displayed
         expect(mapScreenFinder, findsOneWidget, 
           reason: 'Should navigate to Map screen');
