@@ -156,7 +156,7 @@ class TransferScreenViewModel
     // Check destination name - only if explicitly passed
     if (destinationName != null) {
       if (destinationName.isNotEmpty) {
-        if (previousName != null && previousName.isNotEmpty && previousName != destinationName) {
+        if (previousName != null && previousName.isNotEmpty && previousName != destinationName && !currentScreenCubit.state.hasViewModelChanged) {
           corrections.add('recipient corrected to $destinationName');
         } else if (previousName == null || previousName.isEmpty) {
           newValues.add('recipient $destinationName');
@@ -165,7 +165,7 @@ class TransferScreenViewModel
     }
 
     if (amount != null) {
-      if (previousAmount != null && previousAmount != amount) {
+      if (previousAmount != null && previousAmount != amount && !currentScreenCubit.state.hasViewModelChanged) {
         corrections.add('amount corrected to ${amount.toStringAsFixed(2)} euros');
       } else if (previousAmount == null) {
         newValues.add('amount ${amount.toStringAsFixed(2)} euros');
@@ -176,7 +176,7 @@ class TransferScreenViewModel
     // Check description - only if explicitly passed
     if (description != null) {
       if (description.isNotEmpty) {
-        if (previousDescription != null && previousDescription.isNotEmpty && previousDescription != description) {
+        if (previousDescription != null && previousDescription.isNotEmpty && previousDescription != description && !currentScreenCubit.state.hasViewModelChanged) {
           corrections.add('description corrected to $description');
         } else if (previousDescription == null || previousDescription.isEmpty) {
           newValues.add('description $description');
