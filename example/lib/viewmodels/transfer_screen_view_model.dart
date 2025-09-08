@@ -149,13 +149,17 @@ class TransferScreenViewModel
     
     // Build smart confirmations based on what changed
     // Only speak about parameters that were explicitly passed (not null in the method call)
+    speakConfirmations(destinationName, previousName, amount, previousAmount, description, previousDescription);
+  }
+
+  void speakConfirmations(String? destinationName, String? previousName, double? amount, double? previousAmount, String? description, String? previousDescription) {
     List<String> newValues = [];
     List<String> corrections = [];
-    
+
     _checkFieldUpdate(destinationName, previousName, 'recipient', destinationName, corrections, newValues);
     _checkFieldUpdate(amount, previousAmount, 'amount', '${amount?.toStringAsFixed(2)} euros', corrections, newValues);
     _checkFieldUpdate(description, previousDescription, 'description', description, corrections, newValues);
-    
+
     // Speak corrections first, then new values
     List<String> allConfirmations = [...corrections, ...newValues];
     if (allConfirmations.isNotEmpty) {
