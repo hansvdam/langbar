@@ -103,6 +103,10 @@ class TransferScreenViewModel
       amount: amount,
       amountText: amount?.toStringAsFixed(2) ?? '',
     ));
+    // Speak confirmation of amount update
+    if (amount != null) {
+      speakConfirmation('bedrag ${amount.toStringAsFixed(2)} euro');
+    }
   }
 
   void updateDestinationName(String? destinationName) {
@@ -113,6 +117,10 @@ class TransferScreenViewModel
       destinationAccountNameText: destinationName ?? '',
     ));
     _updateContactFuture();
+    // Speak confirmation of destination name update
+    if (destinationName != null && destinationName.isNotEmpty) {
+      speakConfirmation('begunstigde $destinationName');
+    }
   }
 
   void updateDescription(String? description) {
@@ -122,6 +130,10 @@ class TransferScreenViewModel
       description: description,
       descriptionText: description ?? '',
     ));
+    // Speak confirmation of description update
+    if (description != null && description.isNotEmpty) {
+      speakConfirmation('omschrijving $description');
+    }
   }
 
   void updateFromAccountId(String fromAccountId) {
@@ -154,6 +166,22 @@ class TransferScreenViewModel
       descriptionText: description ?? '',
     ));
     _updateContactFuture();
+    
+    // Speak confirmation of all parameters
+    List<String> confirmations = [];
+    if (amount != null) {
+      confirmations.add('bedrag ${amount.toStringAsFixed(2)} euro');
+    }
+    if (destinationName != null && destinationName.isNotEmpty) {
+      confirmations.add('begunstigde $destinationName');
+    }
+    if (description != null && description.isNotEmpty) {
+      confirmations.add('omschrijving $description');
+    }
+    if (confirmations.isNotEmpty) {
+      print("speaking confirmations");
+      speakConfirmation(confirmations.join(', '));
+    }
   }
 
   /// Update text field values directly (for user input)
