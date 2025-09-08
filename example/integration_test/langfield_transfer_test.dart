@@ -238,6 +238,95 @@ void main() {
         
         fail('Expected to navigate to Transfer screen for third test, but Transfer screen was not found');
       }
+      
+      // Fourth test step: Test amount correction with "no 80"
+      // This should be interpreted as "no, make it 80" - correcting the previous amount from 70 to 80
+      print('Starting fourth test step: Testing amount correction from 70 to 80...');
+      
+      // Submit query using helper function
+      await LangFieldTestHelpers.submitLangFieldQuery(tester, 'no 80');
+      
+      // Wait for Transfer screen and TransferScreenViewModel (should stay on or return to transfer screen)
+      final navigationSuccessful4 = await LangFieldTestHelpers.waitForScreenAndViewModel(
+        tester, 
+        TransferScreen, 
+        TransferScreenViewModel,
+        timeout: const Duration(seconds: 10),
+        pollInterval: const Duration(milliseconds: 300)
+      );
+      
+      if (navigationSuccessful4) {
+        // Get the finder now that we know we're on transfer screen
+        final transferScreenFinder4 = find.byType(TransferScreen);
+        
+        // Verify the Transfer screen is displayed
+        expect(transferScreenFinder4, findsOneWidget, 
+          reason: 'Should be on Transfer screen after amount correction');
+          
+        // Verify that currentScreenCubit is set to TransferScreenViewModel
+        final currentViewModel4 = currentScreenCubit.state.currentViewModel;
+        expect(currentViewModel4, isNotNull,
+          reason: 'Current screen cubit should have a current ViewModel for amount correction');
+        expect(currentViewModel4, isA<TransferScreenViewModel>(), 
+          reason: 'Current screen cubit should be set to TransferScreenViewModel for amount correction');
+        
+        // Additional verification: check the ViewModel has the corrected amount
+        final transferViewModel4 = currentViewModel4 as TransferScreenViewModel;
+        expect(transferViewModel4.state.amount, equals(80.0),
+          reason: 'TransferScreenViewModel should have corrected amount = 80.0 (was 70.0)');
+        
+        // Destination and description should remain the same from previous state
+        expect(transferViewModel4.state.destinationName, equals('Mary'),
+          reason: 'TransferScreenViewModel should keep destinationName = Mary');
+        expect(transferViewModel4.state.description, equals('dinner'),
+          reason: 'TransferScreenViewModel should keep description = dinner');
+        
+        // Check for amount field with "80"
+        final amountTextFields4 = find.descendant(
+          of: transferScreenFinder4,
+          matching: find.byType(TextFormField)
+        );
+        
+        bool foundCorrectedAmountField = false;
+        bool foundSameDestinationField = false;
+        bool foundSameDescriptionField = false;
+        
+        // Check each TextFormField for the expected values
+        for (final element in amountTextFields4.evaluate()) {
+          final textField = element.widget as TextFormField;
+          final initialValue = textField.initialValue;
+          
+          if (initialValue != null) {
+            if (initialValue.contains('80')) {
+              foundCorrectedAmountField = true;
+            }
+            if (initialValue.toLowerCase().contains('mary')) {
+              foundSameDestinationField = true;
+            }
+            if (initialValue.toLowerCase().contains('dinner')) {
+              foundSameDescriptionField = true;
+            }
+          }
+        }
+        
+        expect(foundCorrectedAmountField, isTrue, 
+          reason: 'Transfer screen should have amount field corrected to "80"');
+        expect(foundSameDestinationField, isTrue, 
+          reason: 'Transfer screen should still have destination field with "Mary"');
+        expect(foundSameDescriptionField, isTrue, 
+          reason: 'Transfer screen should still have description field with "dinner"');
+        
+        print('✓ Test passed: Amount correction "no 80" successfully changed amount from 70 to 80 while preserving Mary and dinner');
+      } else {
+        // If we didn't find the Transfer screen, this is unexpected for amount correction
+        final allWidgets4 = find.byType(Widget);
+        print('Available widgets on screen after "no 80":');
+        for (final element in allWidgets4.evaluate().take(10)) {
+          print('- ${element.widget.runtimeType}');
+        }
+        
+        fail('Expected to be on Transfer screen for amount correction "no 80", but Transfer screen was not found');
+      }
     });
   });
 }
