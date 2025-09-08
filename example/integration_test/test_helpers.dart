@@ -45,13 +45,12 @@ class LangFieldTestHelpers {
     // Get the TextField widget for submission
     final textField = tester.widget<TextField>(textFieldInLangField);
     
-    // Submit the text by pressing enter
-    await tester.testTextInput.receiveAction(TextInputAction.send);
-    await tester.pumpAndSettle();
-    
-    // Alternative submission method if onSubmitted callback exists
+    // Submit the text - prefer onSubmitted callback if available, otherwise use platform input action
     if (textField.onSubmitted != null) {
       textField.onSubmitted!(text);
+      await tester.pumpAndSettle();
+    } else {
+      await tester.testTextInput.receiveAction(TextInputAction.send);
       await tester.pumpAndSettle();
     }
     
