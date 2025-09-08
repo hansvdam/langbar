@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:langbar_core/ui/langfield/langfield.dart';
 import 'package:langbar_core/utils/utils.dart' show currentScreenCubit;
+import 'package:langbar_core/send_to_llm.dart' show printChatMessageMemory, getChatMessageHistory;
+import 'package:langchain/langchain.dart';
 
 /// Helper functions for integration tests involving LangField interactions
 class LangFieldTestHelpers {
@@ -177,5 +179,45 @@ class LangFieldTestHelpers {
     
     stopwatch.stop();
     return false;
+  }
+  
+  /// Validates chat history contains expected user messages
+  /// Useful for testing conversational context and corrections
+  static Future<void> validateChatHistory({
+    required List<String> expectedUserMessages,
+    bool allowAdditionalMessages = false
+  }) async {
+    final chatMessages = await getChatMessageHistory();
+    final userMessages = chatMessages
+        .where((msg) => msg is HumanChatMessage)
+        .cast<HumanChatMessage>()
+        .map((msg) => msg.content)
+        .toList();
+    
+    print('Chat history validation:');
+    print('Expected user messages: $expectedUserMessages');
+    print('Actual user messages: $userMessages');
+    
+    if (allowAdditionalMessages) {
+      // Check that all expected messages are present
+      for (final expectedMsg in expectedUserMessages) {
+        expect(userMessages, contains(expectedMsg),
+          reason: 'Chat history should contain user message: "$expectedMsg"');
+      }
+    } else {
+      // Check for exact match
+      expect(userMessages.length, equals(expectedUserMessages.length),
+        reason: 'Chat history should contain exactly ${expectedUserMessages.length} user message(s)');
+      
+      for (int i = 0; i < expectedUserMessages.length; i++) {
+        expect(userMessages[i], equals(expectedUserMessages[i]),
+          reason: 'User message $i should be "${expectedUserMessages[i]}" but was "${userMessages[i]}"');
+      }
+    }
+  }
+  
+  /// Prints current chat history for debugging
+  static Future<void> printChatHistoryForDebugging() async {
+    await printChatMessageMemory('DEBUG - Current chat history');
   }
 }

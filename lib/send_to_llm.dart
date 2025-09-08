@@ -96,6 +96,11 @@ printChatMessageMemory(String heading) async {
   print("$heading: $messages");
 }
 
+/// Get the current chat message history for testing purposes
+Future<List<ChatMessage>> getChatMessageHistory() async {
+  return await _chatMessageMemory.chatHistory.getChatMessages();
+}
+
 Future<void> sendToOpenai(BaseChatModel llm, BuildContext context,
     ChatHistory chatHistoryForUi, Cubit? currentViewmodel) async {
   // final forecastTool = ForecastScreen.getTool(GoRouter.of(context));

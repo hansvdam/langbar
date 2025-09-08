@@ -99,7 +99,7 @@ void main() {
       
       // Second test step: Navigate to Map screen with "show offices"
       print('Starting second test step: Map screen navigation...');
-      
+
       // Submit query using helper function
       await LangFieldTestHelpers.submitLangFieldQuery(tester, 'find bank offices near me');
       
@@ -152,7 +152,12 @@ void main() {
         
         fail('Expected to navigate to Map screen, but Map screen was not found');
       }
-      
+
+      await LangFieldTestHelpers.validateChatHistory(
+          expectedUserMessages: ['find bank offices near me'],
+          allowAdditionalMessages: true // Allow AI responses and other messages
+      );
+
       // Third test step: Navigate back to Transfer screen with "70 to Mary for dinner"
       print('Starting third test step: Transfer screen navigation with description...');
       
@@ -242,6 +247,12 @@ void main() {
       // Fourth test step: Test amount correction with "no 80"
       // This should be interpreted as "no, make it 80" - correcting the previous amount from 70 to 80
       print('Starting fourth test step: Testing amount correction from 70 to 80...');
+      
+      // First, validate that chat history contains only the previous user message before correction
+      await LangFieldTestHelpers.validateChatHistory(
+        expectedUserMessages: ['70 to Mary for dinner'],
+        allowAdditionalMessages: true // Allow AI responses and other messages
+      );
       
       // Submit query using helper function
       await LangFieldTestHelpers.submitLangFieldQuery(tester, 'no 80');
