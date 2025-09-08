@@ -59,7 +59,7 @@ class GenericScreenViewModel<State> extends Cubit<State> with SpeechEnabled {
   
   /// Speak confirmation of understood parameters
   Future<void> speakConfirmation(String confirmation) async {
-    await speak('Begrepen: $confirmation');
+    await speak('Understood: $confirmation');
   }
   
   /// Enable or disable TTS for this view model

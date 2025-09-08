@@ -98,13 +98,13 @@ class TransferScreenViewModel
     // Speak initial values that were provided
     List<String> initialValues = [];
     if (amount != null) {
-      initialValues.add('bedrag ${amount.toStringAsFixed(2)} euro');
+      initialValues.add('amount ${amount.toStringAsFixed(2)} euros');
     }
     if (destinationName != null && destinationName.isNotEmpty) {
-      initialValues.add('begunstigde $destinationName');
+      initialValues.add('recipient $destinationName');
     }
     if (description != null && description.isNotEmpty) {
-      initialValues.add('omschrijving $description');
+      initialValues.add('description $description');
     }
     if (initialValues.isNotEmpty) {
       // Small delay to ensure TTS is initialized
@@ -157,18 +157,18 @@ class TransferScreenViewModel
     if (destinationName != null) {
       if (destinationName.isNotEmpty) {
         if (previousName != null && previousName.isNotEmpty && previousName != destinationName) {
-          corrections.add('begunstigde gecorrigeerd naar $destinationName');
+          corrections.add('recipient corrected to $destinationName');
         } else if (previousName == null || previousName.isEmpty) {
-          newValues.add('begunstigde $destinationName');
+          newValues.add('recipient $destinationName');
         }
       }
     }
 
     if (amount != null) {
       if (previousAmount != null && previousAmount != amount) {
-        corrections.add('bedrag gecorrigeerd naar ${amount.toStringAsFixed(2)} euro');
+        corrections.add('amount corrected to ${amount.toStringAsFixed(2)} euros');
       } else if (previousAmount == null) {
-        newValues.add('bedrag ${amount.toStringAsFixed(2)} euro');
+        newValues.add('amount ${amount.toStringAsFixed(2)} euros');
       }
     }
 
@@ -177,9 +177,9 @@ class TransferScreenViewModel
     if (description != null) {
       if (description.isNotEmpty) {
         if (previousDescription != null && previousDescription.isNotEmpty && previousDescription != description) {
-          corrections.add('omschrijving gecorrigeerd naar $description');
+          corrections.add('description corrected to $description');
         } else if (previousDescription == null || previousDescription.isEmpty) {
-          newValues.add('omschrijving $description');
+          newValues.add('description $description');
         }
       }
     }
