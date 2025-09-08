@@ -114,79 +114,6 @@ class TransferScreenViewModel
     }
   }
 
-  void updateAmount(double? amount) {
-    langbarLogger.i(
-        'TransferScreenViewModel updating amount from ${state.amount} to $amount');
-    final previousAmount = state.amount;
-    emit(state.copyWith(
-      amount: amount,
-      amountText: amount?.toStringAsFixed(2) ?? '',
-    ));
-    // Speak confirmation of amount update
-    if (amount != null) {
-      if (previousAmount != null && previousAmount != amount) {
-        // Correction of existing value
-        speakConfirmation('bedrag gecorrigeerd naar ${amount.toStringAsFixed(2)} euro');
-      } else if (previousAmount == null) {
-        // New value
-        speakConfirmation('bedrag ${amount.toStringAsFixed(2)} euro');
-      }
-      // If value is the same, don't speak
-    }
-  }
-
-  void updateDestinationName(String? destinationName) {
-    langbarLogger.i(
-        'TransferScreenViewModel updating destinationName from ${state.destinationName} to $destinationName');
-    final previousName = state.destinationName;
-    emit(state.copyWith(
-      destinationName: destinationName,
-      destinationAccountNameText: destinationName ?? '',
-    ));
-    _updateContactFuture();
-    // Speak confirmation of destination name update
-    if (destinationName != null && destinationName.isNotEmpty) {
-      if (previousName != null && previousName.isNotEmpty && previousName != destinationName) {
-        // Correction of existing value
-        speakConfirmation('begunstigde gecorrigeerd naar $destinationName');
-      } else if (previousName == null || previousName.isEmpty) {
-        // New value
-        speakConfirmation('begunstigde $destinationName');
-      }
-      // If value is the same, don't speak
-    }
-  }
-
-  void updateDescription(String? description) {
-    langbarLogger.i(
-        'TransferScreenViewModel updating description from ${state.description} to $description');
-    final previousDescription = state.description;
-    emit(state.copyWith(
-      description: description,
-      descriptionText: description ?? '',
-    ));
-    // Speak confirmation of description update
-    if (description != null && description.isNotEmpty) {
-      if (previousDescription != null && previousDescription.isNotEmpty && previousDescription != description) {
-        // Correction of existing value
-        speakConfirmation('omschrijving gecorrigeerd naar $description');
-      } else if (previousDescription == null || previousDescription.isEmpty) {
-        // New value
-        speakConfirmation('omschrijving $description');
-      }
-      // If value is the same, don't speak
-    }
-  }
-
-  void updateFromAccountId(String fromAccountId) {
-    langbarLogger.i(
-        'TransferScreenViewModel updating fromAccountId from ${state.fromAccountId} to $fromAccountId');
-    emit(state.copyWith(
-      fromAccountId: fromAccountId,
-      fromAccount: accounts[fromAccountId],
-    ));
-  }
-
   /// Update the ViewModel with new constructor parameters
   void updateFromConstructorParams({
     double? amount,
@@ -226,14 +153,6 @@ class TransferScreenViewModel
     List<String> corrections = [];
     
     // Check amount - only if explicitly passed
-    if (amount != null) {
-      if (previousAmount != null && previousAmount != amount) {
-        corrections.add('bedrag gecorrigeerd naar ${amount.toStringAsFixed(2)} euro');
-      } else if (previousAmount == null) {
-        newValues.add('bedrag ${amount.toStringAsFixed(2)} euro');
-      }
-    }
-    
     // Check destination name - only if explicitly passed
     if (destinationName != null) {
       if (destinationName.isNotEmpty) {
@@ -244,7 +163,16 @@ class TransferScreenViewModel
         }
       }
     }
-    
+
+    if (amount != null) {
+      if (previousAmount != null && previousAmount != amount) {
+        corrections.add('bedrag gecorrigeerd naar ${amount.toStringAsFixed(2)} euro');
+      } else if (previousAmount == null) {
+        newValues.add('bedrag ${amount.toStringAsFixed(2)} euro');
+      }
+    }
+
+
     // Check description - only if explicitly passed
     if (description != null) {
       if (description.isNotEmpty) {
