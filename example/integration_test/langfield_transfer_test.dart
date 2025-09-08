@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:langbar/main.dart' as app;
-import 'package:langbar_core/ui/langfield/langfield.dart';
 import 'package:langbar/ui/screens/transfer_screen.dart';
 import 'package:langbar/viewmodels/transfer_screen_view_model.dart';
 import 'package:langbar/ui/screens/map_screen.dart';
 import 'package:langbar/viewmodels/map_screen_view_model.dart';
 import 'package:langbar_core/utils/utils.dart' show currentScreenCubit;
+import 'test_helpers.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -21,44 +21,8 @@ void main() {
       // Wait for the app to fully initialize
       await tester.pumpAndSettle(const Duration(seconds: 3));
       
-      // Find the LangField widget specifically
-      final langFieldFinder = find.byType(LangField);
-      expect(langFieldFinder, findsOneWidget);
-      
-      // Find the TextField inside the LangField
-      final textFieldInLangField = find.descendant(
-        of: langFieldFinder,
-        matching: find.byType(TextField),
-      );
-      
-      // Tap on the TextField inside LangField to focus it
-      await tester.tap(textFieldInLangField);
-      await tester.pumpAndSettle();
-      
-      // Enter the text "40 to robert"
-      await tester.enterText(textFieldInLangField, '40 to robert');
-      await tester.pumpAndSettle();
-      
-      // Verify the text was entered correctly
-      expect(find.text('40 to robert'), findsOneWidget);
-      
-      // Submit the text by pressing enter or finding submit mechanism
-      // Try to find and tap any submit button or trigger submission
-      final textField = tester.widget<TextField>(textFieldInLangField);
-      
-      // Simulate pressing enter to submit
-      await tester.testTextInput.receiveAction(TextInputAction.send);
-      await tester.pumpAndSettle();
-      
-      // Alternative: try to find submit functionality through the LangField's onSubmitted callback
-      if (textField.onSubmitted != null) {
-        textField.onSubmitted!('40 to robert');
-        await tester.pumpAndSettle();
-      }
-      
-      // Wait for potential navigation and LLM processing
-      // This might take some time as it involves LLM API calls
-      await tester.pumpAndSettle(const Duration(seconds: 10));
+      // Submit query using helper function
+      await LangFieldTestHelpers.submitLangFieldQuery(tester, '40 to robert');
       
       // Check if we navigated to the Transfer screen
       // Look for Transfer screen indicators
@@ -129,39 +93,8 @@ void main() {
       // Second test step: Navigate to Map screen with "show offices"
       print('Starting second test step: Map screen navigation...');
       
-      // Find the LangField again for the second test
-      final langFieldFinder2 = find.byType(LangField);
-      expect(langFieldFinder2, findsOneWidget);
-      
-      // Find the TextField inside the LangField
-      final textFieldInLangField2 = find.descendant(
-        of: langFieldFinder2,
-        matching: find.byType(TextField),
-      );
-      
-      await tester.tap(textFieldInLangField2);
-      await tester.pumpAndSettle();
-      
-      // Clear the existing text and enter "find bank offices near me"
-      await tester.enterText(textFieldInLangField2, 'find bank offices near me');
-      await tester.pumpAndSettle();
-      
-      // Verify the text was entered correctly
-      expect(find.text('find bank offices near me'), findsOneWidget);
-      
-      // Submit the text
-      await tester.testTextInput.receiveAction(TextInputAction.send);
-      await tester.pumpAndSettle();
-      
-      // Alternative submission method
-      final textField2 = tester.widget<TextField>(textFieldInLangField2);
-      if (textField2.onSubmitted != null) {
-        textField2.onSubmitted!('find bank offices near me');
-        await tester.pumpAndSettle();
-      }
-      
-      // Wait for navigation and LLM processing
-      await tester.pumpAndSettle(const Duration(seconds: 10));
+      // Submit query using helper function
+      await LangFieldTestHelpers.submitLangFieldQuery(tester, 'find bank offices near me');
       
       // Check if we navigated to the Map screen
       final mapScreenFinder = find.byType(MapScreen);
