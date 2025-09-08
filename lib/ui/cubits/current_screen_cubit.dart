@@ -22,7 +22,7 @@ class CurrentScreenState {
   ScreenVM? get previousViewModel =>
       (previousPath == null) ? null : vmByPath[previousPath!];
 
-  bool get hasViewModelChanged =>
+  bool get hasScreenChanged =>
       previousPath != currentPath;
 
   CurrentScreenState copyWith({

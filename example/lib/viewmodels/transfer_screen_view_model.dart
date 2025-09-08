@@ -152,37 +152,9 @@ class TransferScreenViewModel
     List<String> newValues = [];
     List<String> corrections = [];
     
-    // Check amount - only if explicitly passed
-    // Check destination name - only if explicitly passed
-    if (destinationName != null) {
-      if (destinationName.isNotEmpty) {
-        if (previousName != null && previousName.isNotEmpty && previousName != destinationName && !currentScreenCubit.state.hasViewModelChanged) {
-          corrections.add('recipient corrected to $destinationName');
-        } else if (previousName == null || previousName.isEmpty) {
-          newValues.add('recipient $destinationName');
-        }
-      }
-    }
-
-    if (amount != null) {
-      if (previousAmount != null && previousAmount != amount && !currentScreenCubit.state.hasViewModelChanged) {
-        corrections.add('amount corrected to ${amount.toStringAsFixed(2)} euros');
-      } else if (previousAmount == null) {
-        newValues.add('amount ${amount.toStringAsFixed(2)} euros');
-      }
-    }
-
-
-    // Check description - only if explicitly passed
-    if (description != null) {
-      if (description.isNotEmpty) {
-        if (previousDescription != null && previousDescription.isNotEmpty && previousDescription != description && !currentScreenCubit.state.hasViewModelChanged) {
-          corrections.add('description corrected to $description');
-        } else if (previousDescription == null || previousDescription.isEmpty) {
-          newValues.add('description $description');
-        }
-      }
-    }
+    _checkFieldUpdate(destinationName, previousName, 'recipient', destinationName, corrections, newValues);
+    _checkFieldUpdate(amount, previousAmount, 'amount', '${amount?.toStringAsFixed(2)} euros', corrections, newValues);
+    _checkFieldUpdate(description, previousDescription, 'description', description, corrections, newValues);
     
     // Speak corrections first, then new values
     List<String> allConfirmations = [...corrections, ...newValues];
@@ -230,6 +202,21 @@ class TransferScreenViewModel
   List<KeyWordtrigger> getKeyWordHandlers(BuildContext context) {
     // Return empty list for now - can add transfer-specific keywords later
     return [];
+  }
+
+  void _checkFieldUpdate<T>(T? newValue, T? previousValue, String fieldName, String? displayValue, List<String> corrections, List<String> newValues) {
+    if (newValue == null) return;
+    
+    final hasValue = newValue is String ? newValue.isNotEmpty : true;
+    final previousHasValue = previousValue is String ? previousValue.isNotEmpty : previousValue != null;
+    
+    if (hasValue) {
+      if (previousHasValue && previousValue != newValue && !currentScreenCubit.state.hasScreenChanged) {
+        corrections.add('$fieldName corrected to $displayValue');
+      } else if (!previousHasValue) {
+        newValues.add('$fieldName $displayValue');
+      }
+    }
   }
 
   /// Update the contact lookup Future based on current destinationName

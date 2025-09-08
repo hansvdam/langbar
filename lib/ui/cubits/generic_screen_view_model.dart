@@ -27,15 +27,6 @@ class GenericScreenViewModel<State> extends Cubit<State> with SpeechEnabled {
   }
 
   @override
-  Future<void> close() async {
-    clearChatMessageMemory(
-        caller:
-            'GenericScreenViewModel.close'); // new context for parameter interpretation
-    // currentScreenCubit.removeCurrentCubit(this);
-    return super.close();
-  }
-
-  @override
   List<Tool<Object, ToolOptions, Object>> getTools(BuildContext context) {
     List<Tool> tools =
         parseRouters(GoRouter.of(context), globalRoutes, context: context);
