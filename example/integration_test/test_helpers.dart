@@ -190,7 +190,22 @@ class LangFieldTestHelpers {
     final userMessages = chatMessages
         .where((msg) => msg is HumanChatMessage)
         .cast<HumanChatMessage>()
-        .map((msg) => msg.content)
+        .map((msg) {
+          // Extract text content from ChatMessageContent
+          if (msg.content is ChatMessageContentText) {
+            return (msg.content as ChatMessageContentText).text.trim();
+          } else if (msg.content is List) {
+            // Handle case where content is a list of ChatMessageContent
+            final contentList = msg.content as List;
+            return contentList
+                .whereType<ChatMessageContentText>()
+                .map((content) => content.text)
+                .join(' ')
+                .trim();
+          } else {
+            return msg.content.toString().trim();
+          }
+        })
         .toList();
     
     print('Chat history validation:');
