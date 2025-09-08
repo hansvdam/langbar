@@ -13,7 +13,7 @@ class TTSService {
   double volume = 1.0;
   double pitch = 1.0;
   double rate = 0.5;
-  String? language = 'en-US';
+  String? language = 'en-UK';
   bool isInitialized = false;
 
   TTSService._internal();
