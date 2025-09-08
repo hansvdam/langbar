@@ -152,6 +152,92 @@ void main() {
         
         fail('Expected to navigate to Map screen, but Map screen was not found');
       }
+      
+      // Third test step: Navigate back to Transfer screen with "70 to Mary for dinner"
+      print('Starting third test step: Transfer screen navigation with description...');
+      
+      // Submit query using helper function
+      await LangFieldTestHelpers.submitLangFieldQuery(tester, '70 to Mary for dinner');
+      
+      // Wait for both Transfer screen and TransferScreenViewModel with early exit
+      final navigationSuccessful3 = await LangFieldTestHelpers.waitForScreenAndViewModel(
+        tester, 
+        TransferScreen, 
+        TransferScreenViewModel,
+        timeout: const Duration(seconds: 10),
+        pollInterval: const Duration(milliseconds: 300)
+      );
+      
+      if (navigationSuccessful3) {
+        // Get the finder now that we know navigation succeeded
+        final transferScreenFinder3 = find.byType(TransferScreen);
+        
+        // Verify the Transfer screen is displayed
+        expect(transferScreenFinder3, findsOneWidget, 
+          reason: 'Should navigate to Transfer screen for third test');
+          
+        // Verify that currentScreenCubit is set to TransferScreenViewModel
+        final currentViewModel3 = currentScreenCubit.state.currentViewModel;
+        expect(currentViewModel3, isNotNull,
+          reason: 'Current screen cubit should have a current ViewModel for third test');
+        expect(currentViewModel3, isA<TransferScreenViewModel>(), 
+          reason: 'Current screen cubit should be set to TransferScreenViewModel for third test');
+        
+        // Additional verification: check the ViewModel has the correct values
+        final transferViewModel3 = currentViewModel3 as TransferScreenViewModel;
+        expect(transferViewModel3.state.amount, equals(70.0),
+          reason: 'TransferScreenViewModel should have amount = 70.0');
+        expect(transferViewModel3.state.destinationName, equals('Mary'),
+          reason: 'TransferScreenViewModel should have destinationName = Mary');
+        expect(transferViewModel3.state.description, equals('dinner'),
+          reason: 'TransferScreenViewModel should have description = dinner');
+        
+        // Check for amount field with "70"
+        final amountTextFields3 = find.descendant(
+          of: transferScreenFinder3,
+          matching: find.byType(TextFormField)
+        );
+        
+        bool foundAmountField3 = false;
+        bool foundDestinationField3 = false;
+        bool foundDescriptionField3 = false;
+        
+        // Check each TextFormField for the expected values
+        for (final element in amountTextFields3.evaluate()) {
+          final textField = element.widget as TextFormField;
+          final initialValue = textField.initialValue;
+          
+          if (initialValue != null) {
+            if (initialValue.contains('70')) {
+              foundAmountField3 = true;
+            }
+            if (initialValue.toLowerCase().contains('mary')) {
+              foundDestinationField3 = true;
+            }
+            if (initialValue.toLowerCase().contains('dinner')) {
+              foundDescriptionField3 = true;
+            }
+          }
+        }
+        
+        expect(foundAmountField3, isTrue, 
+          reason: 'Transfer screen should have amount field filled with "70"');
+        expect(foundDestinationField3, isTrue, 
+          reason: 'Transfer screen should have destination field filled with "Mary"');
+        expect(foundDescriptionField3, isTrue, 
+          reason: 'Transfer screen should have description field filled with "dinner"');
+        
+        print('✓ Test passed: Successfully navigated to Transfer screen with amount=70, destination=Mary, description=dinner and currentScreenCubit set to TransferScreenViewModel');
+      } else {
+        // If we didn't find the Transfer screen, let's see what screens are available
+        final allWidgets3 = find.byType(Widget);
+        print('Available widgets on screen after "70 to Mary for dinner":');
+        for (final element in allWidgets3.evaluate().take(10)) {
+          print('- ${element.widget.runtimeType}');
+        }
+        
+        fail('Expected to navigate to Transfer screen for third test, but Transfer screen was not found');
+      }
     });
   });
 }
