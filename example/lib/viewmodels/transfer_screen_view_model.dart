@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'app_generic_screen_view_model.dart';
 import 'package:langbar_core/utils/utils.dart';
 import 'package:langbar_core/send_to_llm.dart';
+import 'package:langbar_core/tts_highlight_service.dart';
 import '../utils/name_matcher.dart';
 import '../ui/models/account.dart';
 
@@ -95,23 +96,8 @@ class TransferScreenViewModel
         'TransferScreenViewModel created with amount: $amount, destinationName: $destinationName, description: $description, fromAccountId: $fromAccountId');
     _updateContactFuture();
     
-    // Speak initial values that were provided
-    List<String> initialValues = [];
-    if (amount != null) {
-      initialValues.add('amount ${amount.toStringAsFixed(2)} euros');
-    }
-    if (destinationName != null && destinationName.isNotEmpty) {
-      initialValues.add('recipient $destinationName');
-    }
-    if (description != null && description.isNotEmpty) {
-      initialValues.add('description $description');
-    }
-    if (initialValues.isNotEmpty) {
-      // Small delay to ensure TTS is initialized
-      Future.delayed(const Duration(milliseconds: 500), () {
-        speakConfirmation(initialValues.join(', '));
-      });
-    }
+    // Speak initial values with highlighting
+    _speakInitialValuesWithHighlight(amount, destinationName, description);
   }
 
   /// Update the ViewModel with new constructor parameters
@@ -153,18 +139,39 @@ class TransferScreenViewModel
   }
 
   void speakConfirmations(String? destinationName, String? previousName, double? amount, double? previousAmount, String? description, String? previousDescription) {
-    List<String> newValues = [];
-    List<String> corrections = [];
+    List<TtsParameter> parameters = [];
 
-    _checkFieldUpdate(destinationName, previousName, 'recipient', destinationName, corrections, newValues);
-    _checkFieldUpdate(amount, previousAmount, 'amount', '${amount?.toStringAsFixed(2)} euros', corrections, newValues);
-    _checkFieldUpdate(description, previousDescription, 'description', description, corrections, newValues);
+    // Check which fields have been updated and prepare TTS parameters
+    if (amount != null && (amount != previousAmount || currentScreenCubit.state.hasScreenChanged)) {
+      parameters.add(TtsParameter(
+        fieldId: 'amount',
+        label: currentScreenCubit.state.hasScreenChanged || previousAmount == null
+            ? 'amount'
+            : 'amount corrected to',
+        value: '${amount.toStringAsFixed(2)} euros',
+      ));
+    }
+    
+    if (destinationName != null && (destinationName != previousName || currentScreenCubit.state.hasScreenChanged)) {
+      parameters.add(TtsParameter(
+        fieldId: 'recipient',
+        label: currentScreenCubit.state.hasScreenChanged || previousName == null ? 'recipient' : 'recipient corrected to',
+        value: destinationName,
+      ));
+    }
+    
+    if (description != null && (description != previousDescription || currentScreenCubit.state.hasScreenChanged)) {
+      parameters.add(TtsParameter(
+        fieldId: 'description',
+        label: currentScreenCubit.state.hasScreenChanged || previousDescription == null ? 'description' : 'description corrected to',
+        value: description,
+      ));
+    }
 
-    // Speak corrections first, then new values
-    List<String> allConfirmations = [...corrections, ...newValues];
-    if (allConfirmations.isNotEmpty) {
-      langbarLogger.d("Speaking confirmations: ${allConfirmations.join(', ')}");
-      speakConfirmation(allConfirmations.join(', '));
+    // Speak with highlighting
+    if (parameters.isNotEmpty) {
+      langbarLogger.d("Speaking parameters with highlighting: ${parameters.map((p) => p.spokenText).join(', ')}");
+      TtsHighlightService.instance.speakParametersWithHighlight(parameters);
     }
   }
 
@@ -220,6 +227,42 @@ class TransferScreenViewModel
       } else if (!previousHasValue) {
         newValues.add('$fieldName $displayValue');
       }
+    }
+  }
+
+  /// Speak initial values with synchronized highlighting
+  void _speakInitialValuesWithHighlight(double? amount, String? destinationName, String? description) {
+    List<TtsParameter> parameters = [];
+    
+    if (amount != null) {
+      parameters.add(TtsParameter(
+        fieldId: 'amount',
+        label: 'amount',
+        value: '${amount.toStringAsFixed(2)} euros',
+      ));
+    }
+    
+    if (destinationName != null && destinationName.isNotEmpty) {
+      parameters.add(TtsParameter(
+        fieldId: 'recipient',
+        label: 'recipient',
+        value: destinationName,
+      ));
+    }
+    
+    if (description != null && description.isNotEmpty) {
+      parameters.add(TtsParameter(
+        fieldId: 'description',
+        label: 'description',
+        value: description,
+      ));
+    }
+    
+    if (parameters.isNotEmpty) {
+      // Small delay to ensure TTS and UI are initialized
+      Future.delayed(const Duration(milliseconds: 500), () {
+        TtsHighlightService.instance.speakParametersWithHighlight(parameters);
+      });
     }
   }
 

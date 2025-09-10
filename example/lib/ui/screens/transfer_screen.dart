@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:langbar_core/tts_highlight_service.dart';
 
 import '../models/account.dart';
 import '../../viewmodels/transfer_screen_view_model.dart';
@@ -127,36 +128,57 @@ class TransferContentWidget extends StatelessWidget {
                 fromAccount.number,
               ),
             ),
-            TextFormField(
-              key: ValueKey('amount_${state.amountText}'),
-              initialValue: state.amountText,
-              onChanged: (value) => viewModel.updateAmountText(value),
-              decoration: const InputDecoration(
-                labelText: 'Amount',
-                prefixText: '€ ',
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: TtsHighlightWrapper(
+                fieldId: 'amount',
+                child: TextFormField(
+                  key: ValueKey('amount_${state.amountText}'),
+                  initialValue: state.amountText,
+                  onChanged: (value) => viewModel.updateAmountText(value),
+                  decoration: const InputDecoration(
+                    labelText: 'Amount',
+                    prefixText: '€ ',
+                  ),
+                ),
               ),
             ),
-            TextFormField(
-              key: ValueKey(
-                  'destinationName_${state.destinationAccountNameText}'),
-              initialValue: state.destinationAccountNameText,
-              onChanged: (value) =>
-                  viewModel.updateDestinationAccountNameText(value),
-              decoration: const InputDecoration(labelText: 'To'),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: TtsHighlightWrapper(
+                fieldId: 'recipient',
+                child: TextFormField(
+                  key: ValueKey(
+                      'destinationName_${state.destinationAccountNameText}'),
+                  initialValue: state.destinationAccountNameText,
+                  onChanged: (value) =>
+                      viewModel.updateDestinationAccountNameText(value),
+                  decoration: const InputDecoration(labelText: 'To'),
+                ),
+              ),
             ),
-            TextFormField(
-              key: ValueKey(
-                  'accountNumber_${state.destinationAccountNumberText}'),
-              initialValue: state.destinationAccountNumberText,
-              onChanged: (value) =>
-                  viewModel.updateDestinationAccountNumberText(value),
-              decoration: const InputDecoration(labelText: 'Account Number'),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: TextFormField(
+                key: ValueKey(
+                    'accountNumber_${state.destinationAccountNumberText}'),
+                initialValue: state.destinationAccountNumberText,
+                onChanged: (value) =>
+                    viewModel.updateDestinationAccountNumberText(value),
+                decoration: const InputDecoration(labelText: 'Account Number'),
+              ),
             ),
-            TextFormField(
-              key: ValueKey('description_${state.descriptionText}'),
-              initialValue: state.descriptionText,
-              onChanged: (value) => viewModel.updateDescriptionText(value),
-              decoration: const InputDecoration(labelText: 'Description'),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: TtsHighlightWrapper(
+                fieldId: 'description',
+                child: TextFormField(
+                  key: ValueKey('description_${state.descriptionText}'),
+                  initialValue: state.descriptionText,
+                  onChanged: (value) => viewModel.updateDescriptionText(value),
+                  decoration: const InputDecoration(labelText: 'Description'),
+                ),
+              ),
             ),
             SizedBox(height: 20),
             Center(
