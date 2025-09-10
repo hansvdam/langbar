@@ -95,9 +95,10 @@ class TransferScreenViewModel
     langbarLogger.i(
         'TransferScreenViewModel created with amount: $amount, destinationName: $destinationName, description: $description, fromAccountId: $fromAccountId');
     _updateContactFuture();
-    
+
+    // speakConfirmations(destinationName,null,amount,null,description,null);
     // Speak initial values with highlighting
-    _speakInitialValuesWithHighlight(amount, destinationName, description);
+    // _speakInitialValuesWithHighlight(amount, destinationName, description);
   }
 
   /// Update the ViewModel with new constructor parameters
@@ -231,40 +232,40 @@ class TransferScreenViewModel
   }
 
   /// Speak initial values with synchronized highlighting
-  void _speakInitialValuesWithHighlight(double? amount, String? destinationName, String? description) {
-    List<TtsParameter> parameters = [];
-    
-    if (amount != null) {
-      parameters.add(TtsParameter(
-        fieldId: 'amount',
-        label: 'amount',
-        value: '${amount.toStringAsFixed(2)} euros',
-      ));
-    }
-    
-    if (destinationName != null && destinationName.isNotEmpty) {
-      parameters.add(TtsParameter(
-        fieldId: 'recipient',
-        label: 'recipient',
-        value: destinationName,
-      ));
-    }
-    
-    if (description != null && description.isNotEmpty) {
-      parameters.add(TtsParameter(
-        fieldId: 'description',
-        label: 'description',
-        value: description,
-      ));
-    }
-    
-    if (parameters.isNotEmpty) {
-      // Small delay to ensure TTS and UI are initialized
-      Future.delayed(const Duration(milliseconds: 500), () {
-        TtsHighlightService.instance.speakParametersWithHighlight(parameters);
-      });
-    }
-  }
+  // void _speakInitialValuesWithHighlight(double? amount, String? destinationName, String? description) {
+  //   List<TtsParameter> parameters = [];
+  //
+  //   if (amount != null) {
+  //     parameters.add(TtsParameter(
+  //       fieldId: 'amount',
+  //       label: 'amount',
+  //       value: '${amount.toStringAsFixed(2)} euros',
+  //     ));
+  //   }
+  //
+  //   if (destinationName != null && destinationName.isNotEmpty) {
+  //     parameters.add(TtsParameter(
+  //       fieldId: 'recipient',
+  //       label: 'recipient',
+  //       value: destinationName,
+  //     ));
+  //   }
+  //
+  //   if (description != null && description.isNotEmpty) {
+  //     parameters.add(TtsParameter(
+  //       fieldId: 'description',
+  //       label: 'description',
+  //       value: description,
+  //     ));
+  //   }
+  //
+  //   if (parameters.isNotEmpty) {
+  //     // Small delay to ensure TTS and UI are initialized
+  //     Future.delayed(const Duration(milliseconds: 500), () {
+  //       TtsHighlightService.instance.speakParametersWithHighlight(parameters);
+  //     });
+  //   }
+  // }
 
   /// Update the contact lookup Future based on current destinationName
   void _updateContactFuture() {
