@@ -7,7 +7,7 @@ import 'langfield/langbar_states.dart';
 abstract class Switchable {
   Future<List<ParsedToolCall>> handleNewAndSwitch(
       Cubit<dynamic>? currentViewmodel,
-      String? currentScreenName,
+      String? currentPath,
       List<ParsedToolCall> toolcalls,
       ParsedToolCall firstToolCall,
       MyConversationBufferWindowMemory chatMessageMemory,

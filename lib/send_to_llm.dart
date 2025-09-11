@@ -186,11 +186,11 @@ Future<void> sendToOpenai(BaseChatModel llm, BuildContext context,
     var firstToolCall = toolcalls.first;
     // in case of a switch of we start clean:
 
-    String? currentScreenName;
+    String? currentPath = currentScreenCubit.state.currentPath;
     if (currentViewmodel is Switchable) {
       toolcalls = await (currentViewmodel as Switchable).handleNewAndSwitch(
           currentViewmodel,
-          currentScreenName,
+          currentPath,
           toolcalls,
           firstToolCall,
           _chatMessageMemory,
