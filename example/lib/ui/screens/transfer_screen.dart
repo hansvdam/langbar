@@ -13,7 +13,7 @@ class TransferScreen extends DefaultAppbarScreen {
   final double? amount;
   final String? destinationName;
   final String? description;
-  final bool? isNewTransfer;
+  final String? intent;
 
   TransferScreen(
       {required super.label,
@@ -21,13 +21,13 @@ class TransferScreen extends DefaultAppbarScreen {
       this.amount,
       this.destinationName,
       this.description,
-      this.isNewTransfer})
+      this.intent})
       : super(
           body: _TransferScreenBody(
             amount: amount,
             destinationName: destinationName,
             description: description,
-            isNewTransfer: isNewTransfer,
+            intent: intent,
           ),
         );
 
@@ -40,14 +40,14 @@ class _TransferScreenBody extends StatelessWidget {
   final String? destinationName;
   final String? description;
   final String fromAccountId;
-  final bool? isNewTransfer;
+  final String? intent;
 
   const _TransferScreenBody({
     required this.amount,
     required this.destinationName,
     required this.description,
     this.fromAccountId = "1",
-    required this.isNewTransfer,
+    required this.intent,
   });
 
   @override
@@ -60,7 +60,7 @@ class _TransferScreenBody extends StatelessWidget {
         destinationName: destinationName,
         description: description,
         fromAccountId: fromAccountId,
-        isNewTransfer: isNewTransfer,
+        intent: intent,
       ),
       child: Builder(builder: (context) {
         // Update ViewModel when parameters change
@@ -69,7 +69,7 @@ class _TransferScreenBody extends StatelessWidget {
               destinationName: destinationName,
               description: description,
               fromAccountId: fromAccountId,
-              isNewTransfer: isNewTransfer,
+              intent: intent,
             );
 
         return BlocBuilder<TransferScreenViewModel, TransferScreenState>(

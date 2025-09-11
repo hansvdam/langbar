@@ -73,7 +73,7 @@ class TransferScreenViewModel
     String? destinationName,
     String? description,
     String fromAccountId = "1",
-    bool? isNewTransfer,
+    String? intent,
   })  : _context = context,
         super(
           TransferScreenState(
@@ -107,12 +107,13 @@ class TransferScreenViewModel
     String? destinationName,
     String? description,
     String? fromAccountId,
-    bool? isNewTransfer,
+    String? intent,
   }) {
     langbarLogger.i(
         'TransferScreenViewModel updating from constructor params: amount=$amount, destinationName=$destinationName, description=$description, fromAccountId=$fromAccountId');
 
-    var isCorrection = isNewTransfer == null || !isNewTransfer;
+    // Determine if this is a correction/modification or a new transfer
+    var isCorrection = intent == 'correction';
     // Store previous values before updating
     final previousAmount = isCorrection ? state.amount : null;
     final previousName = isCorrection ? state.destinationName : null;
@@ -139,7 +140,7 @@ class TransferScreenViewModel
     // Build smart confirmations based on what changed
     // Only speak about parameters that were explicitly passed (not null in the method call)
     speakConfirmations(destinationName, previousName, amount, previousAmount,
-        description, previousDescription, isNewTransfer);
+        description, previousDescription, intent);
   }
 
   void speakConfirmations(
@@ -148,7 +149,7 @@ class TransferScreenViewModel
       double? amount,
       double? previousAmount,
       String? description,
-      String? previousDescription, bool? isNewTransfer) {
+      String? previousDescription, String? intent) {
     List<TtsParameter> parameters = [];
 
     // Check which fields have been updated and prepare TTS parameters

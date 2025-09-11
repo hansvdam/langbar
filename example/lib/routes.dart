@@ -31,7 +31,7 @@ const DataKey actionKey = DataKey('action');
 const DataKey filterStringKey = DataKey('filterString');
 const DataKey atmOrOfficeKey = DataKey('atmOrOffice');
 const DataKey amountKey = DataKey('amount');
-const DataKey isNewTransferKey = DataKey('sNewTransfer');
+const DataKey transferIntentKey = DataKey('transferIntent');
 const DataKey destinationNameKey = DataKey('destinationName');
 const DataKey purposeKey = DataKey('purpose');
 
@@ -188,10 +188,10 @@ List<RouteBase> navBarRoutes = [
             path: "/${TransferScreen.name}",
             parameters: const [
               SUIParameter(
-                name: 'isNewTransfer',
-                description: 'is this a new transfer or an addition or correction to an existing transfer',
-                type: DataType.boolean,
-                key: isNewTransferKey,
+                name: 'intent',
+                description: 'User\'s intent for the transfer based ONLY on the latest message',
+                enumeration: ['start_new', 'correction'],
+                key: transferIntentKey,
               ),
               SUIParameter(
                 name: 'amount',
@@ -205,9 +205,9 @@ List<RouteBase> navBarRoutes = [
                 key: destinationNameKey,
               ),
               SUIParameter(
-                name: 'purpose',
+                name: 'description',
                 description:
-                    'Purpose of the transfer. Make sure the message formulation is directed toward the receiver, e.g. "donation for your Library" instead of "as a donation for his library".',
+                    'description of the purpose of the transfer. Make sure the message formulation is directed toward the receiver, e.g. "donation for your Library" instead of "as a donation for his library".',
                 key: purposeKey,
               ),
             ],
@@ -215,11 +215,11 @@ List<RouteBase> navBarRoutes = [
               return NoTransitionPage(
                   child: TransferScreen(
                 label: 'Bank Transfer',
-                isNewTransfer: state.uri.queryParameters['isNewTransfer'] == 'true',
+                intent: state.uri.queryParameters['intent'],
                 amount:
                     double.tryParse(state.uri.queryParameters['amount'] ?? ''),
                 destinationName: state.uri.queryParameters['destinationName'],
-                description: state.uri.queryParameters['purpose'],
+                description: state.uri.queryParameters['description'],
               ));
             },
           ),
