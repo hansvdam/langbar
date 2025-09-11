@@ -40,11 +40,20 @@ final class GenericScreenTool
         'GenericScreenTool.invokeInternal - name: $name, toolInput: $toolInput, push: $push');
     Map<String, String>? extraPathParameters =
         await hook?.call(toolInput, namedLocation: namedLocation);
+    
+    // Filter out empty parameters
+    final filteredQueryParams = Map<String, String>.fromEntries(
+      toolInput.entries
+          .where((entry) => 
+              entry.value != null && 
+              entry.value.toString().isNotEmpty)
+          .map((entry) => MapEntry(entry.key, entry.value.toString()))
+    );
+    
     String? fullPath = goRouter.namedLocation(
       namedLocation,
       pathParameters: extraPathParameters ?? {},
-      queryParameters:
-          toolInput.map((key, value) => MapEntry(key, value.toString())),
+      queryParameters: filteredQueryParams,
     );
     langbarLogger.i('GenericScreenTool generated fullPath: $fullPath');
     activateUri(fullPath, push);
