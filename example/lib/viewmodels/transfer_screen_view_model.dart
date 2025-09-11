@@ -73,6 +73,7 @@ class TransferScreenViewModel
     String? destinationName,
     String? description,
     String fromAccountId = "1",
+    bool? isNewTransfer,
   })  : _context = context,
         super(
           TransferScreenState(
@@ -80,12 +81,11 @@ class TransferScreenViewModel
             destinationName: destinationName,
             description: description,
             fromAccountId: fromAccountId,
-            fromAccount: accounts[
-                fromAccountId], // Initialize fromAccount from accounts map
-            mostLikelyDestinationContactFuture: destinationName != null
-                ? null
-                : Future(
-                    () => null), // Will be set properly in _updateContactFuture
+            fromAccount: accounts[fromAccountId],
+            // Initialize fromAccount from accounts map
+            mostLikelyDestinationContactFuture:
+                destinationName != null ? null : Future(() => null),
+            // Will be set properly in _updateContactFuture
             amountText: amount?.toStringAsFixed(2) ?? '',
             destinationAccountNameText: destinationName ?? '',
             descriptionText: description ?? '',
@@ -107,19 +107,21 @@ class TransferScreenViewModel
     String? destinationName,
     String? description,
     String? fromAccountId,
+    bool? isNewTransfer,
   }) {
     langbarLogger.i(
         'TransferScreenViewModel updating from constructor params: amount=$amount, destinationName=$destinationName, description=$description, fromAccountId=$fromAccountId');
 
+    var isCorrection = isNewTransfer == null || !isNewTransfer;
     // Store previous values before updating
-    final previousAmount = state.amount;
-    final previousName = state.destinationName;
-    final previousDescription = state.description;
+    final previousAmount = isCorrection ? state.amount : null;
+    final previousName = isCorrection ? state.destinationName : null;
+    final previousDescription = isCorrection ? state.description : null;
 
     // Use existing state values if new values are not provided
-    final newAmount = amount ?? state.amount;
-    final newDestinationName = destinationName ?? state.destinationName;
-    final newDescription = description ?? state.description;
+    final newAmount = amount ?? previousAmount;
+    final newDestinationName = destinationName ?? previousName;
+    final newDescription = description ?? previousDescription;
     final newFromAccountId = fromAccountId ?? state.fromAccountId;
 
     emit(state.copyWith(
@@ -133,45 +135,65 @@ class TransferScreenViewModel
       descriptionText: newDescription ?? '',
     ));
     _updateContactFuture();
-    
+
     // Build smart confirmations based on what changed
     // Only speak about parameters that were explicitly passed (not null in the method call)
-    speakConfirmations(destinationName, previousName, amount, previousAmount, description, previousDescription);
+    speakConfirmations(destinationName, previousName, amount, previousAmount,
+        description, previousDescription, isNewTransfer);
   }
 
-  void speakConfirmations(String? destinationName, String? previousName, double? amount, double? previousAmount, String? description, String? previousDescription) {
+  void speakConfirmations(
+      String? destinationName,
+      String? previousName,
+      double? amount,
+      double? previousAmount,
+      String? description,
+      String? previousDescription, bool? isNewTransfer) {
     List<TtsParameter> parameters = [];
 
     // Check which fields have been updated and prepare TTS parameters
-    if (amount != null && (amount != previousAmount || currentScreenCubit.state.hasScreenChanged)) {
+    if (amount != null &&
+        (amount != previousAmount ||
+            currentScreenCubit.state.hasScreenChanged)) {
       parameters.add(TtsParameter(
         fieldId: 'amount',
-        label: currentScreenCubit.state.hasScreenChanged || previousAmount == null
-            ? 'amount'
-            : 'amount corrected to',
+        label:
+            currentScreenCubit.state.hasScreenChanged || previousAmount == null
+                ? 'amount'
+                : 'amount corrected to',
         value: '${amount.toStringAsFixed(2)} euros',
       ));
     }
-    
-    if (destinationName != null && (destinationName != previousName || currentScreenCubit.state.hasScreenChanged)) {
+
+    if (destinationName != null &&
+        (destinationName != previousName ||
+            currentScreenCubit.state.hasScreenChanged)) {
       parameters.add(TtsParameter(
         fieldId: 'recipient',
-        label: currentScreenCubit.state.hasScreenChanged || previousName == null ? 'recipient' : 'recipient corrected to',
+        label: currentScreenCubit.state.hasScreenChanged || previousName == null
+            ? 'recipient'
+            : 'recipient corrected to',
         value: destinationName,
       ));
     }
-    
-    if (description != null && (description != previousDescription || currentScreenCubit.state.hasScreenChanged)) {
+
+    if (description != null &&
+        (description != previousDescription ||
+            currentScreenCubit.state.hasScreenChanged)) {
       parameters.add(TtsParameter(
         fieldId: 'description',
-        label: currentScreenCubit.state.hasScreenChanged || previousDescription == null ? 'description' : 'description corrected to',
+        label: currentScreenCubit.state.hasScreenChanged ||
+                previousDescription == null
+            ? 'description'
+            : 'description corrected to',
         value: description,
       ));
     }
 
     // Speak with highlighting
     if (parameters.isNotEmpty) {
-      langbarLogger.d("Speaking parameters with highlighting: ${parameters.map((p) => p.spokenText).join(', ')}");
+      langbarLogger.d(
+          "Speaking parameters with highlighting: ${parameters.map((p) => p.spokenText).join(', ')}");
       TtsHighlightService.instance.speakParametersWithHighlight(parameters);
     }
   }
@@ -216,14 +238,19 @@ class TransferScreenViewModel
     return [];
   }
 
-  void _checkFieldUpdate<T>(T? newValue, T? previousValue, String fieldName, String? displayValue, List<String> corrections, List<String> newValues) {
+  void _checkFieldUpdate<T>(T? newValue, T? previousValue, String fieldName,
+      String? displayValue, List<String> corrections, List<String> newValues) {
     if (newValue == null) return;
-    
+
     final hasValue = newValue is String ? newValue.isNotEmpty : true;
-    final previousHasValue = previousValue is String ? previousValue.isNotEmpty : previousValue != null;
-    
+    final previousHasValue = previousValue is String
+        ? previousValue.isNotEmpty
+        : previousValue != null;
+
     if (hasValue) {
-      if (previousHasValue && previousValue != newValue && !currentScreenCubit.state.hasScreenChanged) {
+      if (previousHasValue &&
+          previousValue != newValue &&
+          !currentScreenCubit.state.hasScreenChanged) {
         corrections.add('$fieldName corrected to $displayValue');
       } else if (!previousHasValue) {
         newValues.add('$fieldName $displayValue');

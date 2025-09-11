@@ -31,6 +31,7 @@ const DataKey actionKey = DataKey('action');
 const DataKey filterStringKey = DataKey('filterString');
 const DataKey atmOrOfficeKey = DataKey('atmOrOffice');
 const DataKey amountKey = DataKey('amount');
+const DataKey isNewTransferKey = DataKey('sNewTransfer');
 const DataKey destinationNameKey = DataKey('destinationName');
 const DataKey purposeKey = DataKey('purpose');
 
@@ -187,6 +188,12 @@ List<RouteBase> navBarRoutes = [
             path: "/${TransferScreen.name}",
             parameters: const [
               SUIParameter(
+                name: 'isNewTransfer',
+                description: 'is this a new transfer or an addition or correction to an existing transfer',
+                type: DataType.boolean,
+                key: isNewTransferKey,
+              ),
+              SUIParameter(
                 name: 'amount',
                 description: 'amount to transfer',
                 type: DataType.number,
@@ -208,6 +215,7 @@ List<RouteBase> navBarRoutes = [
               return NoTransitionPage(
                   child: TransferScreen(
                 label: 'Bank Transfer',
+                isNewTransfer: state.uri.queryParameters['isNewTransfer'] == 'true',
                 amount:
                     double.tryParse(state.uri.queryParameters['amount'] ?? ''),
                 destinationName: state.uri.queryParameters['destinationName'],
