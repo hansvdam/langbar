@@ -13,13 +13,11 @@ class TransferScreen extends DefaultAppbarScreen {
   final double? amount;
   final String? destinationName;
   final String? description;
-  final String fromAccountId;
   final bool? isNewTransfer;
 
   TransferScreen(
       {required super.label,
       super.key,
-      this.fromAccountId = "1",
       this.amount,
       this.destinationName,
       this.description,
@@ -29,7 +27,6 @@ class TransferScreen extends DefaultAppbarScreen {
             amount: amount,
             destinationName: destinationName,
             description: description,
-            fromAccountId: fromAccountId,
             isNewTransfer: isNewTransfer,
           ),
         );
@@ -49,7 +46,7 @@ class _TransferScreenBody extends StatelessWidget {
     required this.amount,
     required this.destinationName,
     required this.description,
-    required this.fromAccountId,
+    this.fromAccountId = "1",
     required this.isNewTransfer,
   });
 
