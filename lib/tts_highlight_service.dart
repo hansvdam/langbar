@@ -53,7 +53,7 @@ class TtsHighlightService extends ChangeNotifier {
   
   /// Speak parameters with synchronized highlighting
   Future<void> speakParametersWithHighlight(List<TtsParameter> parameters, {
-    Duration pauseBetweenParameters = const Duration(milliseconds: 300),
+    Duration pauseBetweenParameters = const Duration(milliseconds: 0),
   }) async {
     if (parameters.isEmpty) return;
     
@@ -71,26 +71,21 @@ class TtsHighlightService extends ChangeNotifier {
         await _highlightField(param.fieldId);
         
         // Small delay to ensure highlight is visible before speaking
-        await Future.delayed(const Duration(milliseconds: 100));
+        // await Future.delayed(const Duration(milliseconds: 100));
         
-        // Speak the parameter
+        // Speak the parameter - this already waits for completion
+        // because awaitSpeakCompletion(true) is set in TTS service
         await _ttsService.speak(param.spokenText ?? '${param.label} ${param.value}');
         
-        // Wait for TTS to complete (handled by awaitSpeakCompletion in TTS service)
-        while (_ttsService.isPlaying) {
-          await Future.delayed(const Duration(milliseconds: 50));
-        }
+        // Clear highlight after 300ms without blocking continuation
+        Future.delayed(const Duration(milliseconds: 300), () {
+          _clearHighlight();
+        });
         
-        // Keep highlight visible for a moment after speech
-        await Future.delayed(const Duration(milliseconds: 200));
-        
-        // Clear the highlight
-        await _clearHighlight();
-        
-        // Pause between parameters if not the last one
-        if (param != parameters.last) {
-          await Future.delayed(pauseBetweenParameters);
-        }
+        // // Pause between parameters if not the last one
+        // if (param != parameters.last) {
+        //   await Future.delayed(pauseBetweenParameters);
+        // }
       }
     } finally {
       _isHighlighting = false;
