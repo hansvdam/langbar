@@ -63,6 +63,7 @@ void setupLLMDependencyInjection(Service service, {String? externalModel, String
     case Service.openai:
       llm = ChatOpenAI(
           apiKey: getOpenAIKey(),
+          baseUrl: getLlmBaseUrl() ?? 'https://api.openai.com/v1',
           defaultOptions: const ChatOpenAIOptions(
               temperature: 0.0,
               model: 'gpt-4o',

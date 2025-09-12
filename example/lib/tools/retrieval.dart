@@ -17,7 +17,7 @@ enum AIModel { OpenAI, Gemini, Ollama }
 Future<String> conversationalRetrievalChain(String userQuestion) async {
   final embeddings = OpenAIEmbeddings(
       model: 'text-embedding-ada-002',
-      apiKey: getSessionToken(),
+      apiKey: getOpenAIKey(),
       baseUrl: getLlmBaseUrl() ?? 'https://api.openai.com/v1');
 
   // normally never reinitialize this, because on initialization the index is (re)discovered through a call that takes 1000ms, so do this only once per session. IN this case we provide hostUrl, which is a direct link to the index, so we don't need to discover it.
@@ -25,7 +25,7 @@ Future<String> conversationalRetrievalChain(String userQuestion) async {
   final vectorStore = Pinecone(
     hostUrl: getVectorStoreBaseUrl()!,
     environment: pineConeEnvironment(),
-    apiKey: getSessionToken(),
+    apiKey: getVectoreStoreApiKey(),
     indexName: pineConeIndexName(),
     embeddings: embeddings,
   );

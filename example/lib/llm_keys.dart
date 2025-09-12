@@ -11,6 +11,8 @@ String? getLlmBaseUrl() => dotenv.env['LLM_BASE_URL'];
 
 String? getVectorStoreBaseUrl() => dotenv.env['VECTOR_STORE_BASE_URL'];
 
+String? getVectoreStoreApiKey() => getSessionToken();
+
 String? getSessionToken() {
   var timeInMillis = DateTime.now().millisecondsSinceEpoch;
   var scrambled = ((timeInMillis + 10000000) / 7).round();
