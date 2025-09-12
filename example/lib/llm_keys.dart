@@ -11,7 +11,8 @@ String? getLlmBaseUrl() => dotenv.env['LLM_BASE_URL'];
 
 String? getVectorStoreBaseUrl() => dotenv.env['VECTOR_STORE_BASE_URL'];
 
-String? getVectoreStoreApiKey() => getSessionToken();
+String? getVectoreStoreApiKey() => dotenv.env['PINECONE_API_KEY'] ?? getSessionToken();
+
 
 String? getSessionToken() {
   var timeInMillis = DateTime.now().millisecondsSinceEpoch;
