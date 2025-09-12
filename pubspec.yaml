@@ -1,7 +1,16 @@
 name: langbar_core
-description: "A new Flutter project."
-version: 0.0.1
-homepage:
+description: "A Flutter library for natural language interface components that integrate with LLMs using LangChain.dart"
+version: 0.1.0
+homepage: https://github.com/hansvandam/langbar_core
+repository: https://github.com/hansvandam/langbar_core
+issue_tracker: https://github.com/hansvandam/langbar_core/issues
+topics:
+  - flutter
+  - llm
+  - langchain
+  - natural-language
+  - ai
+  - voice-interface
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
@@ -28,12 +37,12 @@ dependencies:
 
   provider: ^6.1.5+1
   get_it: ^7.7.0
-  langchain_core: any
-  path: any
-  http: any
-  meta: any
-  pinecone: any
-  uuid: any
+  langchain_core: ^0.3.9
+  path: ^1.9.1
+  http: ^1.5.0
+  meta: ^1.16.0
+  pinecone: ^0.7.2
+  uuid: ^4.5.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

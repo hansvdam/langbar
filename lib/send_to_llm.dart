@@ -219,7 +219,7 @@ Future<void> sendToOpenai(BaseChatModel llm, BuildContext context,
     langbarState.controllerOutlined.clear();
     langbarState.sendingToOpenAI = false;
 
-    if (lastResult == LOCAL_ACTION_HANDLED) {
+    if (lastResult == localActionHandled) {
       return;
     }
 

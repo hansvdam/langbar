@@ -12,18 +12,23 @@ const defaultPadding = 16.0;
 
 var scaffoldKey = GlobalKey<ScaffoldState>();
 
-class ScaffoldWithNestedNavigation extends StatelessWidget {
-  ScaffoldWithNestedNavigation({
+class ScaffoldWithNestedNavigation extends StatefulWidget {
+  const ScaffoldWithNestedNavigation({
     Key? key,
     required this.navigationShell,
-  }) : super(
-            key: key ?? const ValueKey<String>('ScaffoldWithNestedNavigation'));
+  }) : super(key: key ?? const ValueKey<String>('ScaffoldWithNestedNavigation'));
+  
   final StatefulNavigationShell navigationShell;
 
+  @override
+  State<ScaffoldWithNestedNavigation> createState() => _ScaffoldWithNestedNavigationState();
+}
+
+class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigation> {
   void _goBranch(int index) {
-    navigationShell.goBranch(
+    widget.navigationShell.goBranch(
       index,
-      initialLocation: index == navigationShell.currentIndex,
+      initialLocation: index == widget.navigationShell.currentIndex,
     );
   }
 
@@ -34,22 +39,26 @@ class ScaffoldWithNestedNavigation extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       if (constraints.maxWidth < maxPhoneWidth) {
-        if (screenWiderThanPhone = true) {
-          screenWiderThanPhone = false;
+        if (screenWiderThanPhone == true) {
+          setState(() {
+            screenWiderThanPhone = false;
+          });
           triggerWidthRebuild(context);
         }
         return ScaffoldWithNavigationBar(
-            body: navigationShell,
-            selectedIndex: navigationShell.currentIndex,
+            body: widget.navigationShell,
+            selectedIndex: widget.navigationShell.currentIndex,
             onDestinationSelected: _goBranch);
       } else {
-        if (screenWiderThanPhone = false) {
-          screenWiderThanPhone = true;
+        if (screenWiderThanPhone == false || screenWiderThanPhone == null) {
+          setState(() {
+            screenWiderThanPhone = true;
+          });
           triggerWidthRebuild(context);
         }
         return ScaffoldWithNavigationRail(
-          body: navigationShell,
-          selectedIndex: navigationShell.currentIndex,
+          body: widget.navigationShell,
+          selectedIndex: widget.navigationShell.currentIndex,
           onDestinationSelected: _goBranch,
         );
       }

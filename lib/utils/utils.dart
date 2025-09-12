@@ -29,12 +29,12 @@ extension UriExtension on Uri {
   }
 }
 
-const String LOCAL_ACTION_HANDLED = "LocalActionHandled";
+const String localActionHandled = "LocalActionHandled";
 
 late GoRouter goRouter;
 CurrentScreenCubit currentScreenCubit = CurrentScreenCubit();
 
-setGoRouter(GoRouter goRouterParam) {
+void setGoRouter(GoRouter goRouterParam) {
   goRouter = goRouterParam;
   _trySetupRouteListener();
 }
