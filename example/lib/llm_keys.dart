@@ -3,13 +3,9 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 
 String getOpenAIKey() => dotenv.env['OPENAI_API_KEY'] ?? getSessionToken()!;
 
-String getOpenAIKey2() => dotenv.env['OPENAI_API_KEY_2'] ?? '';
-
 String getGroqApiKey() => dotenv.env['GROQ_API_KEY'] ?? '';
 
 String getOpenRouterAPIKey() => dotenv.env['OPENROUTER_API_KEY'] ?? '';
-
-String? getLlmBaseUrl2() => dotenv.env['LLM_BASE_URL_2'];
 
 String? getLlmBaseUrl() => dotenv.env['LLM_BASE_URL'];
 
