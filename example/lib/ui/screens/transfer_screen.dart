@@ -1,8 +1,5 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:langbar_core/tts_highlight_service.dart';
 
 import '../models/account.dart';
@@ -187,15 +184,10 @@ class TransferContentWidget extends StatelessWidget {
             Center(
                 child: FilledButton(
               onPressed: () {
-                context.go("/${TransferScreen.name}");
-                var goRouter = GoRouter.of(context);
-                // ugly trick, but we need to clear the Transfer screen first.
-                // tried many things, but this is the only thing that works.
-                Future.delayed(Duration(milliseconds: 50), () {
-                  goRouter.go("/home");
-                });
+                // Call the ViewModel's confirmTransfer method
+                viewModel.confirmTransfer();
               },
-              child: const Text('Transfer'),
+              child: const Text('Confirm Transfer'),
             )),
           ],
         );

@@ -16,6 +16,9 @@ import 'package:langbar_core/send_to_llm.dart';
 import 'package:langbar_core/tts_highlight_service.dart';
 import '../utils/name_matcher.dart';
 import '../ui/models/account.dart';
+import 'package:langchain_core/tools.dart';
+import 'package:go_router/go_router.dart';
+import '../ui/screens/transfer_screen.dart';
 
 class TransferScreenState {
   final double? amount;
@@ -252,6 +255,31 @@ class TransferScreenViewModel
     return [];
   }
 
+  @override
+  List<Tool<Object, ToolOptions, Object>> getTools(BuildContext context) {
+    // Create the confirm transfer tool
+    final confirmTransferTool = Tool.fromFunction<Object, String>(
+      name: 'confirm_transfer',
+      description: 'Confirms and executes the current transfer',
+      inputJsonSchema: const {
+        'type': 'object',
+        'properties': {},
+        'required': [],
+      },
+      func: (_) async {
+        // Call the shared confirmTransfer method
+        await confirmTransfer();
+        return 'Transfer completed successfully';
+      },
+    );
+
+    // Get tools from superclass
+    final superTools = super.getTools(context);
+    
+    // Prepend the confirm transfer tool
+    return [confirmTransferTool, ...superTools];
+  }
+
 
   /// Speak initial values with synchronized highlighting
   // void _speakInitialValuesWithHighlight(double? amount, String? destinationName, String? description) {
@@ -289,6 +317,39 @@ class TransferScreenViewModel
   //   }
   // }
 
+  /// Confirm and execute the transfer
+  Future<void> confirmTransfer() async {
+    // Show dialog with transfer completed message
+    await showDialog(
+      context: _context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        // Auto-close after 3 seconds
+        Future.delayed(const Duration(seconds: 3), () {
+          if (dialogContext.mounted) {
+            Navigator.of(dialogContext).pop();
+          }
+        });
+        
+        return AlertDialog(
+          content: const Text('Transfer completed'),
+          backgroundColor: Theme.of(dialogContext).dialogTheme.backgroundColor,
+        );
+      },
+    );
+
+    // Navigate to home screen
+    if (_context.mounted) {
+      // First navigate to transfer to clear state, then to home
+      GoRouter.of(_context).go("/${TransferScreen.name}");
+      // Small delay to ensure state is cleared
+      await Future.delayed(const Duration(milliseconds: 50));
+      if (_context.mounted) {
+        GoRouter.of(_context).go("/home");
+      }
+    }
+  }
+
   /// Update the contact lookup Future based on current destinationName
   void _updateContactFuture() {
     if (state.destinationName != null) {
@@ -324,6 +385,7 @@ class TransferScreenViewModel
   //   throw UnimplementedError();
   // }
 
+  @override
   Future<List<ParsedToolCall>> handleNewAndSwitch(
       Cubit<dynamic>? currentViewmodel,
       String? currentPath,
