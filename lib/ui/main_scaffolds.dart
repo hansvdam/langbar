@@ -67,7 +67,9 @@ class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigat
 
   void triggerWidthRebuild(BuildContext context) {
     Future.delayed(Duration.zero, () {
-      Provider.of<WidthChanged>(context, listen: false).trigger();
+      if (context.mounted) {
+        Provider.of<WidthChanged>(context, listen: false).trigger();
+      }
     });
   }
 }

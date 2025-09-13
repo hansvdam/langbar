@@ -252,25 +252,6 @@ class TransferScreenViewModel
     return [];
   }
 
-  void _checkFieldUpdate<T>(T? newValue, T? previousValue, String fieldName,
-      String? displayValue, List<String> corrections, List<String> newValues) {
-    if (newValue == null) return;
-
-    final hasValue = newValue is String ? newValue.isNotEmpty : true;
-    final previousHasValue = previousValue is String
-        ? previousValue.isNotEmpty
-        : previousValue != null;
-
-    if (hasValue) {
-      if (previousHasValue &&
-          previousValue != newValue &&
-          !currentScreenCubit.state.hasScreenChanged) {
-        corrections.add('$fieldName corrected to $displayValue');
-      } else if (!previousHasValue) {
-        newValues.add('$fieldName $displayValue');
-      }
-    }
-  }
 
   /// Speak initial values with synchronized highlighting
   // void _speakInitialValuesWithHighlight(double? amount, String? destinationName, String? description) {

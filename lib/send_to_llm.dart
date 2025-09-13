@@ -24,7 +24,7 @@ enum Service { openai, openrouter, ollama, groq }
 
 late List<RouteBase> globalRoutes;
 
-setRoutes(List<RouteBase> routes) {
+void setRoutes(List<RouteBase> routes) {
   globalRoutes = routes;
 }
 
@@ -59,12 +59,12 @@ final _chatMessageMemory = MyConversationBufferWindowMemory(
 //     chatHistory: ChatMessageHistory(),
 //     returnMessages: true); // default window length is 5
 
-clearChatMessageMemory({String caller = 'unknown'}) async {
+Future<void> clearChatMessageMemory({String caller = 'unknown'}) async {
   await _chatMessageMemory.clear();
   print("chatMessageMemory cleared by: $caller");
 }
 
-preserveLastMessageAndClearHistory() async {
+Future<void> preserveLastMessageAndClearHistory() async {
   var messages = await _chatMessageMemory.chatHistory.getChatMessages();
   ChatMessage? lastMessage = messages.lastOrNull;
 
@@ -80,7 +80,7 @@ preserveLastMessageAndClearHistory() async {
   }
 }
 
-addHumanChatMessage(String message) {
+void addHumanChatMessage(String message) {
   _chatMessageMemory.chatHistory.addHumanChatMessage(message);
 }
 
@@ -90,7 +90,7 @@ void setHistoryCleared(bool cleared) {
   _historyWasIntentionallyCleared = cleared;
 }
 
-printChatMessageMemory(String heading) async {
+Future<void> printChatMessageMemory(String heading) async {
   var messages = await _chatMessageMemory.chatHistory.getChatMessages();
   print("$heading: $messages");
 }
@@ -260,7 +260,7 @@ class KeyWordtrigger {
 
   KeyWordtrigger({required this.regexList, required this.handler});
 
-  invoke(String input) {
+  void invoke(String input) {
     handler(input);
   }
 }
@@ -317,7 +317,7 @@ Tool matchTool(ParsedToolCall parsedToolCall,
 /// RAG functionality. In the history we do not want to see this intermediate step, but rather see
 /// the result of the RAG call.
 Future<void> replaceRetrieverFunctionCallWithAssistantResponseInHistory(
-    response) async {
+    String response) async {
   var chatHistoryLLM = _chatMessageMemory.chatHistory;
   var chatHistoryLLMItems = await chatHistoryLLM.getChatMessages();
   ChatMessage? lastChatMessage = chatHistoryLLMItems.lastOrNull;

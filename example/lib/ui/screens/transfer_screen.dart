@@ -39,14 +39,12 @@ class _TransferScreenBody extends StatelessWidget {
   final double? amount;
   final String? destinationName;
   final String? description;
-  final String fromAccountId;
   final String? intent;
 
   const _TransferScreenBody({
     required this.amount,
     required this.destinationName,
     required this.description,
-    this.fromAccountId = "1",
     required this.intent,
   });
 
@@ -59,7 +57,7 @@ class _TransferScreenBody extends StatelessWidget {
         amount: amount,
         destinationName: destinationName,
         description: description,
-        fromAccountId: fromAccountId,
+        fromAccountId: "1",
         intent: intent,
       ),
       child: Builder(builder: (context) {
@@ -68,7 +66,7 @@ class _TransferScreenBody extends StatelessWidget {
               amount: amount,
               destinationName: destinationName,
               description: description,
-              fromAccountId: fromAccountId,
+              fromAccountId: "1",
               intent: intent,
             );
 

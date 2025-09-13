@@ -15,26 +15,33 @@ const defaultPadding = 16.0;
 
 var scaffoldKey = GlobalKey<ScaffoldState>();
 
-class ScaffoldWithNestedNavigation extends StatelessWidget {
-  ScaffoldWithNestedNavigation({
+class ScaffoldWithNestedNavigation extends StatefulWidget {
+  const ScaffoldWithNestedNavigation({
     Key? key,
     required this.navigationShell,
-  }) : super(
-            key: key ?? const ValueKey<String>('ScaffoldWithNestedNavigation'));
+  }) : super(key: key);
   final StatefulNavigationShell navigationShell;
+
+  @override
+  State<ScaffoldWithNestedNavigation> createState() => _ScaffoldWithNestedNavigationState();
+}
+
+class _ScaffoldWithNestedNavigationState extends State<ScaffoldWithNestedNavigation> {
+  bool? screenWiderThanPhone;
+  static const maxPhoneWidth = 505;
 
   void _goBranch(int index, [BuildContext? context]) {
     // Only trigger history clearing if we're actually switching tabs
-    if (index != navigationShell.currentIndex && context != null) {
+    if (index != widget.navigationShell.currentIndex && context != null) {
       print(
-          'Tab navigation: switching from tab ${navigationShell.currentIndex} to tab $index - clearing chat history');
+          'Tab navigation: switching from tab ${widget.navigationShell.currentIndex} to tab $index - clearing chat history');
       // Import the function directly since we know tab switches are screen changes
       _clearHistoryForTabSwitch();
     }
 
-    navigationShell.goBranch(
+    widget.navigationShell.goBranch(
       index,
-      initialLocation: index == navigationShell.currentIndex,
+      initialLocation: index == widget.navigationShell.currentIndex,
     );
   }
 
@@ -43,29 +50,30 @@ class ScaffoldWithNestedNavigation extends StatelessWidget {
     clearChatMessageMemory(caller: '_clearHistoryForTabSwitch');
   }
 
-  bool? screenWiderThanPhone;
-  static const maxPhoneWidth = 505;
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       if (constraints.maxWidth < maxPhoneWidth) {
-        if (screenWiderThanPhone = true) {
-          screenWiderThanPhone = false;
+        if (screenWiderThanPhone == true) {
+          setState(() {
+            screenWiderThanPhone = false;
+          });
           triggerWidthRebuild(context);
         }
         return ScaffoldWithNavigationBar(
-            body: navigationShell,
-            selectedIndex: navigationShell.currentIndex,
+            body: widget.navigationShell,
+            selectedIndex: widget.navigationShell.currentIndex,
             onDestinationSelected: (index) => _goBranch(index, context));
       } else {
-        if (screenWiderThanPhone = false) {
-          screenWiderThanPhone = true;
+        if (screenWiderThanPhone == false) {
+          setState(() {
+            screenWiderThanPhone = true;
+          });
           triggerWidthRebuild(context);
         }
         return ScaffoldWithNavigationRail(
-          body: navigationShell,
-          selectedIndex: navigationShell.currentIndex,
+          body: widget.navigationShell,
+          selectedIndex: widget.navigationShell.currentIndex,
           onDestinationSelected: (index) => _goBranch(index, context),
         );
       }
@@ -74,7 +82,9 @@ class ScaffoldWithNestedNavigation extends StatelessWidget {
 
   void triggerWidthRebuild(BuildContext context) {
     Future.delayed(Duration.zero, () {
-      Provider.of<WidthChanged>(context, listen: false).trigger();
+      if (context.mounted) {
+        Provider.of<WidthChanged>(context, listen: false).trigger();
+      }
     });
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:langchain_core/src/tools/base.dart';
+import 'package:langchain_core/tools.dart';
 
 import 'send_to_llm.dart';
 

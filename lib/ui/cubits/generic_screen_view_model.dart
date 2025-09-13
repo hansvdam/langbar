@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:langchain_core/src/tools/base.dart';
-import 'package:langchain_core/src/tools/types.dart';
+import 'package:langchain_core/tools.dart';
 
 import '../../send_to_llm.dart';
 import '../../speech_enabled.dart';
 import '../../tts_service.dart';
 import 'current_screen_cubit.dart';
 
-class GenericScreenViewModel<State> extends Cubit<State> with SpeechEnabled {
+class GenericScreenViewModel<TState> extends Cubit<TState> with SpeechEnabled {
   CurrentScreenCubit currentScreenCubit;
   final TTSService tts = TTSService.instance;
   bool ttsEnabled = true;

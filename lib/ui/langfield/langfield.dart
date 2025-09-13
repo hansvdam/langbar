@@ -10,7 +10,7 @@ import 'langbar_states.dart';
 class LangField extends StatefulWidget {
   final bool showHistoryButton;
 
-  const LangField([this.showHistoryButton = false]);
+  const LangField({Key? key, this.showHistoryButton = false}) : super(key: key);
 
   @override
   State<LangField> createState() => _LangFieldState();
@@ -229,5 +229,7 @@ void showDialogThenDismiss(BuildContext context) async {
 
   await Future.delayed(const Duration(seconds: 3));
 
-  Navigator.of(context).pop();
+  if (context.mounted) {
+    Navigator.of(context).pop();
+  }
 }

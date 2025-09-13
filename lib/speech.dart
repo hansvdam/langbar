@@ -36,7 +36,9 @@ class Speech {
         onResult: (value) => onResult(value.recognizedWords),
         listenFor: const Duration(seconds: 30),
         pauseFor: const Duration(seconds: 3),
-        listenMode: ListenMode.dictation,
+        listenOptions: SpeechListenOptions(
+          listenMode: ListenMode.dictation,
+        ),
         // partialResults: false
       );
       if (initing && PlatformDetails().isWeb) {

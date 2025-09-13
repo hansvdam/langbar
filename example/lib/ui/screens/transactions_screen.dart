@@ -79,7 +79,7 @@ class _TransactionsListState extends UpdatingScreenState<TransactionsList> {
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       child: ListTile(
-                        title: Text(contact.description ?? '',
+                        title: Text(contact.description,
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyLarge

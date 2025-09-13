@@ -15,7 +15,6 @@ class _BottomSheetButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isBright = Theme.of(context).brightness == Brightness.light;
     return Tooltip(
       preferBelow: showTooltipBelow,
       message: 'Toggle Langbar',
@@ -45,7 +44,6 @@ Future<void> animateFieldContent(
           injectedContent.substring(0, textController.text.length + 1);
     } else {
       timer.cancel();
-      textController.notifyListeners();
       if (!completer.isCompleted) {
         completer.complete();
       }

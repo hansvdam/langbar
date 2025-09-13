@@ -31,7 +31,7 @@ class LangBarWrapper extends StatelessWidget {
                 return body;
               }))));
       if (langbarState.showLangbar) {
-        children.add(Material(child: LangField(chatHistory.items.isNotEmpty)));
+        children.add(Material(child: LangField(showHistoryButton: chatHistory.items.isNotEmpty)));
       }
       return Column(
         mainAxisSize: MainAxisSize.min,

@@ -110,7 +110,7 @@ class HistoryView extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
+                    color: Colors.grey.withValues(alpha: 0.5),
                     spreadRadius: 3,
                     blurRadius: 7,
                     offset: const Offset(0, 3),

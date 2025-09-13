@@ -54,8 +54,6 @@ Future<String> conversationalRetrievalChain(String userQuestion) async {
       );
       // Add other model here
       break;
-    default:
-      model = geminiModel;
   }
   const stringOutputParser = StringOutputParser<ChatResult>();
 
