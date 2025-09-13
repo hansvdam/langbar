@@ -8,7 +8,7 @@ import 'package:langbar_core/ui/langfield/langbar_states.dart';
 import 'package:langbar_core/platform_details.dart';
 import 'package:langbar_core/send_to_llm.dart';
 import 'package:langbar_core/utils/utils.dart'
-    show setGoRouter, setcurrentScreenCubit, langbarLogger, currentScreenCubit;
+    show setGoRouter, langbarLogger, currentScreenCubit;
 import 'package:langbar_core/documented_route.dart';
 import 'package:langbar/ui/main_scaffolds.dart';
 import 'package:provider/provider.dart';
