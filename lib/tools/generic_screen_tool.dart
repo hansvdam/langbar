@@ -10,7 +10,7 @@ import '../utils/utils.dart';
 /// A for forecasting the weather from an api.
 /// {@endtemplate}
 final class GenericScreenTool
-    extends GenericTool<Map<String, dynamic>, ToolOptions, String> {
+    extends GenericTool<Map<String, dynamic>, ToolOptions> {
   final GoRouter goRouter;
 
   final String path;
@@ -34,7 +34,7 @@ final class GenericScreenTool
   }) : super(returnDirect: true);
 
   @override
-  Future<String> invokeInternal(Map<String, dynamic> toolInput,
+  Future<GenericOutput> invokeInternal(Map<String, dynamic> toolInput,
       {final ToolOptions? options}) async {
     langbarLogger.i(
         'GenericScreenTool.invokeInternal - name: $name, toolInput: $toolInput, push: $push');
@@ -57,7 +57,8 @@ final class GenericScreenTool
     );
     langbarLogger.i('GenericScreenTool generated fullPath: $fullPath');
     activateUri(fullPath, push);
-    return fullPath;
+    GenericOutput returnValue = GenericOutput(type: OutputType.navigation, hyperlink: fullPath, result: "navigating to $fullPath");
+    return returnValue;
   }
 
   @override

@@ -4,6 +4,8 @@ import 'data_key.dart';
 
 enum DataType { string, integer, number, boolean, object, array }
 
+enum OutputType { text, navigation, localFunction }
+
 class SUIParamBase {
   const SUIParamBase({
     required this.name,
@@ -52,10 +54,39 @@ class SUIParameter extends SUIParamBase {
 
 }
 
+class GenericOutput {
+  const GenericOutput({
+    required this.type,
+    this.hyperlink,
+    required this.result,
+  });
+
+  final OutputType type;
+  final String? hyperlink;
+  final String result;
+
+  @override
+  String toString() {
+    return 'GenericOutput(type: $type, hyperlink: $hyperlink, contents: $result)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is GenericOutput &&
+        other.type == type &&
+        other.hyperlink == hyperlink &&
+        other.result == result;
+  }
+
+  @override
+  int get hashCode => Object.hash(type, hyperlink, result);
+}
+
+
 abstract base class GenericTool<
     Input extends Object,
-    Options extends ToolOptions,
-    Output extends Object> extends Tool<Input, Options, Output> {
+    Options extends ToolOptions> extends Tool<Input, Options, GenericOutput> {
   GenericTool(
       {required super.name,
       required super.description,

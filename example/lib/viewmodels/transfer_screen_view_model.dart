@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:langbar_core/data/for_langchain.dart';
 import 'package:langbar_core/my_conversation_buffer_memory.dart';
 import 'package:langbar_core/speech_enabled.dart';
 import 'package:langbar_core/ui/langfield/langbar_states.dart';
@@ -258,7 +259,7 @@ class TransferScreenViewModel
   @override
   List<Tool<Object, ToolOptions, Object>> getTools(BuildContext context) {
     // Create the confirm transfer tool
-    final confirmTransferTool = Tool.fromFunction<Object, String>(
+    final confirmTransferTool = Tool.fromFunction<Object, GenericOutput>(
       name: 'confirm_transfer',
       description: 'Confirms and executes the current transfer',
       inputJsonSchema: const {
@@ -269,7 +270,8 @@ class TransferScreenViewModel
       func: (_) async {
         // Call the shared confirmTransfer method
         await confirmTransfer();
-        return 'Transfer completed successfully';
+        var returnValue = GenericOutput(type: OutputType.localFunction, result: 'Transfer completed successfully');
+        return returnValue;
       },
     );
 

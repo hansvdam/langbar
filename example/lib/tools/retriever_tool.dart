@@ -14,7 +14,7 @@ const String user_question_key = 'user_question';
 /// A for forecasting the weather from an api.
 /// {@endtemplate}
 final class RetrieverTool
-    extends GenericTool<Map<String, dynamic>, ToolOptions, String> {
+    extends GenericTool<Map<String, dynamic>, ToolOptions> {
   RetrieverTool(
       {super.name = retriever_name,
       super.description =
@@ -31,10 +31,11 @@ final class RetrieverTool
 
   @override
   @override
-  Future<String> invokeInternal(Map<String, dynamic> toolInput,
-      {ToolOptions? options}) {
+  Future<GenericOutput> invokeInternal(Map<String, dynamic> toolInput,
+      {ToolOptions? options}) async {
     var userQuestion = toolInput['gebruikersvraag'];
-    var returnValue = conversationalRetrievalChain(userQuestion);
+    var returnString = await conversationalRetrievalChain(userQuestion);
+    var returnValue = GenericOutput(type: OutputType.text, result: returnString);
     return returnValue;
   }
 

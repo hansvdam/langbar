@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'data/for_langchain.dart';
 import 'speech_enabled.dart';
 import 'ui/switchable_screen.dart';
 import 'utils/utils.dart';
@@ -208,8 +209,8 @@ Future<void> sendToOpenai(BaseChatModel llm, BuildContext context,
     var results = [];
     // for (var parsedToolCall in toolcalls) {
     Tool tool = matchTool(toolCallToCall, tools);
-    chatHistoryForUi.add(
-        HistoryMessage(text: "invoking tool: $toolCallToCall", isHuman: false));
+    // chatHistoryForUi.add(
+    //     HistoryMessage(text: "invoking tool: $toolCallToCall", isHuman: false));
     lastResult = await tool.invoke(toolCallToCall.arguments);
     results.add(lastResult);
     // }
@@ -221,24 +222,28 @@ Future<void> sendToOpenai(BaseChatModel llm, BuildContext context,
       return;
     }
 
-    if (lastResult is String && !lastResult.startsWith("/")) {
-      // lastResult is not a hyperlink, so it is a message to the user:
-      _chatMessageMemory.chatHistory.addAIChatMessage(lastResult);
-      chatHistoryForUi.add(HistoryMessage(text: query, isHuman: true));
-      chatHistoryForUi.add(HistoryMessage(text: lastResult, isHuman: false));
-      langbarState.historyExpansion = ChatSheetExpansion.full;
-      langbarState.historyShowing = true;
-    } else if (lastResult is String) {
-      //lastResult is a hyperlink, so add hyperlink to the history:
-      // add the original query, but the navigation-uri-repsonse as the hyperlink when you click on it
-      langbarState.historyShowing = false;
-      langbarState.historyExpansion = ChatSheetExpansion.part;
-      chatHistoryForUi
-          .add(HistoryMessage(text: query, isHuman: true, navUri: lastResult));
+    if (lastResult is GenericOutput) {
+      switch (lastResult.type) {
+        case OutputType.navigation:
+        //lastResult is a hyperlink, so add hyperlink to the history:
+        // add the original query, but the navigation-uri-repsonse as the hyperlink when you click on it
+          langbarState.historyShowing = false;
+          langbarState.historyExpansion = ChatSheetExpansion.part;
+          chatHistoryForUi
+              .add(HistoryMessage(text: query, isHuman: true, navUri: lastResult.hyperlink));
 
-      print("string result from llm: $lastResult");
-      // make sure the chathistory is immune to clearing by closing cubits
-      await liftChathistoryOverClearingsByGUI();
+          print("string result from llm: $lastResult");
+          // make sure the chathistory is immune to clearing by closing cubits
+          await liftChathistoryOverClearingsByGUI();
+        case OutputType.text:
+          _chatMessageMemory.chatHistory.addAIChatMessage(lastResult.result);
+          chatHistoryForUi.add(HistoryMessage(text: query, isHuman: true));
+          chatHistoryForUi.add(HistoryMessage(text: lastResult.result, isHuman: false));
+          langbarState.historyExpansion = ChatSheetExpansion.full;
+          langbarState.historyShowing = true;
+        case OutputType.localFunction:
+          // do nothing for now. Later may send result via the MCP server
+      }
     }
   } catch (e) {
     print("error calling llm or parsing output: $e");
