@@ -27,7 +27,7 @@ This example demonstrates the Langbar Core library architecture:
 **LLM Integration**
 - `send_to_llm.dart` from langbar_core provides LLM orchestration
 - Supports OpenAI, OpenRouter, Ollama, and Groq via Service enum
-- Global system prompt configuration via `setSystemPrompt()`
+- System prompt configuration via dependency injection
 - Route-based tool generation via `setRoutes()`
 
 **Natural Language Input**

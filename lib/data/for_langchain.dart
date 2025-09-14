@@ -41,29 +41,15 @@ class SUIParameter extends SUIParamBase {
     super.enumeration,
     this.isDataModelParam = true,
     String? codeName,
-    String? caption,
     String? unit,
-    String? iconName,
     required this.key,
-  })  : _caption = caption,
-        unit = unit,
-        iconName = iconName;
+  })  : unit = unit;
 
-  @Deprecated(
-      'This property should be removed, and be part of GUIFormProperty (only)')
-  final String? _caption;
   final String? unit;
-  @Deprecated(
-      'This property should be removed, and be part of GUIFormProperty (only)')
-  final String? iconName;
 
   final bool isDataModelParam;
   final DataKey key;
 
-  // Getter for caption
-  @Deprecated(
-      'This property should be removed, and be part of GUIFormProperty (only)')
-  String get caption => _caption ?? name;
 }
 
 abstract base class GenericTool<

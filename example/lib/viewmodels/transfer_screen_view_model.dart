@@ -1,4 +1,4 @@
-import 'package:bloc/src/cubit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:langbar_core/my_conversation_buffer_memory.dart';
 import 'package:langbar_core/speech_enabled.dart';

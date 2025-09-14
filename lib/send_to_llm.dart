@@ -28,8 +28,6 @@ void setRoutes(List<RouteBase> routes) {
   globalRoutes = routes;
 }
 
-@Deprecated('Use dependency injection with get_it instead. '
-    'Register systemPrompt as: getIt.registerSingleton<String>(prompt, instanceName: \'systemPrompt\')')
 void setSystemPrompt(String prompt) {
   // Register the system prompt with get_it for backward compatibility
   if (getIt.isRegistered<String>(instanceName: 'systemPrompt')) {

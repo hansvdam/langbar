@@ -58,7 +58,7 @@ class _LangFieldState extends State<LangField> {
           height: 20,
           child: Padding(
               padding: EdgeInsets.all(2.0),
-              child: CircularProgressIndicator())));
+              child: const CircularProgressIndicator())));
     } else if (widget.showHistoryButton) {
       children.add(ShowHistoryButton(langbarState: langbarState));
     }

@@ -28,12 +28,12 @@ Standard Flutter commands apply:
 - Uses `get_it: ^7.7.0` for dependency injection
 - System prompt registration via get_it instance
 - LLM instance management through dependency injection
-- Backward compatibility maintained with deprecated global functions
+- Clean architecture with dependency injection
 
 **LLM Integration**
 - `send_to_llm.dart` - Main LLM orchestration with support for OpenAI, OpenRouter, Ollama, and Groq
 - `Service` enum defines available LLM providers
-- System prompt configuration via dependency injection (preferred) or deprecated `setSystemPrompt()`
+- System prompt configuration via dependency injection
 - Route-based tool generation via `setRoutes()`
 - Support for external models and custom base URLs
 
@@ -181,8 +181,7 @@ Key external dependencies:
 - Singleton pattern for global configuration
 - Support for service switching and external model configuration
 
-**Legacy Global Configuration (Deprecated)**
-- `setSystemPrompt()` function (deprecated - use dependency injection instead)
+**Configuration**
 - `setRoutes()` for global route configuration
 - Service selection via Service enum
 
@@ -227,12 +226,6 @@ class MyViewModel extends GenericScreenViewModel<MyState> {
 }
 ```
 
-**Legacy Setup (Deprecated):**
-```dart
-// Legacy global configuration (still supported)
-setSystemPrompt("Your system prompt here");
-setRoutes(yourRoutes);
-```
 
 **Custom Tools:**
 - Extend `DocumentedGoRoute` with descriptions and parameters
