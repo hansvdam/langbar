@@ -251,10 +251,20 @@ class TransferScreenViewModel
     // For now, we'll keep it empty to let the conversation flow naturally
   }
 
+  void navigateBack(BuildContext context) {
+    var backPath = currentScreenCubit.state.previousPath;
+    context.go(backPath!);
+  }
+
   @override
   List<KeyWordtrigger> getKeyWordHandlers(BuildContext context) {
-    // Return empty list for now - can add transfer-specific keywords later
-    return [];
+    KeyWordtrigger backKeyHandler = KeyWordtrigger(
+        regexList: ["back", "terug", "vorig"],
+        handler: (input) {
+          navigateBack(context);
+        });
+
+    return [backKeyHandler];
   }
 
   @override
