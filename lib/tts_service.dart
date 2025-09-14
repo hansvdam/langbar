@@ -12,7 +12,7 @@ class TTSService {
   
   double volume = 1.0;
   double pitch = 1.0;
-  double rate = 0.6;
+  double rate = 0.55;
   String? language = 'en-UK';
   bool isInitialized = false;
 

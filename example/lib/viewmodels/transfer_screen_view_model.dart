@@ -18,6 +18,7 @@ import 'package:langbar_core/tts_highlight_service.dart';
 import '../utils/name_matcher.dart';
 import '../ui/models/account.dart';
 import 'package:langchain_core/tools.dart';
+import '../widgets/transfer_completed_dialog.dart';
 import 'package:go_router/go_router.dart';
 import '../ui/screens/transfer_screen.dart';
 
@@ -322,21 +323,20 @@ class TransferScreenViewModel
   /// Confirm and execute the transfer
   Future<void> confirmTransfer() async {
     // Show dialog with transfer completed message
+    if(ttsEnabled){
+      tts.speak("Transfer completed");
+    }
     await showDialog(
       context: _context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
         // Auto-close after 3 seconds
-        Future.delayed(const Duration(seconds: 3), () {
+        Future.delayed(const Duration(seconds: 2), () {
           if (dialogContext.mounted) {
             Navigator.of(dialogContext).pop();
           }
         });
-        
-        return AlertDialog(
-          content: const Text('Transfer completed'),
-          backgroundColor: Theme.of(dialogContext).dialogTheme.backgroundColor,
-        );
+        return const TransferCompletedDialog();
       },
     );
 
