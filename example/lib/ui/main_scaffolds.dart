@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import 'package:langbar_core/ui/langfield/langbar_wrapper.dart';
 import 'package:langbar_core/send_to_llm.dart' show clearChatMessageMemory;
+import 'package:langbar_core/tts_highlight_service.dart';
 
 const smallSpacing = 10.0;
 const defaultPadding = 16.0;
@@ -95,11 +96,16 @@ class WidthChanged extends ChangeNotifier {
   }
 }
 
-const navBarDestinations = [
+List<NavigationDestination> get navBarDestinations => [
   NavigationDestination(label: 'Home', icon: Icon(Icons.home)),
   NavigationDestination(label: 'Accounts', icon: Icon(Icons.account_balance)),
   NavigationDestination(label: 'Map', icon: Icon(Icons.map_outlined)),
-  NavigationDestination(label: 'Transfer', icon: Icon(Icons.monetization_on)),
+  NavigationDestination(
+    label: 'Transfer', 
+    icon: TtsTabBarHighlightWrapper(
+      child: Icon(Icons.monetization_on),
+    ),
+  ),
   NavigationDestination(label: 'Contacts', icon: Icon(Icons.contacts)),
 ];
 

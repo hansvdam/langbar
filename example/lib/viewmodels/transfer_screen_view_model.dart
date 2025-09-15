@@ -170,6 +170,10 @@ class TransferScreenViewModel
       String? previousDescription, String? intent) {
     List<TtsParameter> parameters = [];
 
+    String? prefix;
+    if(currentScreenCubit.state.hasScreenChanged){
+      prefix = "Transfer";
+    }
     // Check which fields have been updated and prepare TTS parameters
     if (amount != null &&
         (amount != previousAmount ||
@@ -213,7 +217,7 @@ class TransferScreenViewModel
     if (parameters.isNotEmpty) {
       langbarLogger.d(
           "Speaking parameters with highlighting: ${parameters.map((p) => p.spokenText).join(', ')}");
-      TtsHighlightService.instance.speakParametersWithHighlight(parameters);
+      TtsHighlightService.instance.speakParametersWithHighlight(prefix=prefix, parameters=parameters);
     }
   }
 

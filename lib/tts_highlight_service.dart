@@ -22,66 +22,95 @@ class TtsParameter {
 class TtsHighlightService extends ChangeNotifier {
   static TtsHighlightService? _instance;
   final TTSService _ttsService = TTSService.instance;
-  
+
   String? _currentHighlightedField;
   bool _isHighlighting = false;
   StreamController<String?>? _highlightController;
-  
+  bool _isTabBarHighlighted = false;
+  StreamController<bool>? _tabBarHighlightController;
+
   TtsHighlightService._internal() {
     // Initialize the stream controller immediately
     _highlightController = StreamController<String?>.broadcast();
+    _tabBarHighlightController = StreamController<bool>.broadcast();
     langbarLogger.d('TtsHighlightService created with stream controller');
   }
-  
+
   static TtsHighlightService get instance {
     _instance ??= TtsHighlightService._internal();
     return _instance!;
   }
-  
+
   String? get currentHighlightedField => _currentHighlightedField;
+
   bool get isHighlighting => _isHighlighting;
-  Stream<String?> get highlightStream => _highlightController?.stream ?? const Stream.empty();
-  
+
+  Stream<String?> get highlightStream =>
+      _highlightController?.stream ?? const Stream.empty();
+
+  Stream<bool> get tabBarHighlightStream =>
+      _tabBarHighlightController?.stream ?? const Stream.empty();
+
+  bool get isTabBarHighlighted => _isTabBarHighlighted;
+
   /// Initialize the highlight service
   Future<void> initialize() async {
     if (_highlightController == null || _highlightController!.isClosed) {
       _highlightController = StreamController<String?>.broadcast();
       langbarLogger.d('Initialized highlight stream controller');
     }
+    if (_tabBarHighlightController == null || _tabBarHighlightController!.isClosed) {
+      _tabBarHighlightController = StreamController<bool>.broadcast();
+      langbarLogger.d('Initialized tab bar highlight stream controller');
+    }
     await _ttsService.initialize();
   }
-  
+
   /// Speak parameters with synchronized highlighting
-  Future<void> speakParametersWithHighlight(List<TtsParameter> parameters, {
+  Future<void> speakParametersWithHighlight(
+    String? prefix,
+    List<TtsParameter> parameters, {
     Duration pauseBetweenParameters = const Duration(milliseconds: 0),
   }) async {
     if (parameters.isEmpty) return;
-    
-    langbarLogger.i('Starting TTS with highlighting for ${parameters.length} parameters');
-    
+
+    langbarLogger.i(
+        'Starting TTS with highlighting for ${parameters.length} parameters');
+
     await initialize();
     _isHighlighting = true;
     notifyListeners();
-    
+
+    if (prefix != null) {
+      // Highlight tab bar icon when prefix is spoken
+      await _highlightTabBarIcon();
+      await _ttsService.speak(prefix);
+      // Clear tab bar highlight after 2 seconds
+      // Future.delayed(const Duration(seconds: 2), () {
+        _clearTabBarHighlight();
+      // });
+    }
     try {
       for (final param in parameters) {
-        langbarLogger.d('Speaking parameter: ${param.fieldId} - ${param.spokenText}');
-        
+        langbarLogger
+            .d('Speaking parameter: ${param.fieldId} - ${param.spokenText}');
+
         // Start highlighting the field
         await _highlightField(param.fieldId);
-        
+
         // Small delay to ensure highlight is visible before speaking
         // await Future.delayed(const Duration(milliseconds: 100));
-        
+
         // Speak the parameter - this already waits for completion
         // because awaitSpeakCompletion(true) is set in TTS service
-        await _ttsService.speak(param.spokenText ?? '${param.label} ${param.value}');
-        
+        await _ttsService
+            .speak(param.spokenText ?? '${param.label} ${param.value}');
+
         // Clear highlight after 300ms without blocking continuation
         Future.delayed(const Duration(milliseconds: 300), () {
           _clearHighlight();
         });
-        
+
         // // Pause between parameters if not the last one
         // if (param != parameters.last) {
         //   await Future.delayed(pauseBetweenParameters);
@@ -94,19 +123,19 @@ class TtsHighlightService extends ChangeNotifier {
       langbarLogger.i('Completed TTS with highlighting');
     }
   }
-  
+
   /// Highlight a specific field
   Future<void> _highlightField(String fieldId) async {
     _currentHighlightedField = fieldId;
     langbarLogger.d('Highlighting field: $fieldId');
-    
+
     // Add a small delay to ensure widgets are built before emitting
     await Future.delayed(const Duration(milliseconds: 50));
-    
+
     _highlightController?.add(fieldId);
     notifyListeners();
   }
-  
+
   /// Clear the current highlight
   Future<void> _clearHighlight() async {
     _currentHighlightedField = null;
@@ -114,23 +143,42 @@ class TtsHighlightService extends ChangeNotifier {
     notifyListeners();
     langbarLogger.d('Cleared highlight');
   }
-  
+
+  /// Highlight the tab bar icon
+  Future<void> _highlightTabBarIcon() async {
+    _isTabBarHighlighted = true;
+    langbarLogger.d('Highlighting tab bar icon');
+    _tabBarHighlightController?.add(true);
+    notifyListeners();
+  }
+
+  /// Clear the tab bar highlight
+  Future<void> _clearTabBarHighlight() async {
+    _isTabBarHighlighted = false;
+    langbarLogger.d('Cleared tab bar highlight');
+    _tabBarHighlightController?.add(false);
+    notifyListeners();
+  }
+
   /// Stop any ongoing TTS and clear highlights
   Future<void> stop() async {
     await _ttsService.stop();
     _isHighlighting = false;
     await _clearHighlight();
+    await _clearTabBarHighlight();
   }
-  
+
   /// Check if a specific field is currently highlighted
   bool isFieldHighlighted(String fieldId) {
     return _currentHighlightedField == fieldId;
   }
-  
+
   @override
   void dispose() {
     _highlightController?.close();
     _highlightController = null;
+    _tabBarHighlightController?.close();
+    _tabBarHighlightController = null;
     super.dispose();
   }
 }
@@ -142,7 +190,7 @@ class TtsHighlightWrapper extends StatelessWidget {
   final Color highlightColor;
   final Duration animationDuration;
   final double borderWidth;
-  
+
   const TtsHighlightWrapper({
     super.key,
     required this.fieldId,
@@ -151,26 +199,27 @@ class TtsHighlightWrapper extends StatelessWidget {
     this.animationDuration = const Duration(milliseconds: 300),
     this.borderWidth = 4.0,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     // Ensure the service is initialized
     final service = TtsHighlightService.instance;
-    
+
     return StreamBuilder<String?>(
       stream: service.highlightStream,
       initialData: null,
       builder: (context, snapshot) {
         final isHighlighted = snapshot.data == fieldId;
-        
+
         // Debug print to verify highlighting state
         if (snapshot.hasData || fieldId == 'amount') {
-          langbarLogger.d('TtsHighlightWrapper[$fieldId]: Stream data = ${snapshot.data}, isHighlighted = $isHighlighted, hasData = ${snapshot.hasData}');
+          langbarLogger.d(
+              'TtsHighlightWrapper[$fieldId]: Stream data = ${snapshot.data}, isHighlighted = $isHighlighted, hasData = ${snapshot.hasData}');
         }
-        
+
         return Container(
           decoration: BoxDecoration(
-            color: isHighlighted 
+            color: isHighlighted
                 ? Colors.green.withValues(alpha: 0.3)
                 : Colors.transparent,
             border: Border.all(
@@ -190,9 +239,65 @@ class TtsHighlightWrapper extends StatelessWidget {
           ),
           child: AnimatedContainer(
             duration: animationDuration,
-            padding: isHighlighted 
-                ? const EdgeInsets.all(4.0)
-                : EdgeInsets.zero,
+            padding:
+                isHighlighted ? const EdgeInsets.all(4.0) : EdgeInsets.zero,
+            child: child,
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Widget wrapper to apply highlighting to tab bar icons
+class TtsTabBarHighlightWrapper extends StatelessWidget {
+  final Widget child;
+  final Color highlightColor;
+  final Duration animationDuration;
+
+  const TtsTabBarHighlightWrapper({
+    super.key,
+    required this.child,
+    this.highlightColor = Colors.green,
+    this.animationDuration = const Duration(milliseconds: 300),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Ensure the service is initialized
+    final service = TtsHighlightService.instance;
+
+    return StreamBuilder<bool>(
+      stream: service.tabBarHighlightStream,
+      initialData: false,
+      builder: (context, snapshot) {
+        final isHighlighted = snapshot.data ?? false;
+
+        // Debug print to verify highlighting state
+        if (snapshot.hasData) {
+          langbarLogger.d(
+              'TtsTabBarHighlightWrapper: Stream data = ${snapshot.data}, isHighlighted = $isHighlighted');
+        }
+
+        return Container(
+          decoration: BoxDecoration(
+            color: isHighlighted
+                ? highlightColor.withValues(alpha: 0.3)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: isHighlighted
+                ? [
+                    BoxShadow(
+                      color: highlightColor.withValues(alpha: 0.4),
+                      blurRadius: 12,
+                      spreadRadius: 2,
+                    ),
+                  ]
+                : [],
+          ),
+          child: AnimatedContainer(
+            duration: animationDuration,
+            padding: isHighlighted ? const EdgeInsets.all(4.0) : EdgeInsets.zero,
             child: child,
           ),
         );
