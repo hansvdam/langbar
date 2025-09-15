@@ -297,43 +297,6 @@ class TransferScreenViewModel
     return [confirmTransferTool, ...superTools];
   }
 
-
-  /// Speak initial values with synchronized highlighting
-  // void _speakInitialValuesWithHighlight(double? amount, String? destinationName, String? description) {
-  //   List<TtsParameter> parameters = [];
-  //
-  //   if (amount != null) {
-  //     parameters.add(TtsParameter(
-  //       fieldId: 'amount',
-  //       label: 'amount',
-  //       value: '${amount.toStringAsFixed(2)} euros',
-  //     ));
-  //   }
-  //
-  //   if (destinationName != null && destinationName.isNotEmpty) {
-  //     parameters.add(TtsParameter(
-  //       fieldId: 'recipient',
-  //       label: 'recipient',
-  //       value: destinationName,
-  //     ));
-  //   }
-  //
-  //   if (description != null && description.isNotEmpty) {
-  //     parameters.add(TtsParameter(
-  //       fieldId: 'description',
-  //       label: 'description',
-  //       value: description,
-  //     ));
-  //   }
-  //
-  //   if (parameters.isNotEmpty) {
-  //     // Small delay to ensure TTS and UI are initialized
-  //     Future.delayed(const Duration(milliseconds: 500), () {
-  //       TtsHighlightService.instance.speakParametersWithHighlight(parameters);
-  //     });
-  //   }
-  // }
-
   /// Confirm and execute the transfer
   Future<void> confirmTransfer() async {
     // Show dialog with transfer completed message
