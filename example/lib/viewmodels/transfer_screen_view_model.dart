@@ -259,7 +259,7 @@ class TransferScreenViewModel
   @override
   List<KeyWordtrigger> getKeyWordHandlers(BuildContext context) {
     KeyWordtrigger backKeyHandler = KeyWordtrigger(
-        regexList: ["back", "terug", "vorig"],
+        regexList: ["(\b\w+\s+)?[bB]ack"],
         handler: (input) {
           navigateBack(context);
         });
