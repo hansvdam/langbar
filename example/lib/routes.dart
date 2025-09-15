@@ -189,8 +189,8 @@ List<RouteBase> navBarRoutes = [
             parameters: const [
               SUIParameter(
                 name: 'intent',
-                description: 'User\'s intent for the transfer based ONLY on the latest message',
-                enumeration: ['start_new', 'correction'],
+                description: 'User\'s intent for the transfer based ONLY on the latest message in relation to previous user messages.',
+                enumeration: ['start_new', 'correction', 'complement'],
                 key: transferIntentKey,
               ),
               SUIParameter(

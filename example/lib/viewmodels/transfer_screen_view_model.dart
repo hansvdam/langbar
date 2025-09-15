@@ -193,10 +193,14 @@ class TransferScreenViewModel
 
     // Determine if this is a correction/modification or a new transfer
     var isCorrection = intent == 'correction';
+    print("intent: $intent");
     // Store previous values before updating
-    final previousAmount = isCorrection ? state.amount : null;
-    final previousName = isCorrection ? state.destinationName : null;
-    final previousDescription = isCorrection ? state.description : null;
+    final previousAmount = state.amount;
+    final previousName = state.destinationName;
+    final previousDescription = state.description;
+    // final previousAmount = isCorrection ? state.amount : null;
+    // final previousName = isCorrection ? state.destinationName : null;
+    // final previousDescription = isCorrection ? state.description : null;
 
     // Use existing state values if new values are not provided
     final newAmount = amount ?? previousAmount;
