@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:langbar_core/tts_highlight_service.dart';
 import 'app_generic_screen_view_model.dart';
 import 'package:langbar_core/utils/utils.dart';
 import 'package:langbar_core/speech_enabled.dart';
@@ -39,10 +40,46 @@ class MapScreenState {
   }
 }
 
+class MapScreenTtsConfig extends ScreenTtsConfig {
+  @override
+  String get screenName => 'Map';
+
+  @override
+  String? get tabBarIconFieldId => 'map_icon';
+
+  @override
+  List<TtsParameter> buildTtsParameters({
+    required Map<String, dynamic> currentValues,
+    Map<String, dynamic>? previousValues,
+    required bool hasScreenChanged,
+  }) {
+    List<TtsParameter> parameters = [];
+
+    final selectedLocation = currentValues['selectedLocation'] as String?;
+    final previousLocation = previousValues?['selectedLocation'] as String?;
+
+    if (selectedLocation != null &&
+        (selectedLocation != previousLocation || hasScreenChanged)) {
+      // Use the specific field ID for the selected location
+      final fieldId = selectedLocation == 'atms' ? 'location_atms' : 'location_offices';
+      parameters.add(TtsParameter(
+        fieldId: fieldId,
+        label: hasScreenChanged || previousLocation == null
+            ? 'showing'
+            : 'changed to',
+        value: selectedLocation == 'atms' ? 'ATMs' : 'Offices',
+      ));
+    }
+
+    return parameters;
+  }
+}
+
+final MapScreenTtsConfig _ttsConfig = MapScreenTtsConfig();
+
 class MapScreenViewModel extends AppGenericScreenViewModel<MapScreenState>
     with SpeechEnabled
     implements Switchable {
-  final MapScreenTtsConfig _ttsConfig = MapScreenTtsConfig();
 
   MapScreenViewModel({required BuildContext context, String? initialLocation})
       : super(MapScreenState(selectedLocation: initialLocation ?? 'atms'),

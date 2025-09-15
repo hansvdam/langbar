@@ -107,42 +107,6 @@ class TransferScreenTtsConfig extends ScreenTtsConfig {
   }
 }
 
-/// Map screen TTS configuration
-class MapScreenTtsConfig extends ScreenTtsConfig {
-  @override
-  String get screenName => 'Map';
-  
-  @override
-  String? get tabBarIconFieldId => 'map_icon';
-  
-  @override
-  List<TtsParameter> buildTtsParameters({
-    required Map<String, dynamic> currentValues,
-    Map<String, dynamic>? previousValues,
-    required bool hasScreenChanged,
-  }) {
-    List<TtsParameter> parameters = [];
-    
-    final selectedLocation = currentValues['selectedLocation'] as String?;
-    final previousLocation = previousValues?['selectedLocation'] as String?;
-    
-    if (selectedLocation != null &&
-        (selectedLocation != previousLocation || hasScreenChanged)) {
-      // Use the specific field ID for the selected location
-      final fieldId = selectedLocation == 'atms' ? 'location_atms' : 'location_offices';
-      parameters.add(TtsParameter(
-        fieldId: fieldId,
-        label: hasScreenChanged || previousLocation == null
-            ? 'showing'
-            : 'changed to',
-        value: selectedLocation == 'atms' ? 'ATMs' : 'Offices',
-      ));
-    }
-    
-    return parameters;
-  }
-}
-
 /// Contacts screen TTS configuration
 class ContactsScreenTtsConfig extends ScreenTtsConfig {
   @override
