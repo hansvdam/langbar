@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:langbar_core/tts_highlight_service.dart';
 
 import 'default_appbar_scaffold.dart';
 import '../../viewmodels/map_screen_view_model.dart';
@@ -30,61 +31,74 @@ class MapScreen extends StatelessWidget {
           initialLocation: atmOrOffice,
         );
       },
-      child: BlocBuilder<MapScreenViewModel, MapScreenState>(
-        builder: (context, state) {
-          langbarLogger.d(
-              'BlocBuilder rebuilding with state.selectedLocation: ${state.selectedLocation}');
-          return DefaultAppbarScaffold(
-            label: label,
-            body: SafeArea(
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Flexible(
-                        child: RadioListTile<String>(
-                          title: const Text('ATMs'),
-                          value: 'atms',
-                          groupValue: state.selectedLocation,
-                          onChanged: (String? value) {
-                            if (value != null) {
-                              context
-                                  .read<MapScreenViewModel>()
-                                  .updateSelectedLocation(value);
-                            }
-                          },
+      child: Builder(builder: (context) {
+        // Update ViewModel when parameters change
+        context.read<MapScreenViewModel>().updateFromConstructorParams(
+          atmOrOffice: atmOrOffice,
+        );
+        
+        return BlocBuilder<MapScreenViewModel, MapScreenState>(
+          builder: (context, state) {
+            langbarLogger.d(
+                'BlocBuilder rebuilding with state.selectedLocation: ${state.selectedLocation}');
+            return DefaultAppbarScaffold(
+              label: label,
+              body: SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Flexible(
+                          child: TtsHighlightWrapper(
+                            fieldId: 'location_atms',
+                            child: RadioListTile<String>(
+                              title: const Text('ATMs'),
+                              value: 'atms',
+                              groupValue: state.selectedLocation,
+                              onChanged: (String? value) {
+                                if (value != null) {
+                                  context
+                                      .read<MapScreenViewModel>()
+                                      .updateSelectedLocation(value, isManual: true);
+                                }
+                              },
+                            ),
+                          ),
                         ),
-                      ),
-                      Flexible(
-                        child: RadioListTile<String>(
-                          title: const Text('Offices'),
-                          value: 'offices',
-                          groupValue: state.selectedLocation,
-                          onChanged: (String? value) {
-                            if (value != null) {
-                              context
-                                  .read<MapScreenViewModel>()
-                                  .updateSelectedLocation(value);
-                            }
-                          },
+                        Flexible(
+                          child: TtsHighlightWrapper(
+                            fieldId: 'location_offices',
+                            child: RadioListTile<String>(
+                              title: const Text('Offices'),
+                              value: 'offices',
+                              groupValue: state.selectedLocation,
+                              onChanged: (String? value) {
+                                if (value != null) {
+                                  context
+                                      .read<MapScreenViewModel>()
+                                      .updateSelectedLocation(value, isManual: true);
+                                }
+                              },
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  Expanded(
-                    child: Image(
-                      image: AssetImage(
-                          "assets/images/${state.selectedLocation == "atms" ? "atms.jpg" : "offices.jpg"}"),
+                      ],
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: Image(
+                        image: AssetImage(
+                            "assets/images/${state.selectedLocation == "atms" ? "atms.jpg" : "offices.jpg"}"),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-      ),
+            );
+          },
+        );
+      }),
     );
   }
 }

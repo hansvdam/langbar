@@ -27,12 +27,13 @@ class TtsHighlightService extends ChangeNotifier {
   bool _isHighlighting = false;
   StreamController<String?>? _highlightController;
   bool _isTabBarHighlighted = false;
-  StreamController<bool>? _tabBarHighlightController;
+  String? _currentHighlightedTabIcon;
+  StreamController<String?>? _tabBarHighlightController;
 
   TtsHighlightService._internal() {
     // Initialize the stream controller immediately
     _highlightController = StreamController<String?>.broadcast();
-    _tabBarHighlightController = StreamController<bool>.broadcast();
+    _tabBarHighlightController = StreamController<String?>.broadcast();
     langbarLogger.d('TtsHighlightService created with stream controller');
   }
 
@@ -48,7 +49,7 @@ class TtsHighlightService extends ChangeNotifier {
   Stream<String?> get highlightStream =>
       _highlightController?.stream ?? const Stream.empty();
 
-  Stream<bool> get tabBarHighlightStream =>
+  Stream<String?> get tabBarHighlightStream =>
       _tabBarHighlightController?.stream ?? const Stream.empty();
 
   bool get isTabBarHighlighted => _isTabBarHighlighted;
@@ -60,7 +61,7 @@ class TtsHighlightService extends ChangeNotifier {
       langbarLogger.d('Initialized highlight stream controller');
     }
     if (_tabBarHighlightController == null || _tabBarHighlightController!.isClosed) {
-      _tabBarHighlightController = StreamController<bool>.broadcast();
+      _tabBarHighlightController = StreamController<String?>.broadcast();
       langbarLogger.d('Initialized tab bar highlight stream controller');
     }
     await _ttsService.initialize();
@@ -71,6 +72,7 @@ class TtsHighlightService extends ChangeNotifier {
     String? prefix,
     List<TtsParameter> parameters, {
     Duration pauseBetweenParameters = const Duration(milliseconds: 0),
+    String? tabIconId,
   }) async {
     if (parameters.isEmpty) return;
 
@@ -83,12 +85,10 @@ class TtsHighlightService extends ChangeNotifier {
 
     if (prefix != null) {
       // Highlight tab bar icon when prefix is spoken
-      await _highlightTabBarIcon();
+      await _highlightTabBarIcon(tabIconId);
       await _ttsService.speak(prefix);
-      // Clear tab bar highlight after 2 seconds
-      // Future.delayed(const Duration(seconds: 2), () {
-        _clearTabBarHighlight();
-      // });
+      // Clear tab bar highlight after speaking
+      await _clearTabBarHighlight();
     }
     try {
       for (final param in parameters) {
@@ -145,18 +145,21 @@ class TtsHighlightService extends ChangeNotifier {
   }
 
   /// Highlight the tab bar icon
-  Future<void> _highlightTabBarIcon() async {
+  Future<void> _highlightTabBarIcon(String? iconId) async {
+    if (iconId == null) return;
     _isTabBarHighlighted = true;
-    langbarLogger.d('Highlighting tab bar icon');
-    _tabBarHighlightController?.add(true);
+    _currentHighlightedTabIcon = iconId;
+    langbarLogger.d('Highlighting tab bar icon: $iconId');
+    _tabBarHighlightController?.add(iconId);
     notifyListeners();
   }
 
   /// Clear the tab bar highlight
   Future<void> _clearTabBarHighlight() async {
     _isTabBarHighlighted = false;
+    _currentHighlightedTabIcon = null;
     langbarLogger.d('Cleared tab bar highlight');
-    _tabBarHighlightController?.add(false);
+    _tabBarHighlightController?.add(null);
     notifyListeners();
   }
 
@@ -251,12 +254,14 @@ class TtsHighlightWrapper extends StatelessWidget {
 
 /// Widget wrapper to apply highlighting to tab bar icons
 class TtsTabBarHighlightWrapper extends StatelessWidget {
+  final String iconId;
   final Widget child;
   final Color highlightColor;
   final Duration animationDuration;
 
   const TtsTabBarHighlightWrapper({
     super.key,
+    required this.iconId,
     required this.child,
     this.highlightColor = Colors.green,
     this.animationDuration = const Duration(milliseconds: 300),
@@ -267,11 +272,11 @@ class TtsTabBarHighlightWrapper extends StatelessWidget {
     // Ensure the service is initialized
     final service = TtsHighlightService.instance;
 
-    return StreamBuilder<bool>(
+    return StreamBuilder<String?>(
       stream: service.tabBarHighlightStream,
-      initialData: false,
+      initialData: null,
       builder: (context, snapshot) {
-        final isHighlighted = snapshot.data ?? false;
+        final isHighlighted = snapshot.data == iconId;
 
         // Debug print to verify highlighting state
         if (snapshot.hasData) {

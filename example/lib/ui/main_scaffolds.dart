@@ -97,16 +97,41 @@ class WidthChanged extends ChangeNotifier {
 }
 
 List<NavigationDestination> get navBarDestinations => [
-  NavigationDestination(label: 'Home', icon: Icon(Icons.home)),
-  NavigationDestination(label: 'Accounts', icon: Icon(Icons.account_balance)),
-  NavigationDestination(label: 'Map', icon: Icon(Icons.map_outlined)),
+  NavigationDestination(
+    label: 'Home', 
+    icon: TtsTabBarHighlightWrapper(
+      iconId: 'home_icon',
+      child: Icon(Icons.home),
+    ),
+  ),
+  NavigationDestination(
+    label: 'Accounts', 
+    icon: TtsTabBarHighlightWrapper(
+      iconId: 'accounts_icon',
+      child: Icon(Icons.account_balance),
+    ),
+  ),
+  NavigationDestination(
+    label: 'Map', 
+    icon: TtsTabBarHighlightWrapper(
+      iconId: 'map_icon',
+      child: Icon(Icons.map_outlined),
+    ),
+  ),
   NavigationDestination(
     label: 'Transfer', 
     icon: TtsTabBarHighlightWrapper(
+      iconId: 'transfer_icon',
       child: Icon(Icons.monetization_on),
     ),
   ),
-  NavigationDestination(label: 'Contacts', icon: Icon(Icons.contacts)),
+  NavigationDestination(
+    label: 'Contacts', 
+    icon: TtsTabBarHighlightWrapper(
+      iconId: 'contacts_icon',
+      child: Icon(Icons.contacts),
+    ),
+  ),
 ];
 
 class ScaffoldWithNavigationBar extends StatelessWidget {

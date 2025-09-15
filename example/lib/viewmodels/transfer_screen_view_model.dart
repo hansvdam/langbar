@@ -217,7 +217,11 @@ class TransferScreenViewModel
     if (parameters.isNotEmpty) {
       langbarLogger.d(
           "Speaking parameters with highlighting: ${parameters.map((p) => p.spokenText).join(', ')}");
-      TtsHighlightService.instance.speakParametersWithHighlight(prefix=prefix, parameters=parameters);
+      TtsHighlightService.instance.speakParametersWithHighlight(
+        prefix, 
+        parameters,
+        tabIconId: 'transfer_icon',
+      );
     }
   }
 
