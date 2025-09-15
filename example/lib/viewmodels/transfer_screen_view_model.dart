@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:langbar_core/data/for_langchain.dart';
 import 'package:langbar_core/my_conversation_buffer_memory.dart';
 import 'package:langbar_core/speech_enabled.dart';
+import 'package:langbar_core/tts_highlight_service.dart';
 import 'package:langbar_core/ui/langfield/langbar_states.dart';
 import 'package:langbar_core/ui/switchable_screen.dart';
 import 'package:langchain_core/src/chat_models/types.dart';
@@ -14,13 +15,13 @@ import 'package:langchain_core/src/runnables/sequence.dart';
 import 'app_generic_screen_view_model.dart';
 import 'package:langbar_core/utils/utils.dart';
 import 'package:langbar_core/send_to_llm.dart';
-import 'package:langbar_core/tts_highlight_service.dart';
 import '../utils/name_matcher.dart';
 import '../ui/models/account.dart';
 import 'package:langchain_core/tools.dart';
 import '../widgets/transfer_completed_dialog.dart';
 import 'package:go_router/go_router.dart';
 import '../ui/screens/transfer_screen.dart';
+import 'screen_tts_config.dart';
 
 class TransferScreenState {
   final double? amount;
@@ -79,6 +80,66 @@ class TransferScreenState {
   }
 }
 
+class TransferScreenTtsConfig extends ScreenTtsConfig {
+  @override
+  String get screenName => 'Transfer';
+
+  @override
+  String? get tabBarIconFieldId => 'transfer_icon';
+
+  @override
+  List<TtsParameter> buildTtsParameters({
+    required Map<String, dynamic> currentValues,
+    Map<String, dynamic>? previousValues,
+    required bool hasScreenChanged,
+  }) {
+    List<TtsParameter> parameters = [];
+
+    final amount = currentValues['amount'] as double?;
+    final previousAmount = previousValues?['amount'] as double?;
+    final destinationName = currentValues['destinationName'] as String?;
+    final previousName = previousValues?['destinationName'] as String?;
+    final description = currentValues['description'] as String?;
+    final previousDescription = previousValues?['description'] as String?;
+
+    if (amount != null &&
+        (amount != previousAmount || hasScreenChanged)) {
+      parameters.add(TtsParameter(
+        fieldId: 'amount',
+        label: hasScreenChanged || previousAmount == null
+            ? 'amount'
+            : 'amount corrected to',
+        value: '${amount.toStringAsFixed(2)} euros',
+      ));
+    }
+
+    if (destinationName != null &&
+        (destinationName != previousName || hasScreenChanged)) {
+      parameters.add(TtsParameter(
+        fieldId: 'recipient',
+        label: hasScreenChanged || previousName == null
+            ? 'recipient'
+            : 'recipient corrected to',
+        value: destinationName,
+      ));
+    }
+
+    if (description != null &&
+        (description != previousDescription || hasScreenChanged)) {
+      parameters.add(TtsParameter(
+        fieldId: 'description',
+        label: hasScreenChanged || previousDescription == null
+            ? 'description'
+            : 'description corrected to',
+        value: description,
+      ));
+    }
+
+    return parameters;
+  }
+}
+
+final TransferScreenTtsConfig _ttsConfig = TransferScreenTtsConfig();
 class TransferScreenViewModel
     extends AppGenericScreenViewModel<TransferScreenState>
     with SpeechEnabled
@@ -168,61 +229,39 @@ class TransferScreenViewModel
       double? previousAmount,
       String? description,
       String? previousDescription, String? intent) {
-    List<TtsParameter> parameters = [];
-
-    String? prefix;
-    if(currentScreenCubit.state.hasScreenChanged){
-      prefix = "Transfer";
+    
+    // Build current and previous values maps for the TTS config
+    Map<String, dynamic> currentValues = {};
+    Map<String, dynamic> previousValues = {};
+    
+    // Only add values that were actually passed (not null in the method call)
+    if (amount != null) {
+      currentValues['amount'] = amount;
+      if (previousAmount != null) {
+        previousValues['amount'] = previousAmount;
+      }
     }
-    // Check which fields have been updated and prepare TTS parameters
-    if (amount != null &&
-        (amount != previousAmount ||
-            currentScreenCubit.state.hasScreenChanged)) {
-      parameters.add(TtsParameter(
-        fieldId: 'amount',
-        label:
-            currentScreenCubit.state.hasScreenChanged || previousAmount == null
-                ? 'amount'
-                : 'amount corrected to',
-        value: '${amount.toStringAsFixed(2)} euros',
-      ));
+    
+    if (destinationName != null) {
+      currentValues['destinationName'] = destinationName;
+      if (previousName != null) {
+        previousValues['destinationName'] = previousName;
+      }
     }
-
-    if (destinationName != null &&
-        (destinationName != previousName ||
-            currentScreenCubit.state.hasScreenChanged)) {
-      parameters.add(TtsParameter(
-        fieldId: 'recipient',
-        label: currentScreenCubit.state.hasScreenChanged || previousName == null
-            ? 'recipient'
-            : 'recipient corrected to',
-        value: destinationName,
-      ));
+    
+    if (description != null) {
+      currentValues['description'] = description;
+      if (previousDescription != null) {
+        previousValues['description'] = previousDescription;
+      }
     }
-
-    if (description != null &&
-        (description != previousDescription ||
-            currentScreenCubit.state.hasScreenChanged)) {
-      parameters.add(TtsParameter(
-        fieldId: 'description',
-        label: currentScreenCubit.state.hasScreenChanged ||
-                previousDescription == null
-            ? 'description'
-            : 'description corrected to',
-        value: description,
-      ));
-    }
-
-    // Speak with highlighting
-    if (parameters.isNotEmpty) {
-      langbarLogger.d(
-          "Speaking parameters with highlighting: ${parameters.map((p) => p.spokenText).join(', ')}");
-      TtsHighlightService.instance.speakParametersWithHighlight(
-        prefix, 
-        parameters,
-        tabIconId: 'transfer_icon',
-      );
-    }
+    
+    // Use the TTS config to speak the confirmations
+    _ttsConfig.speakConfirmations(
+      currentValues: currentValues,
+      previousValues: previousValues.isNotEmpty ? previousValues : null,
+      currentScreenCubit: currentScreenCubit,
+    );
   }
 
   /// Update text field values directly (for user input)

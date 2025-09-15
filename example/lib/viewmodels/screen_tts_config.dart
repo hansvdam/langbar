@@ -47,66 +47,6 @@ abstract class ScreenTtsConfig {
   }
 }
 
-/// Transfer screen TTS configuration
-class TransferScreenTtsConfig extends ScreenTtsConfig {
-  @override
-  String get screenName => 'Transfer';
-  
-  @override
-  String? get tabBarIconFieldId => 'transfer_icon';
-  
-  @override
-  List<TtsParameter> buildTtsParameters({
-    required Map<String, dynamic> currentValues,
-    Map<String, dynamic>? previousValues,
-    required bool hasScreenChanged,
-  }) {
-    List<TtsParameter> parameters = [];
-    
-    final amount = currentValues['amount'] as double?;
-    final previousAmount = previousValues?['amount'] as double?;
-    final destinationName = currentValues['destinationName'] as String?;
-    final previousName = previousValues?['destinationName'] as String?;
-    final description = currentValues['description'] as String?;
-    final previousDescription = previousValues?['description'] as String?;
-    
-    if (amount != null &&
-        (amount != previousAmount || hasScreenChanged)) {
-      parameters.add(TtsParameter(
-        fieldId: 'amount',
-        label: hasScreenChanged || previousAmount == null
-            ? 'amount'
-            : 'amount corrected to',
-        value: '${amount.toStringAsFixed(2)} euros',
-      ));
-    }
-    
-    if (destinationName != null &&
-        (destinationName != previousName || hasScreenChanged)) {
-      parameters.add(TtsParameter(
-        fieldId: 'recipient',
-        label: hasScreenChanged || previousName == null
-            ? 'recipient'
-            : 'recipient corrected to',
-        value: destinationName,
-      ));
-    }
-    
-    if (description != null &&
-        (description != previousDescription || hasScreenChanged)) {
-      parameters.add(TtsParameter(
-        fieldId: 'description',
-        label: hasScreenChanged || previousDescription == null
-            ? 'description'
-            : 'description corrected to',
-        value: description,
-      ));
-    }
-    
-    return parameters;
-  }
-}
-
 /// Contacts screen TTS configuration
 class ContactsScreenTtsConfig extends ScreenTtsConfig {
   @override
