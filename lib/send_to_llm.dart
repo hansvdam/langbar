@@ -65,15 +65,25 @@ Future<void> clearChatMessageMemory({String caller = 'unknown'}) async {
 
 Future<void> preserveLastMessageAndClearHistory() async {
   var messages = await _chatMessageMemory.chatHistory.getChatMessages();
-  ChatMessage? lastMessage = messages.lastOrNull;
-
+  
+  // Find the last HumanChatMessage
+  int lastHumanIndex = -1;
+  for (int i = messages.length - 1; i >= 0; i--) {
+    if (messages[i] is HumanChatMessage) {
+      lastHumanIndex = i;
+      break;
+    }
+  }
+  
   await _chatMessageMemory.clear();
-
-  // Re-add the last message if it was a human message (the one that triggered navigation)
-  if (lastMessage != null && lastMessage is HumanChatMessage) {
-    await _chatMessageMemory.chatHistory.addChatMessage(lastMessage);
+  
+  // Re-add the last HumanChatMessage and all messages that follow it
+  if (lastHumanIndex >= 0) {
+    for (int i = lastHumanIndex; i < messages.length; i++) {
+      await _chatMessageMemory.chatHistory.addChatMessage(messages[i]);
+    }
     print(
-        "chatMessageMemory cleared but preserved last human message: ${lastMessage.content}");
+        "chatMessageMemory cleared but preserved last human message and ${messages.length - lastHumanIndex - 1} following messages");
   } else {
     print("chatMessageMemory cleared, no human message to preserve");
   }
@@ -171,6 +181,8 @@ Future<void> sendToOpenai(BaseChatModel llm, BuildContext context,
   try {
     final output1 = await chain.invoke(query);
     _chatMessageMemory.chatHistory.addHumanChatMessage(query);
+
+
     var toolcalls = output1 as List<ParsedToolCall>;
     if (toolcalls.isEmpty) {
       chatHistoryForUi.add(HistoryMessage(
@@ -218,21 +230,56 @@ Future<void> sendToOpenai(BaseChatModel llm, BuildContext context,
     langbarState.controllerOutlined.clear();
     langbarState.sendingToOpenAI = false;
 
-    if (lastResult == localActionHandled) {
-      return;
-    }
-
     if (lastResult is GenericOutput) {
       switch (lastResult.type) {
         case OutputType.navigation:
         //lastResult is a hyperlink, so add hyperlink to the history:
         // add the original query, but the navigation-uri-repsonse as the hyperlink when you click on it
+          ChatResult lastChatResult = repairingToolsOutputParser.lastChatResult!;
+        //   List<AIChatMessageToolCall> chatMessageToolCalls = toolcalls.map(toElement)
+          bool addAssistantCallsToHistory = true;
+          if(addAssistantCallsToHistory) {
+            // Create a copy of lastChatResult.output and keep only the last tool call
+            var outputStripped = AIChatMessage(
+              content: lastChatResult.output.content,
+              toolCalls: lastChatResult.output.toolCalls.isNotEmpty
+                  ? [lastChatResult.output.toolCalls.last]
+                  : [],
+            );
+
+            _chatMessageMemory.chatHistory.addChatMessage(outputStripped);
+            // Parse hyperlink to extract function name and parameters
+            final uri = Uri.parse(lastResult.hyperlink!);
+            final pathSegments = uri.pathSegments;
+            final functionName = pathSegments.isNotEmpty
+                ? pathSegments.last
+                : 'unknown';
+            final parameters = uri.queryParameters;
+
+            // Create JSON with function name and parameters
+            final functionCallJson = '{"function": "$functionName", "parameters": ${_mapToJsonString(
+                parameters)}}';
+            _chatMessageMemory.chatHistory.addToolChatMessage(
+                toolCallId: outputStripped.toolCalls[0].id,
+                content: functionCallJson);
+            _chatMessageMemory.chatHistory.addAIChatMessage(lastResult.result);
+          }
           langbarState.historyShowing = false;
           langbarState.historyExpansion = ChatSheetExpansion.part;
           chatHistoryForUi
               .add(HistoryMessage(text: query, isHuman: true, navUri: lastResult.hyperlink));
 
           print("string result from llm: $lastResult");
+          // Clear chat memory if navigating to a different screen (different path)
+          var currentUri = goRouter.routeInformationProvider.value.uri;
+          var targetUri = Uri.parse(lastResult.hyperlink!);
+          if (currentUri.path != targetUri.path) {
+            langbarLogger.i(
+                'Screen change detected (${currentUri.path} -> ${targetUri.path}), clearing chat memory but preserving last message');
+            setHistoryCleared(true);
+            preserveLastMessageAndClearHistory();
+          }
+
           // make sure the chathistory is immune to clearing by closing cubits
           await liftChathistoryOverClearingsByGUI();
         case OutputType.text:
@@ -406,4 +453,14 @@ CreateHookFunction globalCreateHook = (DocumentedGoRoute route, GoRouterState ro
 
 void setGlobalCreateHook(CreateHookFunction newHook) {
   globalCreateHook = newHook;
+}
+
+String _mapToJsonString(Map<String, String> map) {
+  if (map.isEmpty) return '{}';
+  
+  final entries = map.entries.map((entry) => 
+    '"${entry.key}": "${entry.value}"'
+  ).join(', ');
+  
+  return '{$entries}';
 }

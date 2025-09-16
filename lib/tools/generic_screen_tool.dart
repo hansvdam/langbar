@@ -57,7 +57,21 @@ final class GenericScreenTool
     );
     langbarLogger.i('GenericScreenTool generated fullPath: $fullPath');
     activateUri(fullPath, push);
-    GenericOutput returnValue = GenericOutput(type: OutputType.navigation, hyperlink: fullPath, result: "navigating to $fullPath");
+    
+    // Create a descriptive message about the parameters filled
+    final parameterDescriptions = filteredQueryParams.entries
+        .map((entry) => '${entry.key}: ${entry.value}')
+        .join(', ');
+    
+    final resultMessage = parameterDescriptions.isNotEmpty
+        ? "Navigating to $name screen filling out the following parameters: $parameterDescriptions"
+        : "Navigating to $name screen";
+    
+    GenericOutput returnValue = GenericOutput(
+      type: OutputType.navigation, 
+      hyperlink: fullPath, 
+      result: resultMessage
+    );
     return returnValue;
   }
 

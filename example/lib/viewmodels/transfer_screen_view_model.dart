@@ -22,6 +22,7 @@ import '../widgets/transfer_completed_dialog.dart';
 import 'package:go_router/go_router.dart';
 import '../ui/screens/transfer_screen.dart';
 import 'screen_tts_config.dart';
+import '../models/transfer_intent.dart';
 
 class TransferScreenState {
   final double? amount;
@@ -192,9 +193,13 @@ class TransferScreenViewModel
         'TransferScreenViewModel updating from constructor params: amount=$amount, destinationName=$destinationName, description=$description, fromAccountId=$fromAccountId');
 
     // Determine if this is a correction/modification or a new transfer
-    var isCorrection = intent == 'correction';
-    print("intent: $intent");
+    final transferIntent = intent != null 
+      ? TransferIntent.fromString(intent) 
+      : TransferIntent.initialization;
+    var isCorrection = transferIntent == TransferIntent.correction;
+    print("intent: $intent, transferIntent: $transferIntent");
     // Store previous values before updating
+
     final previousAmount = state.amount;
     final previousName = state.destinationName;
     final previousDescription = state.description;

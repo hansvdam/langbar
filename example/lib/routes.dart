@@ -15,6 +15,7 @@ import 'package:langbar_core/utils/utils.dart';
 import 'ui/main_scaffolds.dart';
 import 'ui/screens/credit_card_screen.dart';
 import 'viewmodels/credit_card_screen_view_model.dart';
+import 'models/transfer_intent.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigator1Key = GlobalKey<NavigatorState>(debugLabel: 'shell1');
@@ -189,8 +190,8 @@ List<RouteBase> navBarRoutes = [
             parameters: const [
               SUIParameter(
                 name: 'intent',
-                description: 'User\'s intent for the transfer based ONLY on the latest message in relation to previous user messages.',
-                enumeration: ['start_new', 'correction', 'complement'],
+                description: 'User\'s intent for the transfer-parameters based ONLY on the latest message in relation to previous user messages. An initialization happens when the last user message clearly initiatest a new transfer. A correction happens when the last message provides alternative values for parameters already touched by previous messages. A complement means providing parameters for a transfer that have not been mentioned in previous messages and thus complement the transfer data.',
+                enumeration: TransferIntent.allValuesConst,
                 key: transferIntentKey,
               ),
               SUIParameter(

@@ -68,14 +68,6 @@ void activateUri(String navUri, bool openModal) {
   var currentUri = goRouter.routeInformationProvider.value.uri;
   var targetUri = Uri.parse(navUri);
 
-  // Clear chat memory if navigating to a different screen (different path)
-  if (currentUri.path != targetUri.path) {
-    langbarLogger.i(
-        'Screen change detected (${currentUri.path} -> ${targetUri.path}), clearing chat memory but preserving last message');
-    setHistoryCleared(true);
-    preserveLastMessageAndClearHistory();
-  }
-
   if (openModal) {
     langbarLogger.i('Current URI: $currentUri');
     if (currentUri.hasSamePathAs(navUri)) {
