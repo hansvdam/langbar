@@ -19,29 +19,30 @@ class LangField extends StatefulWidget {
 class _LangFieldState extends State<LangField> {
   late TextEditingController _controllerOutlined;
   late FocusNode _focusNode;
+  LangBarState? _langbarState;
 
   @override
   initState() {
     super.initState();
-    var langbarState = context.read<LangBarState>();
-    _controllerOutlined = langbarState.controllerOutlined;
+    _langbarState = context.read<LangBarState>();
+    _controllerOutlined = _langbarState!.controllerOutlined;
     _focusNode = FocusNode();
     
     // Listen to sendingToOpenAI changes to restore focus
-    langbarState.addListener(_onLangBarStateChanged);
+    _langbarState!.addListener(_onLangBarStateChanged);
   }
   
   @override
   void dispose() {
-    context.read<LangBarState>().removeListener(_onLangBarStateChanged);
+    // Remove listener using the stored reference
+    _langbarState?.removeListener(_onLangBarStateChanged);
     _focusNode.dispose();
     super.dispose();
   }
   
   void _onLangBarStateChanged() {
-    final langbarState = context.read<LangBarState>();
-    // When the request completes (sendingToOpenAI becomes false), restore focus
-    if (!langbarState.sendingToOpenAI && mounted) {
+    // Use the stored reference instead of context.read()
+    if (_langbarState != null && !_langbarState!.sendingToOpenAI && mounted) {
       // Use a post-frame callback to ensure the widget tree is stable
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && _focusNode.canRequestFocus) {
