@@ -62,12 +62,15 @@ class MapScreenTtsConfig extends ScreenTtsConfig {
         (selectedLocation != previousLocation || hasScreenChanged)) {
       // Use the specific field ID for the selected location
       final fieldId = selectedLocation == 'atms' ? 'location_atms' : 'location_offices';
+      var label = hasScreenChanged || previousLocation == null
+            ? 'showing'
+            : 'changed to';
+      var spokenLocation = selectedLocation == 'atms' ? 'ATMs' : 'Offices';
       parameters.add(TtsParameter(
         fieldId: fieldId,
-        label: hasScreenChanged || previousLocation == null
-            ? 'showing'
-            : 'changed to',
-        value: selectedLocation == 'atms' ? 'ATMs' : 'Offices',
+        label: label,
+        value: spokenLocation,
+        spokenText: "$label $spokenLocation near you"
       ));
     }
 
