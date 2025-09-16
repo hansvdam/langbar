@@ -18,12 +18,37 @@ class LangField extends StatefulWidget {
 
 class _LangFieldState extends State<LangField> {
   late TextEditingController _controllerOutlined;
+  late FocusNode _focusNode;
 
   @override
   initState() {
     super.initState();
     var langbarState = context.read<LangBarState>();
     _controllerOutlined = langbarState.controllerOutlined;
+    _focusNode = FocusNode();
+    
+    // Listen to sendingToOpenAI changes to restore focus
+    langbarState.addListener(_onLangBarStateChanged);
+  }
+  
+  @override
+  void dispose() {
+    context.read<LangBarState>().removeListener(_onLangBarStateChanged);
+    _focusNode.dispose();
+    super.dispose();
+  }
+  
+  void _onLangBarStateChanged() {
+    final langbarState = context.read<LangBarState>();
+    // When the request completes (sendingToOpenAI becomes false), restore focus
+    if (!langbarState.sendingToOpenAI && mounted) {
+      // Use a post-frame callback to ensure the widget tree is stable
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _focusNode.canRequestFocus) {
+          _focusNode.requestFocus();
+        }
+      });
+    }
   }
 
   @override
@@ -31,6 +56,7 @@ class _LangFieldState extends State<LangField> {
       Consumer<LangBarState>(builder: (context, langbarState, child) {
         return TextField(
           controller: _controllerOutlined,
+          focusNode: _focusNode,
           maxLines: null,
           textAlignVertical: TextAlignVertical.center,
           textInputAction: TextInputAction.send,
@@ -63,15 +89,23 @@ class _LangFieldState extends State<LangField> {
       children.add(ShowHistoryButton(langbarState: langbarState));
     }
     if (speechEnabled) {
-      children.add(SpeechButton(submit: () => submit(context)));
+      children.add(SpeechButton(submit: () => submit(context), focusNode: _focusNode));
     }
     Row row = Row(mainAxisSize: MainAxisSize.min, children: children);
     return row;
   }
 
   void submit(BuildContext context) {
+    // Store whether we had focus before submitting
+    final hadFocus = _focusNode.hasFocus;
     submitToLLM(context);
     // submitToLLMNoLangchain(context);
+    
+    // If we had focus, ensure we maintain it
+    if (hadFocus) {
+      // Request focus immediately to prevent losing it
+      _focusNode.requestFocus();
+    }
   }
 }
 
@@ -93,8 +127,9 @@ class ShowHistoryButton extends StatelessWidget {
 
 class SpeechButton extends StatefulWidget {
   final Function() submit;
+  final FocusNode? focusNode;
 
-  const SpeechButton({super.key, required this.submit});
+  const SpeechButton({super.key, required this.submit, this.focusNode});
 
   @override
   _SpeechButtonState createState() => _SpeechButtonState();
@@ -135,6 +170,10 @@ class _SpeechButtonState extends State<SpeechButton>
         if (langbarState.controllerOutlined.text.isNotEmpty) {
           widget.submit();
           langbarLogger.d("sending ${langbarState.controllerOutlined.text}");
+          // Request focus back to the text field after speech submission
+          if (widget.focusNode != null) {
+            widget.focusNode!.requestFocus();
+          }
         }
         langbarState.listeningForSpeech = false;
       }

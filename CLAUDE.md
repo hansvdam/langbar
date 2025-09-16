@@ -48,6 +48,11 @@ Standard Flutter commands apply:
 - `RepairingToolsOutputParser` for handling LLM output parsing issues
 - Tools are auto-generated from GoRouter route configuration
 - Support for `DocumentedGoRoute` configurations
+- `Switchable` interface for handling screen transitions with tool calls
+- TransferIntent pattern (example implementation) for parameter handling:
+  - `initialization`: Starting new transfer operations
+  - `correction`: Modifying existing parameters  
+  - `complement`: Adding new parameters to existing transfers
 
 ### Key Directories
 
@@ -86,7 +91,7 @@ Standard Flutter commands apply:
 - `lib/ui/main_scaffolds.dart` - Main application scaffolds
 - `lib/ui/default_appbar_scaffold.dart` - Default AppBar scaffold
 - `lib/ui/history_view.dart` - Conversation history view
-- `lib/ui/switchable_screen.dart` - Switchable screen functionality
+- `lib/ui/switchable_screen.dart` - Switchable interface for screen transitions with tool calls
 - `lib/speech.dart` - Speech-to-text functionality
 
 ## Dependencies
@@ -232,3 +237,8 @@ class MyViewModel extends GenericScreenViewModel<MyState> {
 - Implement `SpeechEnabled` interface for custom tools
 - Use `GenericScreenTool` for navigation-based actions
 - Override `getTools()` method in ViewModels for custom tool sets
+
+**Switchable Screens:**
+- Implement `Switchable` interface for screens that need to handle tool-based navigation
+- Override `handleNewAndSwitch()` method to process tool calls and manage screen transitions
+- Useful for complex workflows where LLM needs to switch between screens based on user intent
