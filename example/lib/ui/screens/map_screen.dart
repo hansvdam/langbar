@@ -22,8 +22,7 @@ class MapScreen extends StatelessWidget {
     langbarLogger.d(
         'MapScreen build() called, about to create MapScreenViewModel with atmOrOffice: $atmOrOffice');
     return BlocProvider(
-      key: ValueKey(
-          'map_screen_$atmOrOffice'), // Force new instance when parameter changes
+      key: const ValueKey('map_screen'), // Use static key to maintain same instance
       create: (context) {
         langbarLogger.d('BlocProvider create() called for MapScreenViewModel');
         return MapScreenViewModel(
