@@ -103,8 +103,7 @@ class TransferScreenTtsConfig extends ScreenTtsConfig {
     final description = currentValues['description'] as String?;
     final previousDescription = previousValues?['description'] as String?;
 
-    if (amount != null &&
-        (amount != previousAmount || hasScreenChanged)) {
+    if (amount != null && (amount != previousAmount || hasScreenChanged)) {
       parameters.add(TtsParameter(
         fieldId: 'amount',
         label: hasScreenChanged || previousAmount == null
@@ -141,6 +140,7 @@ class TransferScreenTtsConfig extends ScreenTtsConfig {
 }
 
 final TransferScreenTtsConfig _ttsConfig = TransferScreenTtsConfig();
+
 class TransferScreenViewModel
     extends AppGenericScreenViewModel<TransferScreenState>
     with SpeechEnabled
@@ -193,19 +193,19 @@ class TransferScreenViewModel
         'TransferScreenViewModel updating from constructor params: amount=$amount, destinationName=$destinationName, description=$description, fromAccountId=$fromAccountId');
 
     // Determine if this is a correction/modification or a new transfer
-    final transferIntent = intent != null 
-      ? TransferIntent.fromString(intent) 
-      : TransferIntent.initialization;
+    final transferIntent = intent != null
+        ? TransferIntent.fromString(intent)
+        : TransferIntent.initialization;
     var isCorrection = transferIntent == TransferIntent.correction;
     print("intent: $intent, transferIntent: $transferIntent");
     // Store previous values before updating
 
-    final previousAmount = state.amount;
-    final previousName = state.destinationName;
-    final previousDescription = state.description;
-    // final previousAmount = isCorrection ? state.amount : null;
-    // final previousName = isCorrection ? state.destinationName : null;
-    // final previousDescription = isCorrection ? state.description : null;
+    // final previousAmount = state.amount;
+    // final previousName = state.destinationName;
+    // final previousDescription = state.description;
+    final previousAmount = isCorrection && amount != null ? state.amount : null;
+    final previousName = isCorrection && destinationName != null ? state.destinationName : null;
+    final previousDescription = isCorrection && description != null ? state.description : null;
 
     // Use existing state values if new values are not provided
     final newAmount = amount ?? previousAmount;
@@ -237,12 +237,12 @@ class TransferScreenViewModel
       double? amount,
       double? previousAmount,
       String? description,
-      String? previousDescription, String? intent) {
-    
+      String? previousDescription,
+      String? intent) {
     // Build current and previous values maps for the TTS config
     Map<String, dynamic> currentValues = {};
     Map<String, dynamic> previousValues = {};
-    
+
     // Only add values that were actually passed (not null in the method call)
     if (amount != null) {
       currentValues['amount'] = amount;
@@ -250,21 +250,21 @@ class TransferScreenViewModel
         previousValues['amount'] = previousAmount;
       }
     }
-    
+
     if (destinationName != null) {
       currentValues['destinationName'] = destinationName;
       if (previousName != null) {
         previousValues['destinationName'] = previousName;
       }
     }
-    
+
     if (description != null) {
       currentValues['description'] = description;
       if (previousDescription != null) {
         previousValues['description'] = previousDescription;
       }
     }
-    
+
     // Use the TTS config to speak the confirmations
     _ttsConfig.speakConfirmations(
       currentValues: currentValues,
@@ -337,14 +337,16 @@ class TransferScreenViewModel
       func: (_) async {
         // Call the shared confirmTransfer method
         await confirmTransfer();
-        var returnValue = GenericOutput(type: OutputType.localFunction, result: 'Transfer completed successfully');
+        var returnValue = GenericOutput(
+            type: OutputType.localFunction,
+            result: 'Transfer completed successfully');
         return returnValue;
       },
     );
 
     // Get tools from superclass
     final superTools = super.getTools(context);
-    
+
     // Prepend the confirm transfer tool
     return [confirmTransferTool, ...superTools];
   }
@@ -352,7 +354,7 @@ class TransferScreenViewModel
   /// Confirm and execute the transfer
   Future<void> confirmTransfer() async {
     // Show dialog with transfer completed message
-    if(ttsEnabled){
+    if (ttsEnabled) {
       tts.speak("Transfer completed");
     }
     await showDialog(
@@ -431,13 +433,12 @@ class TransferScreenViewModel
     String currentScreenName = currentPath!.split("/")[1];
     var chatMessages = await chatMessageMemory.chatHistory.getChatMessages();
     var memoryLength = chatMessages.length;
-    if ((toolcalls.length > 1 ||
-        (firstToolCall.name != currentScreenName)) &&
+    if ((toolcalls.length > 1 || (firstToolCall.name != currentScreenName)) &&
         memoryLength > 1) {
       // context change, try again without history
       chatHistoryForUi.add(HistoryMessage(
           text:
-          "received multiple tool calls (irt multiple user-messages). trying again with only the last user-message",
+              "received multiple tool calls (irt multiple user-messages). trying again with only the last user-message",
           isHuman: false));
       clearChatMessageMemory();
       chain = createChain(promptTemplate, llmWithTools, chatMessageMemory);
@@ -447,5 +448,4 @@ class TransferScreenViewModel
     }
     return toolcalls;
   }
-
 }
