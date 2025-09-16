@@ -146,7 +146,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(
             create: (context) => LangBarState(
                 enableSpeech:
-                    PlatformDetails().isMobile || PlatformDetails().isWeb),
+                    PlatformDetails().isMobile || PlatformDetails().isWeb || PlatformDetails().isDesktop),
           ),
           ChangeNotifierProvider(
             create: (context) => WidthChanged(),
