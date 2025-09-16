@@ -196,16 +196,19 @@ class TransferScreenViewModel
     final transferIntent = intent != null
         ? TransferIntent.fromString(intent)
         : TransferIntent.initialization;
-    var isCorrection = transferIntent == TransferIntent.correction;
+    var isModification = transferIntent != TransferIntent.initialization;
     print("intent: $intent, transferIntent: $transferIntent");
     // Store previous values before updating
 
     // final previousAmount = state.amount;
     // final previousName = state.destinationName;
     // final previousDescription = state.description;
-    final previousAmount = isCorrection && amount != null ? state.amount : null;
-    final previousName = isCorrection && destinationName != null ? state.destinationName : null;
-    final previousDescription = isCorrection && description != null ? state.description : null;
+    final previousAmount = isModification ? state.amount : null;
+    final previousName = isModification ? state.destinationName : null;
+    final previousDescription = isModification ? state.description : null;
+    // final previousAmount = isCorrection && amount != null ? state.amount : null;
+    // final previousName = isCorrection && destinationName != null ? state.destinationName : null;
+    // final previousDescription = isCorrection && description != null ? state.description : null;
 
     // Use existing state values if new values are not provided
     final newAmount = amount ?? previousAmount;
