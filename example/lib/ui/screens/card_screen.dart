@@ -39,31 +39,23 @@ class CardScreen extends StatelessWidget {
         initialLimit: limit,
         cardType: cardType,
       ),
-      child: Builder(builder: (context) {
-        // Update ViewModel when parameters change
-        context.read<CreditCardScreenViewModel>().updateFromConstructorParams(
-          action: action,
-          limit: limit,
-        );
-
-        return CreditCardScreenBody(
-          label: label,
-          imageSrc: imageSrc,
-          initialAction: action,
-          initialLimit: limit,
-        );
-      }),
+      child: CardScreenBody(
+        label: label,
+        imageSrc: imageSrc,
+        initialAction: action,
+        initialLimit: limit,
+      ),
     );
   }
 }
 
-class CreditCardScreenBody extends StatefulWidget {
+class CardScreenBody extends StatefulWidget {
   final String label;
   final String imageSrc;
   final ActionOnCard? initialAction;
   final int? initialLimit;
 
-  const CreditCardScreenBody({
+  const CardScreenBody({
     required this.label,
     required this.imageSrc,
     this.initialAction,
@@ -72,10 +64,10 @@ class CreditCardScreenBody extends StatefulWidget {
   });
 
   @override
-  State<CreditCardScreenBody> createState() => _CreditCardScreenBodyState();
+  State<CardScreenBody> createState() => _CardScreenBodyState();
 }
 
-class _CreditCardScreenBodyState extends State<CreditCardScreenBody> {
+class _CardScreenBodyState extends State<CardScreenBody> {
   late final TextEditingController textEditingController;
   late final TextEditingController actionController;
 

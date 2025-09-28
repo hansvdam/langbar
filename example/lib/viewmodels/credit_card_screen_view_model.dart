@@ -122,6 +122,14 @@ class CreditCardScreenViewModel
     _ttsConfig = CreditCardScreenTtsConfig(cardType: cardType);
     langbarLogger.i(
         'CreditCardScreenViewModel created with cardType: $cardType, action: $initialAction, limit: $initialLimit');
+
+    // Speak initial values if provided
+    if (initialAction != null || initialLimit != null) {
+      // Small delay to ensure the screen is ready
+      Future.delayed(const Duration(milliseconds: 100), () {
+        speakConfirmations(initialAction, null, initialLimit, null);
+      });
+    }
   }
 
   /// Update the ViewModel with new constructor parameters
