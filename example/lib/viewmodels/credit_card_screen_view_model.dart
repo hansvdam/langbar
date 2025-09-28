@@ -1,5 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:langbar_core/my_conversation_buffer_memory.dart';
+import 'package:langbar_core/speech_enabled.dart';
+import 'package:langbar_core/tts_highlight_service.dart';
+import 'package:langbar_core/ui/langfield/langbar_states.dart';
+import 'package:langbar_core/ui/switchable_screen.dart';
+import 'package:langbar_core/utils/utils.dart';
+import 'package:langbar_core/send_to_llm.dart';
+import 'package:langchain/langchain.dart';
 import 'app_generic_screen_view_model.dart';
+import 'screen_tts_config.dart';
 
 enum ActionOnCard {
   cancel,
@@ -36,20 +46,133 @@ class CreditCardScreenState {
   }
 }
 
+class CreditCardScreenTtsConfig extends ScreenTtsConfig {
+  @override
+  String get screenName => 'Credit Card';
+
+  @override
+  String? get tabBarIconFieldId => 'creditcard_icon';
+
+  @override
+  List<TtsParameter> buildTtsParameters({
+    required Map<String, dynamic> currentValues,
+    Map<String, dynamic>? previousValues,
+    required bool hasScreenChanged,
+  }) {
+    List<TtsParameter> parameters = [];
+
+    final action = currentValues['action'] as ActionOnCard?;
+    final previousAction = previousValues?['action'] as ActionOnCard?;
+    final limit = currentValues['limit'] as int?;
+    final previousLimit = previousValues?['limit'] as int?;
+
+    if (action != null && action != ActionOnCard.none &&
+        (action != previousAction || hasScreenChanged)) {
+      parameters.add(TtsParameter(
+        fieldId: 'action',
+        label: hasScreenChanged || previousAction == null
+            ? 'action'
+            : 'action changed to',
+        value: action.name,
+      ));
+    }
+
+    if (limit != null && (limit != previousLimit || hasScreenChanged)) {
+      parameters.add(TtsParameter(
+        fieldId: 'limit',
+        label: hasScreenChanged || previousLimit == null
+            ? 'limit'
+            : 'limit changed to',
+        value: '$limit euros',
+      ));
+    }
+
+    return parameters;
+  }
+}
+
+final CreditCardScreenTtsConfig _ttsConfig = CreditCardScreenTtsConfig();
+
 class CreditCardScreenViewModel
-    extends AppGenericScreenViewModel<CreditCardScreenState> {
+    extends AppGenericScreenViewModel<CreditCardScreenState>
+    with SpeechEnabled
+    implements Switchable {
+  final BuildContext _context;
+
   CreditCardScreenViewModel({
     required BuildContext context,
     ActionOnCard? initialAction,
     int? initialLimit,
-  }) : super(
+  })  : _context = context,
+        super(
           CreditCardScreenState(
             action: initialAction ?? ActionOnCard.none,
             limit: initialLimit,
             initial: true,
           ),
           context: context,
-        );
+        ) {
+    langbarLogger.i(
+        'CreditCardScreenViewModel created with action: $initialAction, limit: $initialLimit');
+  }
+
+  /// Update the ViewModel with new constructor parameters
+  void updateFromConstructorParams({
+    ActionOnCard? action,
+    int? limit,
+  }) {
+    langbarLogger.i(
+        'CreditCardScreenViewModel updating from constructor params: action=$action, limit=$limit');
+
+    // Store previous values before updating
+    final previousAction = state.action != ActionOnCard.none ? state.action : null;
+    final previousLimit = state.limit;
+
+    // Use existing state values if new values are not provided
+    final newAction = action ?? state.action;
+    final newLimit = limit ?? state.limit;
+
+    emit(state.copyWith(
+      action: newAction,
+      limit: newLimit,
+      initial: false,
+    ));
+
+    // Build smart confirmations based on what changed
+    speakConfirmations(action, previousAction, limit, previousLimit);
+  }
+
+  void speakConfirmations(
+      ActionOnCard? action,
+      ActionOnCard? previousAction,
+      int? limit,
+      int? previousLimit) {
+    // Build current and previous values maps for the TTS config
+    Map<String, dynamic> currentValues = {};
+    Map<String, dynamic> previousValues = {};
+
+    // Only add values that were actually passed (not null in the method call)
+    if (action != null) {
+      currentValues['action'] = action;
+      if (previousAction != null) {
+        previousValues['action'] = previousAction;
+      }
+    }
+
+    if (limit != null) {
+      currentValues['limit'] = limit;
+      if (previousLimit != null) {
+        previousValues['limit'] = previousLimit;
+      }
+    }
+
+    // Use the TTS config to speak the confirmations
+    _ttsConfig.speakConfirmations(
+      currentValues: currentValues,
+      previousValues: previousValues.isNotEmpty ? previousValues : null,
+      currentScreenCubit: currentScreenCubit,
+    );
+  }
 
   void updateAction(ActionOnCard action) {
     emit(state.copyWith(action: action, initial: false));
@@ -61,5 +184,36 @@ class CreditCardScreenViewModel
 
   void markAsNotInitial() {
     emit(state.copyWith(initial: false));
+  }
+
+  @override
+  Future<List<ParsedToolCall>> handleNewAndSwitch(
+      Cubit<dynamic>? currentViewmodel,
+      String? currentPath,
+      List<ParsedToolCall> toolcalls,
+      ParsedToolCall firstToolCall,
+      MyConversationBufferWindowMemory chatMessageMemory,
+      ChatHistory chatHistoryForUi,
+      RunnableSequence<Object, Object> chain,
+      ChatPromptTemplate promptTemplate,
+      RunnableBinding<PromptValue, ChatModelOptions, ChatResult> llmWithTools,
+      String query) async {
+    String currentScreenName = currentPath!.split("/")[1];
+    var chatMessages = await chatMessageMemory.chatHistory.getChatMessages();
+    var memoryLength = chatMessages.length;
+    if ((toolcalls.length > 1 || (firstToolCall.name != currentScreenName)) &&
+        memoryLength > 1) {
+      // context change, try again without history
+      chatHistoryForUi.add(HistoryMessage(
+          text:
+              "received multiple tool calls (irt multiple user-messages). trying again with only the last user-message",
+          isHuman: false));
+      clearChatMessageMemory();
+      chain = createChain(promptTemplate, llmWithTools, chatMessageMemory);
+      final output2 = await chain.invoke(query);
+      chatMessageMemory.chatHistory.addHumanChatMessage(query);
+      toolcalls = output2 as List<ParsedToolCall>;
+    }
+    return toolcalls;
   }
 }

@@ -34,7 +34,20 @@ class CreditCardScreen extends StatelessWidget {
         initialAction: action,
         initialLimit: limit,
       ),
-      child: CreditCardScreenBody(label: label, imageSrc: imageSrc),
+      child: Builder(builder: (context) {
+        // Update ViewModel when parameters change
+        context.read<CreditCardScreenViewModel>().updateFromConstructorParams(
+          action: action,
+          limit: limit,
+        );
+
+        return CreditCardScreenBody(
+          label: label,
+          imageSrc: imageSrc,
+          initialAction: action,
+          initialLimit: limit,
+        );
+      }),
     );
   }
 }
@@ -42,10 +55,14 @@ class CreditCardScreen extends StatelessWidget {
 class CreditCardScreenBody extends StatefulWidget {
   final String label;
   final String imageSrc;
+  final ActionOnCard? initialAction;
+  final int? initialLimit;
 
   const CreditCardScreenBody({
     required this.label,
     required this.imageSrc,
+    this.initialAction,
+    this.initialLimit,
     super.key,
   });
 
@@ -75,21 +92,20 @@ class _CreditCardScreenBodyState extends State<CreditCardScreenBody> {
   Widget build(BuildContext context) {
     return BlocBuilder<CreditCardScreenViewModel, CreditCardScreenState>(
       builder: (context, state) {
-        // Handle initial animation
+        // Set initial values for controllers based on state
         if (state.initial) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               context.read<CreditCardScreenViewModel>().markAsNotInitial();
-              if (state.action == ActionOnCard.none) {
-                actionController.text = state.action.name;
+
+              // Set the action controller text regardless of action value
+              actionController.text = state.action.name;
+
+              // Animate the limit field
+              if (state.limit != null) {
+                animateFieldContent(
+                    state.limit.toString(), textEditingController);
               }
-              animateFieldContent(
-                      (state.limit ?? '').toString(), textEditingController)
-                  .then((_) {
-                if (mounted && state.action != ActionOnCard.none) {
-                  animateFieldContent(state.action.name, actionController);
-                }
-              });
             }
           });
         }
@@ -131,6 +147,7 @@ class _CreditCardScreenBodyState extends State<CreditCardScreenBody> {
                 )),
             DropdownMenu<ActionOnCard>(
                 controller: actionController,
+                initialSelection: state.action,
                 label: const Text('Action'),
                 dropdownMenuEntries: actionEntries,
                 onSelected: (action) {
