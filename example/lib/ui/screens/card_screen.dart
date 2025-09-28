@@ -10,15 +10,19 @@ import '../../viewmodels/credit_card_screen_view_model.dart';
 
 const defaultPadding = 16.0;
 
-class CreditCardScreen extends StatelessWidget {
+enum CardType { credit, debit }
+
+class CardScreen extends StatelessWidget {
   final ActionOnCard? action;
   final String label;
   final int? limit;
   final String imageSrc;
+  final CardType cardType;
 
-  const CreditCardScreen({
+  const CardScreen({
     required this.label,
     required this.imageSrc,
+    required this.cardType,
     super.key,
     this.action,
     this.limit,
@@ -33,6 +37,7 @@ class CreditCardScreen extends StatelessWidget {
         context: context,
         initialAction: action,
         initialLimit: limit,
+        cardType: cardType,
       ),
       child: Builder(builder: (context) {
         // Update ViewModel when parameters change

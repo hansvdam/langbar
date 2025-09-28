@@ -13,7 +13,7 @@ import 'package:langbar_core/ui/langfield/langbar_wrapper.dart';
 import 'package:langbar_core/utils/utils.dart';
 
 import 'ui/main_scaffolds.dart';
-import 'ui/screens/credit_card_screen.dart';
+import 'ui/screens/card_screen.dart';
 import 'viewmodels/credit_card_screen_view_model.dart';
 import 'models/transfer_intent.dart';
 
@@ -65,8 +65,9 @@ List<RouteBase> hamburgerRoutes = [
         return MaterialPage(
             fullscreenDialog: true,
             child: LangBarWrapper(
-                body: CreditCardScreen(
+                body: CardScreen(
                     label: 'Credit Card',
+                    cardType: CardType.credit,
                     imageSrc:
                         "https://ae.visamiddleeast.com/dam/VCOM/regional/ap/taiwan/global-elements/images/tw-visa-platinum-card-498x280.png",
                     action: ActionOnCard.fromString(
@@ -85,8 +86,9 @@ List<RouteBase> hamburgerRoutes = [
         return MaterialPage(
             fullscreenDialog: true,
             child: LangBarWrapper(
-                body: CreditCardScreen(
+                body: CardScreen(
                     label: 'Debit Card',
+                    cardType: CardType.debit,
                     imageSrc:
                         "https://www.trustcobank.com/wp-content/uploads/2023/01/Trustco-Debit-Card-450.png",
                     action: ActionOnCard.fromString(

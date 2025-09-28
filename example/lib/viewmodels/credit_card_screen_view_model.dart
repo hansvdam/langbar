@@ -10,6 +10,7 @@ import 'package:langbar_core/send_to_llm.dart';
 import 'package:langchain/langchain.dart';
 import 'app_generic_screen_view_model.dart';
 import 'screen_tts_config.dart';
+import '../ui/screens/card_screen.dart';
 
 enum ActionOnCard {
   cancel,
@@ -47,8 +48,12 @@ class CreditCardScreenState {
 }
 
 class CreditCardScreenTtsConfig extends ScreenTtsConfig {
+  final CardType cardType;
+
+  CreditCardScreenTtsConfig({required this.cardType});
+
   @override
-  String get screenName => 'Credit Card';
+  String get screenName => cardType == CardType.credit ? 'Credit Card' : 'Debit Card';
 
   @override
   String? get tabBarIconFieldId => 'creditcard_icon';
@@ -91,19 +96,21 @@ class CreditCardScreenTtsConfig extends ScreenTtsConfig {
   }
 }
 
-final CreditCardScreenTtsConfig _ttsConfig = CreditCardScreenTtsConfig();
+// TTS config will be created in the ViewModel with the appropriate card type
 
 class CreditCardScreenViewModel
     extends AppGenericScreenViewModel<CreditCardScreenState>
     with SpeechEnabled
     implements Switchable {
-  final BuildContext _context;
+  final CardType cardType;
+  late final CreditCardScreenTtsConfig _ttsConfig;
 
   CreditCardScreenViewModel({
     required BuildContext context,
+    required this.cardType,
     ActionOnCard? initialAction,
     int? initialLimit,
-  })  : _context = context,
+  })  :
         super(
           CreditCardScreenState(
             action: initialAction ?? ActionOnCard.none,
@@ -112,8 +119,9 @@ class CreditCardScreenViewModel
           ),
           context: context,
         ) {
+    _ttsConfig = CreditCardScreenTtsConfig(cardType: cardType);
     langbarLogger.i(
-        'CreditCardScreenViewModel created with action: $initialAction, limit: $initialLimit');
+        'CreditCardScreenViewModel created with cardType: $cardType, action: $initialAction, limit: $initialLimit');
   }
 
   /// Update the ViewModel with new constructor parameters
