@@ -5,6 +5,7 @@ import 'package:image_network/image_network.dart';
 import 'package:provider/provider.dart';
 
 import 'package:langbar_core/ui/langfield/langbar_states.dart';
+import 'package:langbar_core/tts_highlight_service.dart';
 import '../utils.dart';
 import '../../viewmodels/credit_card_screen_view_model.dart';
 
@@ -129,31 +130,37 @@ class _CardScreenBodyState extends State<CardScreenBody> {
           children: [
             SizedBox(
                 width: 100,
-                child: TextField(
-                  controller: textEditingController,
-                  decoration: const InputDecoration(labelText: 'Limit'),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.digitsOnly
-                  ],
-                  onChanged: (value) {
-                    context
-                        .read<CreditCardScreenViewModel>()
-                        .updateLimit(int.tryParse(value));
-                  },
+                child: TtsHighlightWrapper(
+                  fieldId: 'limit',
+                  child: TextField(
+                    controller: textEditingController,
+                    decoration: const InputDecoration(labelText: 'Limit'),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.digitsOnly
+                    ],
+                    onChanged: (value) {
+                      context
+                          .read<CreditCardScreenViewModel>()
+                          .updateLimit(int.tryParse(value));
+                    },
+                  ),
                 )),
-            DropdownMenu<ActionOnCard>(
-                controller: actionController,
-                initialSelection: state.action,
-                label: const Text('Action'),
-                dropdownMenuEntries: actionEntries,
-                onSelected: (action) {
-                  if (action != null) {
-                    context
-                        .read<CreditCardScreenViewModel>()
-                        .updateAction(action);
-                  }
-                }),
+            TtsHighlightWrapper(
+              fieldId: 'action',
+              child: DropdownMenu<ActionOnCard>(
+                  controller: actionController,
+                  initialSelection: state.action,
+                  label: const Text('Action'),
+                  dropdownMenuEntries: actionEntries,
+                  onSelected: (action) {
+                    if (action != null) {
+                      context
+                          .read<CreditCardScreenViewModel>()
+                          .updateAction(action);
+                    }
+                  }),
+            ),
           ],
         );
 
