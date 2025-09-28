@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:langbar_core/tts_highlight_service.dart';
 
 import '../models/account.dart';
 import 'default_appbar_scaffold.dart';
@@ -18,9 +19,9 @@ class AccountsScreen extends DefaultAppbarScreen {
       : super(
             body: BlocProvider(
           create: (context) => AccountsScreenViewModel(context: context),
-          child: BlocBuilder<AccountsScreenViewModel, void>(
+          child: BlocBuilder<AccountsScreenViewModel, AccountsScreenState>(
             builder: (context, state) {
-              return AccountsList(detailsPath);
+              return AccountsList(detailsPath, state: state);
             },
           ),
         ));
@@ -37,8 +38,9 @@ var savingAccounts = accounts.values
 
 class AccountsList extends StatelessWidget {
   final String detailsPath;
+  final AccountsScreenState state;
 
-  const AccountsList(this.detailsPath, {super.key});
+  const AccountsList(this.detailsPath, {super.key, required this.state});
 
   @override
   Widget build(BuildContext context) {
@@ -65,15 +67,26 @@ class AccountsList extends StatelessWidget {
       itemCount: accounts.length,
       itemBuilder: (context, index) {
         var account = accounts[index];
-        return GestureDetector(
-            onTap: () {
-              context.go("$detailsPath?accountid=${account.id}");
-            },
-            child: Card(
-                child: AccountTile(
-                    name: account.name,
-                    iban: account.number,
-                    balance: account.balance.toStringAsFixed(2))));
+        final isSelected = state.selectedAccount == account.name;
+        return TtsHighlightWrapper(
+          fieldId: 'account_${account.id}',
+          child: GestureDetector(
+              onTap: () {
+                // Update ViewModel with selection
+                context.read<AccountsScreenViewModel>().selectAccount(
+                  account.name,
+                  account.balance.toStringAsFixed(2),
+                );
+                // Navigate to details
+                context.go("$detailsPath?accountid=${account.id}");
+              },
+              child: Card(
+                  color: isSelected ? Colors.green.withValues(alpha: 0.1) : null,
+                  child: AccountTile(
+                      name: account.name,
+                      iban: account.number,
+                      balance: account.balance.toStringAsFixed(2)))),
+        );
       },
     );
   }

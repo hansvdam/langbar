@@ -1,32 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:langbar/ui/param_change_detecting_screens.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:langbar_core/tts_highlight_service.dart';
 
 import '../models/account.dart';
+import '../../viewmodels/transactions_screen_view_model.dart';
 import 'default_appbar_scaffold.dart';
 
 class TransactionsScreen extends DefaultAppbarScreen {
   TransactionsScreen({required super.label, super.key, filterString, accountId})
       : super(
-            body: TransactionsList(
-                filterString: filterString, accountId: accountId = 1),
+            body: BlocProvider(
+              create: (context) => TransactionsScreenViewModel(
+                context: context,
+                initialFilterString: filterString,
+                accountId: accountId ?? 1,
+              ),
+              child: BlocBuilder<TransactionsScreenViewModel, TransactionsScreenState>(
+                builder: (context, state) {
+                  return TransactionsList(
+                    filterString: state.searchFilter,
+                    accountId: state.accountId ?? 1,
+                  );
+                },
+              ),
+            ),
             leadingHamburger: false);
 
   static const name = 'transactions';
 }
 
-class TransactionsList extends ChangeDetectingStatefulWidget {
-  const TransactionsList({super.key, this.filterString, required accountId});
+class TransactionsList extends StatefulWidget {
+  const TransactionsList({super.key, this.filterString, required this.accountId});
 
   final String? filterString;
+  final int accountId;
 
   @override
   _TransactionsListState createState() => _TransactionsListState();
-
-  @override
-  String value() => filterString ?? '';
 }
 
-class _TransactionsListState extends UpdatingScreenState<TransactionsList> {
+class _TransactionsListState extends State<TransactionsList> {
   final TextEditingController _filterController = TextEditingController();
   late Future<List<BankTransaction>> _transactions;
 
@@ -34,12 +47,15 @@ class _TransactionsListState extends UpdatingScreenState<TransactionsList> {
   void initState() {
     super.initState();
     _transactions = readTransactionsFromCsv(context);
-    initOrUpdateWidgetParams();
+    _filterController.text = widget.filterString ?? '';
   }
 
   @override
-  void initOrUpdateWidgetParams() {
-    _filterController.text = widget.filterString ?? '';
+  void didUpdateWidget(TransactionsList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.filterString != oldWidget.filterString) {
+      _filterController.text = widget.filterString ?? '';
+    }
   }
 
   @override
@@ -62,35 +78,49 @@ class _TransactionsListState extends UpdatingScreenState<TransactionsList> {
 
           return Column(
             children: <Widget>[
-              TextField(
-                controller: _filterController,
-                decoration: InputDecoration(labelText: 'Search'),
-                onChanged: (value) {
-                  setState(() {});
-                },
+              TtsHighlightWrapper(
+                fieldId: 'transaction_search',
+                child: TextField(
+                  controller: _filterController,
+                  decoration: InputDecoration(labelText: 'Search'),
+                  onChanged: (value) {
+                    context.read<TransactionsScreenViewModel>().updateSearchFilter(value);
+                    setState(() {});
+                  },
+                ),
               ),
               Expanded(
                 child: ListView.builder(
                   itemCount: filteredContacts?.length,
                   itemBuilder: (context, index) {
                     var contact = filteredContacts![index];
-                    return Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      child: ListTile(
-                        title: Text(contact.description,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyLarge
-                                ?.copyWith(fontWeight: FontWeight.bold)),
-                        subtitle: Text(
-                          contact.destinationName,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        trailing: Text(
-                          '€ ${contact.amount.toStringAsFixed(2)}',
-                          style: Theme.of(context).textTheme.bodyLarge,
+                    final isSelected = context.read<TransactionsScreenViewModel>().state.selectedTransaction == contact.description;
+                    return TtsHighlightWrapper(
+                      fieldId: 'transaction_${index}',
+                      child: GestureDetector(
+                        onTap: () {
+                          context.read<TransactionsScreenViewModel>().selectTransaction(contact.description);
+                        },
+                        child: Card(
+                          color: isSelected ? Colors.green.withValues(alpha: 0.1) : null,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          child: ListTile(
+                            title: Text(contact.description,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.copyWith(fontWeight: FontWeight.bold)),
+                            subtitle: Text(
+                              contact.destinationName,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            trailing: Text(
+                              '€ ${contact.amount.toStringAsFixed(2)}',
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                          ),
                         ),
                       ),
                     );

@@ -119,10 +119,10 @@ class AccountsScreenTtsConfig extends ScreenTtsConfig {
 class HomeScreenTtsConfig extends ScreenTtsConfig {
   @override
   String get screenName => 'Home';
-  
+
   @override
   String? get tabBarIconFieldId => 'home_icon';
-  
+
   @override
   List<TtsParameter> buildTtsParameters({
     required Map<String, dynamic> currentValues,
@@ -130,13 +130,61 @@ class HomeScreenTtsConfig extends ScreenTtsConfig {
     required bool hasScreenChanged,
   }) {
     List<TtsParameter> parameters = [];
-    
+
     // Home screen might not have specific parameters to speak
     // but we include it for consistency
     if (hasScreenChanged) {
       // Could add welcome message or status updates here
     }
-    
+
+    return parameters;
+  }
+}
+
+/// Transactions screen TTS configuration
+class TransactionsScreenTtsConfig extends ScreenTtsConfig {
+  @override
+  String get screenName => 'Transactions';
+
+  @override
+  String? get tabBarIconFieldId => 'transactions_icon';
+
+  @override
+  List<TtsParameter> buildTtsParameters({
+    required Map<String, dynamic> currentValues,
+    Map<String, dynamic>? previousValues,
+    required bool hasScreenChanged,
+  }) {
+    List<TtsParameter> parameters = [];
+
+    final searchFilter = currentValues['searchFilter'] as String?;
+    final previousFilter = previousValues?['searchFilter'] as String?;
+
+    if (searchFilter != null && searchFilter.isNotEmpty &&
+        (searchFilter != previousFilter || hasScreenChanged)) {
+      parameters.add(TtsParameter(
+        fieldId: 'transaction_search',
+        label: hasScreenChanged || previousFilter == null
+            ? 'searching for'
+            : 'search changed to',
+        value: searchFilter,
+      ));
+    }
+
+    final selectedTransaction = currentValues['selectedTransaction'] as String?;
+    final previousTransaction = previousValues?['selectedTransaction'] as String?;
+
+    if (selectedTransaction != null &&
+        (selectedTransaction != previousTransaction || hasScreenChanged)) {
+      parameters.add(TtsParameter(
+        fieldId: 'transaction_selection',
+        label: hasScreenChanged || previousTransaction == null
+            ? 'selected transaction'
+            : 'changed to',
+        value: selectedTransaction,
+      ));
+    }
+
     return parameters;
   }
 }
