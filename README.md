@@ -5,13 +5,14 @@ A Flutter library for natural language interface components that integrate with 
 ## Features
 
 - 🎤 **Voice-enabled LLM integration** with speech-to-text and text-to-speech
-- 🏗️ **MVVM architecture** with `GenericScreenViewModel` base class  
+- 🏗️ **MVVM architecture** with `GenericScreenViewModel` base class
 - 💉 **Dependency injection** via get_it for flexible configuration
 - 🔧 **Multi-provider LLM support** (OpenAI, Groq, Ollama, OpenRouter)
 - 🧰 **Auto-generated tools** from GoRouter navigation routes
 - 💾 **Conversation history** with persistent storage
 - 🎯 **Natural language input** via `LangField` widget
 - 📱 **Cross-platform** Flutter support
+- 🔌 **MCP (Model Context Protocol)** support for Claude Desktop integration
 
 ## Installation
 
@@ -176,6 +177,7 @@ For detailed documentation and examples, see:
 - [Architecture Guide](https://github.com/hansvandam/langbar_core/wiki/Architecture)
 - [API Reference](https://pub.dev/documentation/langbar_core/latest/)
 - [Example App](https://github.com/hansvandam/langbar_core/tree/main/example)
+- [MCP Integration Guide](MCP_INTEGRATION.md) - Model Context Protocol support for Claude Desktop
 
 ## Contributing
 
