@@ -289,7 +289,11 @@ Future<void> sendToOpenai(BaseChatModel llm, BuildContext context,
           langbarState.historyExpansion = ChatSheetExpansion.full;
           langbarState.historyShowing = true;
         case OutputType.localFunction:
-          // do nothing for now. Later may send result via the MCP server
+          // Handle local function execution - can be routed through MCP if available
+          _handleLocalFunctionOutput(lastResult, chatHistoryForUi, query);
+          if (_isMCPEnabled()) {
+            _notifyMCPServer(toolCallToCall.name, toolCallToCall.arguments, lastResult);
+          }
       }
     }
   } catch (e) {
@@ -457,10 +461,50 @@ void setGlobalCreateHook(CreateHookFunction newHook) {
 
 String _mapToJsonString(Map<String, String> map) {
   if (map.isEmpty) return '{}';
-  
-  final entries = map.entries.map((entry) => 
+
+  final entries = map.entries.map((entry) =>
     '"${entry.key}": "${entry.value}"'
   ).join(', ');
-  
+
   return '{$entries}';
+}
+
+// MCP Integration Support Functions
+bool _isMCPEnabled() {
+  try {
+    if (getIt.isRegistered<bool>(instanceName: 'mcpEnabled')) {
+      return getIt<bool>(instanceName: 'mcpEnabled');
+    }
+  } catch (e) {
+    // MCP not configured
+  }
+  return false;
+}
+
+void _notifyMCPServer(String toolName, Map<String, dynamic> params, dynamic result) {
+  try {
+    // Record the tool call in GUI events if MCP is enabled
+    if (getIt.isRegistered<Function>(instanceName: 'mcpRecordToolCall')) {
+      final recorder = getIt<Function>(instanceName: 'mcpRecordToolCall');
+      recorder(toolName, params, result);
+    }
+  } catch (e) {
+    // MCP recording not available
+  }
+}
+
+void _handleLocalFunctionOutput(GenericOutput result, ChatHistory chatHistory, String query) {
+  // Add to chat history
+  chatHistory.add(HistoryMessage(text: query, isHuman: true));
+  if (result.result.isNotEmpty) {
+    chatHistory.add(HistoryMessage(text: result.result, isHuman: false));
+  }
+}
+
+// Enable MCP mode for LLM processing
+void enableMCPMode(bool enabled) {
+  if (getIt.isRegistered<bool>(instanceName: 'mcpEnabled')) {
+    getIt.unregister<bool>(instanceName: 'mcpEnabled');
+  }
+  getIt.registerSingleton<bool>(enabled, instanceName: 'mcpEnabled');
 }

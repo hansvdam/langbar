@@ -46,6 +46,9 @@ dependencies:
   # shared_preferences_web is somehow necessary (as a dependency) for web after adding speech, otherwise we get a compile error. Don't understand why:
   shared_preferences_web: ^2.4.3
   csv: ^6.0.0
+  args: ^2.5.0
+  web_socket_channel: ^3.0.1
+  json_rpc_2: ^3.0.2
   flutter_dotenv: ^6.0.0
   flutter_bloc: ^9.1.1
   get_it: ^7.7.0

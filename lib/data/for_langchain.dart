@@ -1,6 +1,7 @@
 import 'package:langchain/langchain.dart';
 
 import 'data_key.dart';
+export 'data_key.dart';
 
 enum DataType { string, integer, number, boolean, object, array }
 

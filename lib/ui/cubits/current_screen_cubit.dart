@@ -76,4 +76,14 @@ class CurrentScreenCubit extends Cubit<CurrentScreenState> {
 
   /// Optional helper if callers want the VM directly.
   ScreenVM? get currentCubit => state.currentViewModel;
+
+  /// Get a ViewModel by its path
+  ScreenVM? getViewModel(String path) {
+    return state.vmByPath[path];
+  }
+
+  /// Get all registered paths
+  List<String> getAllRegisteredPaths() {
+    return state.vmByPath.keys.toList();
+  }
 }

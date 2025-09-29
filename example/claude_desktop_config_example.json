@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "langbar-app": {
+      "command": "/Users/hansvandam/Library/flutter/bin/dart",
+      "args": [
+        "run",
+        "/Users/hansvandam/Projects/Flutter/langbar_core/example/bin/mcp_server.dart"
+      ],
+      "env": {}
+    }
+  }
+}
