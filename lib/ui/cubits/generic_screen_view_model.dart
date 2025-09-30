@@ -17,8 +17,8 @@ class GenericScreenViewModel<TState> extends Cubit<TState> with SpeechEnabled {
 
   GenericScreenViewModel(super.initialState, {required BuildContext context})
       : currentScreenCubit = BlocProvider.of<CurrentScreenCubit>(context) {
-    // Register as current view model
-    context.read<CurrentScreenCubit>().pushCurrentCubit(this);
+    // Register as current view model with context
+    context.read<CurrentScreenCubit>().pushCurrentCubit(this, context: context);
     // Initialize TTS service
     _initializeTTS();
     // Defer MCP tools update until after the widget is built to avoid Provider lifecycle issues

@@ -1,4 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
+import '../../mcp/mcp_integration_interface.dart';
+import 'generic_screen_view_model.dart';
 
 /// If you have a base class for your screen VMs, prefer using it instead of Cubit.
 typedef ScreenVM = Cubit<dynamic>;
@@ -38,21 +42,63 @@ class CurrentScreenState {
 }
 
 class CurrentScreenCubit extends Cubit<CurrentScreenState> {
+  BuildContext? _lastContext;
+
   CurrentScreenCubit() : super(const CurrentScreenState());
 
   /// Called by your Navigator/GoRouter observer on push/pop/replace.
-  void setCurrentPath(String? path) {
+  void setCurrentPath(String? path, {BuildContext? context}) {
     print("setting current path to ${path ?? '(null)'}");
     final previousPath = state.currentPath;
+
+    // Store the context for later use
+    if (context != null) {
+      _lastContext = context;
+    }
+
     emit(state.copyWith(
       currentPath: path,
       previousPath: previousPath,
     ));
+
+    // If we're switching to a path that already has a viewmodel registered,
+    // update MCP tools for that viewmodel
+    if (path != null && state.vmByPath.containsKey(path)) {
+      final viewModel = state.vmByPath[path];
+      if (viewModel is GenericScreenViewModel) {
+        _updateMCPToolsForViewModel(viewModel, context ?? _lastContext);
+      }
+    }
+  }
+
+  /// Update MCP tools for a specific viewmodel
+  void _updateMCPToolsForViewModel(GenericScreenViewModel viewModel, BuildContext? context) {
+    if (context == null) return;
+
+    try {
+      // Try to get MCP integration if it's registered
+      final getIt = GetIt.instance;
+
+      if (getIt.isRegistered<MCPIntegrationInterface>()) {
+        final mcpIntegration = getIt.get<MCPIntegrationInterface>();
+        print('🎯 Updating MCP tools for existing VM: ${viewModel.runtimeType}');
+        mcpIntegration.updateTools(viewModel, context);
+      }
+    } catch (e) {
+      // MCP not available, which is fine
+      print('⚠️ Could not update MCP tools: $e');
+    }
   }
 
   /// Attach/register a VM for a path. Safe to call multiple times.
-  void registerVmForPath(String path, ScreenVM viewModel) {
+  void registerVmForPath(String path, ScreenVM viewModel, {BuildContext? context}) {
     print("registering VM for path to $path");
+
+    // Store the context for later use if provided
+    if (context != null) {
+      _lastContext = context;
+    }
+
     final next = Map<String, ScreenVM>.from(state.vmByPath)..[path] = viewModel;
     emit(state.copyWith(vmByPath: next));
   }
@@ -66,8 +112,8 @@ class CurrentScreenCubit extends Cubit<CurrentScreenState> {
   }
 
   // ---- Backward-compatible API (matches your error messages) ----
-  void pushCurrentCubit(ScreenVM vm) {
-    registerVmForPath(state.currentPath ?? '/', vm);
+  void pushCurrentCubit(ScreenVM vm, {BuildContext? context}) {
+    registerVmForPath(state.currentPath ?? '/', vm, context: context);
   }
 
   void removeCurrentCubit(ScreenVM vm) {
