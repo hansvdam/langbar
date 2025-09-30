@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:window_manager/window_manager.dart';
 import '../../documented_route.dart';
 import '../../data/for_langchain.dart' as langbar;
 import '../tool_registry.dart';
@@ -36,13 +38,26 @@ class RouteToolConverter {
           );
           GoRouter.of(context).go(location);
         } else {
+          // MCP call - show window without stealing focus
+          if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+            try {
+              await windowManager.show();
+              // NOT calling focus() to avoid stealing focus from Claude Desktop
+              // Window becomes visible but Claude Desktop keeps focus
+              logger.d('Window shown without focus for MCP navigation');
+            } catch (e) {
+              logger.w('Could not show window: $e');
+              // Continue with navigation even if window management fails
+            }
+          }
+
           // Use navigation handler for MCP calls (no context)
           final navHandler = MCPNavigationHandler();
           if (!navHandler.canNavigate) {
             return {
               'success': false,
-              'error': 'Navigation not available. Please ensure the Flutter app is in the foreground.',
-              'hint': 'The app must be running and visible to navigate.',
+              'error': 'Navigation not available. Flutter app window shown but may need manual focus.',
+              'hint': 'The app window is visible. Click on it to see the navigation result.',
             };
           }
           await navHandler.navigateTo(route.name!, filteredParams);

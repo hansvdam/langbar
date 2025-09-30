@@ -46,6 +46,7 @@ dependencies:
   web_socket_channel: ^3.0.1
   json_rpc_2: ^3.0.2
   async: ^2.11.0
+  window_manager: ^0.5.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

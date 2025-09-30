@@ -12,6 +12,13 @@ import '../logger_utils.dart';
 
 enum MCPTransport { stdio, websocket }
 
+/// Window behavior when MCP navigation occurs
+enum MCPWindowMode {
+  none,        // No window management
+  showOnly,    // Show window without focus (default)
+  showAndFocus // Show window and take focus
+}
+
 class MCPConfiguration {
   final MCPTransport transport;
   final int? port;
@@ -19,6 +26,7 @@ class MCPConfiguration {
   final bool exposeViewModels;
   final bool enableKeywordMatching;
   final List<String> resources;
+  final MCPWindowMode windowMode;
 
   MCPConfiguration({
     this.transport = MCPTransport.stdio,
@@ -31,6 +39,7 @@ class MCPConfiguration {
       '/last-gui-events',
       '/conversation-history',
     ],
+    this.windowMode = MCPWindowMode.showOnly, // Default to visual-only (no focus steal)
   });
 }
 

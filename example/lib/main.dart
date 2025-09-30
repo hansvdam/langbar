@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:window_manager/window_manager.dart';
 import 'package:langbar/routes.dart' show routesList, router;
 import 'package:langbar_core/ui/langfield/langbar_states.dart';
 import 'package:langbar_core/platform_details.dart';
@@ -133,6 +135,11 @@ void main() async {
   // see: https://codewithandrea.com/articles/flutter-navigation-gorouter-go-vs-push/
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize window manager for desktop platforms (needed for MCP window management)
+  if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+    await windowManager.ensureInitialized();
+  }
+
   // Load environment variables from .env file (from assets)
   await dotenv.load();
 
@@ -162,6 +169,7 @@ void main() async {
             '/last-gui-events',
             '/conversation-history',
           ],
+          windowMode: MCPWindowMode.showOnly, // Visual-only update without focus stealing
         ),
         autoStart: true,
       );
@@ -205,8 +213,13 @@ class _MyAppState extends State<MyApp> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           print('🚀 Initializing MCPNavigationHandler with router and context');
-          MCPNavigationHandler().initialize(context, router);
-          print('✅ MCPNavigationHandler initialized');
+          // Initialize with showOnly mode - window becomes visible but doesn't steal focus
+          MCPNavigationHandler().initialize(
+            context,
+            router,
+            windowMode: MCPWindowMode.showOnly,
+          );
+          print('✅ MCPNavigationHandler initialized with showOnly window mode');
         }
       });
     }
