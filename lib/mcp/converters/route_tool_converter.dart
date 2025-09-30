@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:window_manager/window_manager.dart';
 import '../../documented_route.dart';
@@ -38,16 +39,17 @@ class RouteToolConverter {
           );
           GoRouter.of(context).go(location);
         } else {
-          // MCP call - show window without stealing focus
+          // MCP call - force rendering without stealing focus
           if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
             try {
-              await windowManager.show();
-              // NOT calling focus() to avoid stealing focus from Claude Desktop
-              // Window becomes visible but Claude Desktop keeps focus
-              logger.d('Window shown without focus for MCP navigation');
+              // Force Flutter to render even when unfocused
+              // This ensures the navigation is visible without taking focus
+              SchedulerBinding.instance.scheduleForcedFrame();
+              SchedulerBinding.instance.scheduleWarmUpFrame();
+              logger.d('Forced frame rendering for MCP navigation without focus');
             } catch (e) {
-              logger.w('Could not show window: $e');
-              // Continue with navigation even if window management fails
+              logger.w('Could not force frame rendering: $e');
+              // Continue with navigation even if frame scheduling fails
             }
           }
 

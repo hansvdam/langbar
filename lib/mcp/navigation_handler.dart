@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:window_manager/window_manager.dart';
 import 'mcp_server.dart';
@@ -63,10 +64,19 @@ class MCPNavigationHandler {
               logger.d('Window mode: none - no window management');
               break;
             case MCPWindowMode.showOnly:
-              // Show window without taking focus (visual-only update)
-              await windowManager.show();
-              // NOT calling windowManager.focus() - window visible but Claude keeps focus
-              logger.d('Window shown without focus steal');
+              // Force a frame render without taking focus
+              // This ensures navigation is rendered even when window is unfocused
+
+              // Schedule a forced frame to ensure rendering happens
+              // This bypasses the normal "don't render when unfocused" behavior
+              SchedulerBinding.instance.scheduleForcedFrame();
+              logger.d('Forced frame scheduled for unfocused rendering');
+
+              // Also schedule a warm-up frame as backup
+              // This prepares the framework for the next real frame
+              SchedulerBinding.instance.scheduleWarmUpFrame();
+
+              logger.d('Navigation will render without focus change');
               break;
             case MCPWindowMode.showAndFocus:
               // Show window and take focus
