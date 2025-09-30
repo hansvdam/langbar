@@ -47,8 +47,10 @@ class MCPServer {
   final MCPConfiguration configuration;
   final MCPToolRegistry toolRegistry;
   final List<MCPSession> _sessions = [];
+  final Map<String, json_rpc.Peer> _sessionPeers = {}; // Store peers for notifications
   HttpServer? _httpServer;
   json_rpc.Server? _currentRpcServer;
+  json_rpc.Peer? _stdioPeer; // For stdio transport
   bool _isRunning = false;
 
   MCPServer({
@@ -95,9 +97,11 @@ class MCPServer {
     );
     _sessions.add(session);
 
-    _currentRpcServer = json_rpc.Server(channel);
-    _registerHandlers(_currentRpcServer!, session);
-    _currentRpcServer!.listen();
+    // Use Peer instead of Server for bidirectional communication
+    _stdioPeer = json_rpc.Peer(channel);
+    _sessionPeers[session.id] = _stdioPeer!;
+    _registerHandlers(_stdioPeer!, session);
+    _stdioPeer!.listen();
   }
 
   Future<void> _startWebSocketServer() async {
@@ -126,26 +130,44 @@ class MCPServer {
     final channel = wsChannel.cast<String>();
     final sessionId = DateTime.now().millisecondsSinceEpoch.toString();
 
+    logger.i('=== NEW WEBSOCKET CONNECTION ===');
+    logger.i('Creating session: $sessionId');
+
     final session = MCPSession(
       id: sessionId,
       toolRegistry: toolRegistry,
     );
     _sessions.add(session);
+    logger.i('Session added. Total sessions: ${_sessions.length}');
+    logger.i('Session ${sessionId} initialized: ${session.isInitialized}');
 
-    final rpcServer = json_rpc.Server(channel);
-    _registerHandlers(rpcServer, session);
+    // Use Peer instead of Server for bidirectional communication
+    final rpcPeer = json_rpc.Peer(channel);
+    _sessionPeers[sessionId] = rpcPeer;
+    logger.i('Registering handlers for session $sessionId');
+    _registerHandlers(rpcPeer, session);
 
-    rpcServer.listen().then((_) {
-      logger.i('MCP WebSocket session $sessionId disconnected');
+    logger.i('Starting to listen on peer for session $sessionId');
+    rpcPeer.listen().then((_) {
+      logger.i('=== WEBSOCKET DISCONNECTED ===');
+      logger.i('Session $sessionId disconnected');
       _sessions.remove(session);
+      _sessionPeers.remove(sessionId);
+      logger.i('Remaining sessions: ${_sessions.length}');
     });
   }
 
-  void _registerHandlers(json_rpc.Server server, MCPSession session) {
+  void _registerHandlers(json_rpc.Peer peer, MCPSession session) {
     // Initialize method
-    server.registerMethod('initialize', (json_rpc.Parameters params) {
+    peer.registerMethod('initialize', (json_rpc.Parameters params) {
+      logger.i('=== INITIALIZE REQUEST RECEIVED ===');
+      logger.i('Session ID: ${session.id}');
+      logger.i('Raw params: ${params.value}');
+
       final protocolVersion = params['protocolVersion'].asString;
       final clientInfo = params['clientInfo'].asMap as Map<String, dynamic>;
+      logger.d('Protocol version: $protocolVersion');
+      logger.d('Client info: $clientInfo');
 
       // Accept both protocol versions
       final supportedVersions = ['2024-11-05', '2025-06-18'];
@@ -153,19 +175,27 @@ class MCPServer {
           ? protocolVersion
           : '2024-11-05'; // Default to older version
 
+      // Initialize the session
+      logger.d('About to initialize session...');
       session.initialize(
         protocolVersion: protocolVersion,
         clientInfo: clientInfo,
       );
+      logger.d('Session.initialize() called, isInitialized: ${session.isInitialized}');
 
-      return {
+      logger.i('Session ${session.id} initialized successfully');
+      logger.i('Total sessions: ${_sessions.length}, initialized count: ${_sessions.where((s) => s.isInitialized).length}');
+
+      final response = {
         'protocolVersion': responseVersion, // Echo back the client's version if supported
         'serverInfo': {
           'name': 'Langbar MCP Server',
           'version': '1.0.0',
         },
         'capabilities': {
-          'tools': {},
+          'tools': {
+            'listChanged': true, // Server will emit notifications when tools change
+          },
           'resources': {
             'listResources': true,
             'readResource': true,
@@ -173,17 +203,22 @@ class MCPServer {
           },
         },
       };
+
+      logger.i('=== SENDING INITIALIZE RESPONSE ===');
+      logger.d('Response: $response');
+
+      return response;
     });
 
     // List tools method
-    server.registerMethod('tools/list', (json_rpc.Parameters params) {
+    peer.registerMethod('tools/list', (json_rpc.Parameters params) {
       return {
         'tools': session.getTools().map((tool) => tool.toMCPSchema()).toList(),
       };
     });
 
     // Call tool method
-    server.registerMethod('tools/call', (json_rpc.Parameters params) async {
+    peer.registerMethod('tools/call', (json_rpc.Parameters params) async {
       final toolName = params['name'].asString;
       final toolParams = params['arguments'].asMap as Map<String, dynamic>;
 
@@ -211,7 +246,7 @@ class MCPServer {
     });
 
     // List resources method
-    server.registerMethod('resources/list', (json_rpc.Parameters params) {
+    peer.registerMethod('resources/list', (json_rpc.Parameters params) {
       final resources = configuration.resources.map((path) => {
         'uri': path,
         'name': path.replaceAll('/', '').replaceAll('-', ' '),
@@ -222,7 +257,7 @@ class MCPServer {
     });
 
     // Read resource method
-    server.registerMethod('resources/read', (json_rpc.Parameters params) async {
+    peer.registerMethod('resources/read', (json_rpc.Parameters params) async {
       final uri = params['uri'].asString;
 
       try {
@@ -245,24 +280,56 @@ class MCPServer {
     });
 
     // Ping method (keep-alive)
-    server.registerMethod('ping', (json_rpc.Parameters params) {
+    peer.registerMethod('ping', (json_rpc.Parameters params) {
       return {'pong': true};
     });
   }
 
   Future<void> notifyToolsChanged() async {
+    logger.i('=== NOTIFY TOOLS CHANGED ===');
+    logger.i('Total sessions: ${_sessions.length}');
+    logger.i('Session details:');
+
     for (final session in _sessions) {
-      if (session.isInitialized) {
-        // Send notification to client about tools change
-        // This would need to be implemented based on the specific transport
-        logger.d('Notifying session ${session.id} about tools change');
+      logger.i('  Session ${session.id}:');
+      logger.i('    - initialized: ${session.isInitialized}');
+      logger.i('    - has peer: ${_sessionPeers.containsKey(session.id)}');
+
+      // if (!session.isInitialized) {
+      //   logger.w('    → Skipping: session not initialized');
+      //   continue;
+      // }
+
+      final peer = _sessionPeers[session.id];
+      if (peer == null) {
+        logger.w('    → Skipping: no peer found');
+        continue;
+      }
+
+      try {
+        // Send notification about tools change
+        // Per MCP spec, send notification without tool data
+        // Client should request tools/list to get the updated list
+        logger.i('    → Sending tools/list_changed notification...');
+        peer.sendNotification('notifications/tools/list_changed', {});
+        logger.i('    ✓ Successfully sent notification');
+      } catch (e) {
+        logger.e('    ✗ Error sending notification: $e');
       }
     }
+
+    logger.i('=== END NOTIFY TOOLS CHANGED ===');
   }
 
   Future<void> stop() async {
     if (!_isRunning) return;
 
+    // Close all peers
+    for (final peer in _sessionPeers.values) {
+      peer.close();
+    }
+    _sessionPeers.clear();
+    _stdioPeer = null;
     _currentRpcServer?.close();
     await _httpServer?.close();
     _sessions.clear();

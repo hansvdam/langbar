@@ -68,7 +68,7 @@ class MCPSession {
         final currentVM = currentScreenCubit.getViewModel(currentPath);
         if (currentVM != null && currentVM is GenericScreenViewModel) {
           // Register ViewModel-specific tools
-          toolRegistry.updateViewModelTools(currentVM, _context!);
+          toolRegistry.updateTools(currentVM, _context!);
         }
       }
     } catch (e) {

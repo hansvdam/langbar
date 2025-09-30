@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:langchain/langchain.dart';
 import '../tool_registry.dart';
+import '../navigation_handler.dart';
 import '../../logger_utils.dart';
+import '../../tools/generic_screen_tool.dart';
 
 class ViewModelToolConverter {
   static MCPTool convert(Tool langchainTool) {
@@ -14,11 +16,39 @@ class ViewModelToolConverter {
         // Convert MCP params to LangChain format
         final toolInput = _prepareLangChainInput(params);
 
-        // Execute the LangChain tool
-        final result = await langchainTool.invoke(toolInput);
+        // Check if this is a navigation tool (GenericScreenTool)
+        if (langchainTool is GenericScreenTool) {
+          logger.d('Detected navigation tool: ${langchainTool.name}');
 
-        // Convert the result to MCP format
-        return _convertLangChainOutput(result);
+          // Use MCPNavigationHandler for navigation tools
+          final navHandler = MCPNavigationHandler();
+          if (navHandler.canNavigate) {
+            // Convert params to Map<String, String> for navigation
+            final navParams = <String, String>{};
+            params.forEach((key, value) {
+              if (value != null) {
+                navParams[key] = value.toString();
+              }
+            });
+
+            // Navigate using the handler which ensures UI thread execution
+            await navHandler.navigateTo(langchainTool.name, navParams);
+
+            return {
+              'success': true,
+              'result': 'Navigated to ${langchainTool.name} with parameters: $navParams',
+            };
+          } else {
+            logger.w('MCPNavigationHandler not initialized, falling back to direct invocation');
+            // Fall back to direct invocation if navigation handler is not available
+            final result = await langchainTool.invoke(toolInput);
+            return _convertLangChainOutput(result);
+          }
+        } else {
+          // For non-navigation tools, invoke normally
+          final result = await langchainTool.invoke(toolInput);
+          return _convertLangChainOutput(result);
+        }
       } catch (e) {
         logger.e('Error executing ViewModel tool ${langchainTool.name}: $e');
         return {
@@ -41,23 +71,27 @@ class ViewModelToolConverter {
 
     // LangChain tools have inputJsonSchema property
     if (tool.inputJsonSchema != null && tool.inputJsonSchema is Map) {
-      final schema = tool.inputJsonSchema as Map<String, dynamic>;
+      // Convert to Map<String, dynamic> safely
+      final schema = Map<String, dynamic>.from(tool.inputJsonSchema as Map);
 
       // Extract properties from the schema
       if (schema['properties'] != null && schema['properties'] is Map) {
-        final properties = schema['properties'] as Map<String, dynamic>;
+        // Convert properties to proper type
+        final properties = Map<String, dynamic>.from(schema['properties'] as Map);
 
         properties.forEach((key, value) {
-          if (value is Map<String, dynamic>) {
+          if (value is Map) {
+            // Convert value to Map<String, dynamic>
+            final valueMap = Map<String, dynamic>.from(value);
             params[key] = {
-              'type': value['type'] ?? 'string',
-              'description': value['description'] ?? '',
+              'type': valueMap['type'] ?? 'string',
+              'description': valueMap['description'] ?? '',
               'required': _isRequired(key, schema),
             };
 
             // Add enum if present
-            if (value['enum'] != null) {
-              params[key]['enum'] = value['enum'];
+            if (valueMap['enum'] != null) {
+              params[key]['enum'] = valueMap['enum'];
             }
           }
         });

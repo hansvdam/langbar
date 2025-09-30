@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:langchain/langchain.dart';
 import '../ui/cubits/generic_screen_view_model.dart';
-import '../tools/generic_screen_tool.dart';
-import '../documented_route.dart';
-import '../data/for_langchain.dart' as langbar;
 import '../logger_utils.dart';
-import 'converters/route_tool_converter.dart';
 import 'converters/viewmodel_tool_converter.dart';
 
 abstract class MCPTool {
@@ -58,9 +54,6 @@ class MCPToolImpl extends MCPTool {
 
 class MCPToolRegistry {
   final Map<String, MCPTool> _tools = {};
-  final Map<String, MCPTool> _routeTools = {};
-  final Map<String, MCPTool> _viewModelTools = {};
-  final Map<String, MCPTool> _keywordTools = {};
 
   // Observers for tool changes
   final List<Function()> _changeListeners = [];
@@ -79,75 +72,46 @@ class MCPToolRegistry {
     }
   }
 
-  void registerRouteTool(DocumentedGoRoute route) {
+  /// Update all tools from the current ViewModel
+  void updateTools(GenericScreenViewModel viewModel, BuildContext context) {
+    logger.d('Starting tool update for ViewModel: ${viewModel.runtimeType}');
+
+    // Clear all existing tools
+    _tools.clear();
+    logger.d('Cleared existing tools');
+
+    // Get ALL tools from ViewModel (includes routes, keywords, and ViewModel-specific)
     try {
-      final tool = RouteToolConverter.convert(route);
-      _routeTools[tool.name] = tool;
-      _tools[tool.name] = tool;
-      logger.d('Registered route tool: ${tool.name}');
-    } catch (e) {
-      logger.e('Error registering route tool: $e');
-    }
-  }
-
-  void registerRouteTools(List<DocumentedGoRoute> routes) {
-    for (final route in routes) {
-      registerRouteTool(route);
-    }
-    _notifyChanges();
-  }
-
-  void updateViewModelTools(GenericScreenViewModel viewModel, BuildContext context) {
-    // Clear existing ViewModel tools
-    _viewModelTools.clear();
-
-    // Get tools from ViewModel
-    try {
+      logger.d('Attempting to get tools from ViewModel...');
       final tools = viewModel.getTools(context);
+      logger.d('Got ${tools.length} tools from ViewModel ${viewModel.runtimeType}');
+
       for (final tool in tools) {
         final mcpTool = ViewModelToolConverter.convert(tool);
-        _viewModelTools[mcpTool.name] = mcpTool;
+        _tools[mcpTool.name] = mcpTool;
+        logger.d('Converted tool: ${tool.name} to MCP tool');
       }
 
-      // Merge with route tools
-      _rebuildToolsMap();
+      logger.d('Updated tools: ${_tools.length} total tools from ViewModel');
+
+      // Notify listeners about the change
+      logger.d('Notifying listeners about tool changes...');
       _notifyChanges();
+      logger.d('Notification complete');
+    } catch (e, stackTrace) {
+      // Check if this is the Provider lifecycle error we expect during construction
+      if (e.toString().contains('Tried to listen to an InheritedWidget') ||
+          e.toString().contains('life-cycle that will never be called again')) {
+        logger.d('Provider lifecycle error during construction - tools will be updated after frame');
+      } else {
+        logger.e('Error updating tools from ViewModel: $e');
+        logger.e('Stack trace: $stackTrace');
+      }
 
-      logger.d('Updated ViewModel tools: ${_viewModelTools.length} tools');
-    } catch (e) {
-      logger.e('Error updating ViewModel tools: $e');
+      // Even if there's an error getting tools, notify listeners that tools have changed (cleared)
+      logger.d('Notifying listeners despite error...');
+      _notifyChanges();
     }
-  }
-
-  void registerKeywordTool(String pattern, Function handler) {
-    final tool = MCPToolImpl(
-      name: 'keyword_${pattern.hashCode}',
-      description: 'Direct keyword match for pattern: $pattern',
-      parameters: {
-        'input': {
-          'type': 'string',
-          'description': 'The user input to match against the pattern',
-        },
-      },
-      executionHandler: (params, context) async {
-        final input = params['input'] as String?;
-        if (input != null && RegExp(pattern).hasMatch(input)) {
-          return handler(input);
-        }
-        return null;
-      },
-    );
-
-    _keywordTools[tool.name] = tool;
-    _tools[tool.name] = tool;
-    _notifyChanges();
-  }
-
-  void _rebuildToolsMap() {
-    _tools.clear();
-    _tools.addAll(_routeTools);
-    _tools.addAll(_viewModelTools);
-    _tools.addAll(_keywordTools);
   }
 
   MCPTool? getTool(String name) {
@@ -158,40 +122,14 @@ class MCPToolRegistry {
     return _tools.values.toList();
   }
 
-  List<MCPTool> getRouteTools() {
-    return _routeTools.values.toList();
-  }
-
-  List<MCPTool> getViewModelTools() {
-    return _viewModelTools.values.toList();
-  }
-
-  List<MCPTool> getKeywordTools() {
-    return _keywordTools.values.toList();
-  }
-
-  void clearViewModelTools() {
-    for (final toolName in _viewModelTools.keys) {
-      _tools.remove(toolName);
-    }
-    _viewModelTools.clear();
-    _notifyChanges();
-  }
-
   void clearAll() {
     _tools.clear();
-    _routeTools.clear();
-    _viewModelTools.clear();
-    _keywordTools.clear();
     _notifyChanges();
   }
 
   Map<String, dynamic> getStatistics() {
     return {
       'total': _tools.length,
-      'routes': _routeTools.length,
-      'viewModel': _viewModelTools.length,
-      'keywords': _keywordTools.length,
     };
   }
 }

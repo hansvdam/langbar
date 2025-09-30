@@ -32,3 +32,4 @@ build/
 
 # Environment variables
 .env
+/.specstory/

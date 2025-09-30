@@ -157,7 +157,6 @@ void main() async {
     try {
       print('🔄 Setting up MCP server...');
       await setupMCP(
-        routes: routesList,
         configuration: MCPConfiguration(
           transport: MCPTransport.websocket,
           port: mcpPort,

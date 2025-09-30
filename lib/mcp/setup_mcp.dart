@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:go_router/go_router.dart';
 import 'mcp_server.dart';
 import 'mcp_langbar_integration.dart';
 import '../send_to_llm.dart';
@@ -12,16 +11,16 @@ import 'resources/gui_events_resource.dart';
 /// Example usage:
 /// ```dart
 /// await setupMCP(
-///   routes: router.routes,
 ///   configuration: MCPConfiguration(
 ///     transport: MCPTransport.websocket,
 ///     port: 3000,
 ///   ),
+///   context: context,
 /// );
 /// ```
 Future<void> setupMCP({
-  required List<RouteBase> routes,
   MCPConfiguration? configuration,
+  BuildContext? context,
   bool autoStart = true,
 }) async {
   try {
@@ -30,7 +29,7 @@ Future<void> setupMCP({
     // Initialize MCP integration
     await MCPLangbarIntegration.instance.initialize(
       configuration: configuration,
-      routes: routes,
+      context: context,
     );
 
     // Register MCP recording function for tool calls
@@ -60,9 +59,8 @@ Future<void> setupMCP({
 }
 
 /// Convenience function to setup MCP with standard configuration
-Future<void> setupMCPWithDefaults(List<RouteBase> routes) async {
+Future<void> setupMCPWithDefaults([BuildContext? context]) async {
   await setupMCP(
-    routes: routes,
     configuration: MCPConfiguration(
       transport: MCPTransport.websocket,
       port: 3000,
@@ -70,6 +68,7 @@ Future<void> setupMCPWithDefaults(List<RouteBase> routes) async {
       exposeViewModels: true,
       enableKeywordMatching: true,
     ),
+    context: context,
   );
 }
 

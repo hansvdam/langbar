@@ -180,17 +180,20 @@ class MCPBridgeServer {
       final params = json['params'] as Map<String, dynamic>? ?? {};
       final clientProtocol = params['protocolVersion'] ?? '2025-06-18';
 
-      _error('Handling initialize with protocol version: $clientProtocol');
+      _error('=== INITIALIZE REQUEST ===');
+      _error('Client protocol: $clientProtocol');
+      _error('Connected to Flutter: $_isConnected');
 
       // If connected to Flutter, forward and let it respond
       if (_isConnected && _wsChannel != null) {
         // Adapt protocol version if needed
         if (clientProtocol == '2025-06-18') {
+          _error('Adapting protocol from 2025-06-18 to 2024-11-05 for Flutter');
           params['protocolVersion'] = '2024-11-05';
         }
         final messageStr = jsonEncode(json);
         _wsChannel!.sink.add(messageStr);
-        _error('Forwarded initialize to Flutter');
+        _error('Forwarded initialize to Flutter: $messageStr');
       } else {
         // Not connected - respond directly from bridge
         _error('Not connected to Flutter, responding from bridge');

@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:go_router/go_router.dart';
 import 'mcp_server.dart';
 import 'tool_registry.dart';
-import '../documented_route.dart';
+import 'mcp_integration_interface.dart';
 import '../ui/cubits/current_screen_cubit.dart';
 import '../ui/cubits/generic_screen_view_model.dart';
 import '../logger_utils.dart';
-import 'converters/route_tool_converter.dart';
 import 'resources/gui_events_resource.dart';
 
-class MCPLangbarIntegration {
+class MCPLangbarIntegration implements MCPIntegrationInterface {
   static MCPLangbarIntegration? _instance;
   static MCPLangbarIntegration get instance => _instance ??= MCPLangbarIntegration._();
 
   MCPServer? _server;
   MCPToolRegistry? _toolRegistry;
   bool _isInitialized = false;
+  BuildContext? _context; // Store context for ViewModel tool updates
 
   MCPLangbarIntegration._();
 
@@ -27,7 +26,7 @@ class MCPLangbarIntegration {
   /// Initialize the MCP integration with Langbar
   Future<void> initialize({
     MCPConfiguration? configuration,
-    List<RouteBase>? routes,
+    BuildContext? context,
   }) async {
     if (_isInitialized) {
       logger.w('MCP integration already initialized');
@@ -35,13 +34,11 @@ class MCPLangbarIntegration {
     }
 
     try {
+      // Store context if provided
+      _context = context;
+
       // Create tool registry
       _toolRegistry = MCPToolRegistry();
-
-      // Register route tools if provided
-      if (routes != null) {
-        _registerRouteTools(routes);
-      }
 
       // Create and configure MCP server
       final config = configuration ?? MCPConfiguration();
@@ -64,37 +61,21 @@ class MCPLangbarIntegration {
     }
   }
 
-  void _registerRouteTools(List<RouteBase> routes) {
-    final documentedRoutes = <DocumentedGoRoute>[];
-
-    void extractDocumentedRoutes(List<RouteBase> routeList) {
-      for (final route in routeList) {
-        // Check if it's a DocumentedGoRoute
-        if (route is DocumentedGoRoute) {
-          documentedRoutes.add(route);
-        }
-
-        // Handle StatefulShellRoute by iterating through its branches
-        if (route is StatefulShellRoute) {
-          for (final branch in route.branches) {
-            extractDocumentedRoutes(branch.routes);
-          }
-        }
-
-        // Handle regular GoRoute and its nested routes
-        if (route is GoRoute && route.routes.isNotEmpty) {
-          extractDocumentedRoutes(route.routes);
-        }
-      }
-    }
-
-    extractDocumentedRoutes(routes);
-    _toolRegistry!.registerRouteTools(documentedRoutes);
-    logger.i('Registered ${documentedRoutes.length} route tools with MCP');
-  }
 
   void _registerWithGetIt() {
     final getIt = GetIt.instance;
+
+    // Register MCP integration as interface type for ViewModels to access
+    if (!getIt.isRegistered<MCPIntegrationInterface>()) {
+      getIt.registerSingleton<MCPIntegrationInterface>(this);
+      logger.d('Registered MCP integration with GetIt as MCPIntegrationInterface');
+    }
+
+    // Also register as concrete type for direct access if needed
+    if (!getIt.isRegistered<MCPLangbarIntegration>()) {
+      getIt.registerSingleton<MCPLangbarIntegration>(this);
+      logger.d('Registered MCP integration with GetIt as MCPLangbarIntegration type');
+    }
 
     // Register MCP server and tool registry
     if (!getIt.isRegistered<MCPServer>()) {
@@ -109,6 +90,7 @@ class MCPLangbarIntegration {
   void _setupListeners() {
     // Listen for tool registry changes
     _toolRegistry!.addChangeListener(() {
+      logger.d('Tool registry changed, notifying MCP clients');
       _server?.notifyToolsChanged();
     });
 
@@ -133,21 +115,58 @@ class MCPLangbarIntegration {
       );
 
       // Update ViewModel tools if available
-      final vm = GetIt.instance<CurrentScreenCubit>().getViewModel(state.currentPath!);
+      final vm = state.currentViewModel;
       if (vm != null) {
-        updateViewModelTools(vm);
+        logger.d('Screen changed to ${state.currentPath}, updating MCP tools for ViewModel: ${vm.runtimeType}');
+        // Use stored context (will be set by the app when it initializes MCP)
+        updateViewModelTools(vm, _context);
+      } else {
+        logger.d('Screen changed to ${state.currentPath}, but no ViewModel found');
       }
     }
+  }
+
+  /// Update the BuildContext (should be called when context becomes available)
+  void updateContext(BuildContext context) {
+    _context = context;
+    // Re-update tools if we have a current ViewModel
+    try {
+      final currentScreenCubit = GetIt.instance<CurrentScreenCubit>();
+      final currentPath = currentScreenCubit.state.currentPath;
+      if (currentPath != null) {
+        final vm = currentScreenCubit.getViewModel(currentPath);
+        if (vm != null && vm is GenericScreenViewModel) {
+          updateViewModelTools(vm, context);
+        }
+      }
+    } catch (e) {
+      logger.d('Could not update tools after context change: $e');
+    }
+  }
+
+  /// Update tools based on current ViewModel (alias for compatibility)
+  @override
+  void updateTools(dynamic viewModel, dynamic context) {
+    updateViewModelTools(viewModel, context as BuildContext?);
   }
 
   /// Update tools based on current ViewModel
   void updateViewModelTools(dynamic viewModel, [BuildContext? context]) {
     if (_toolRegistry == null) return;
 
+    // Use stored context if not provided
+    final ctx = context ?? _context;
+    if (ctx == null) {
+      logger.w('Cannot update ViewModel tools without BuildContext');
+      return;
+    }
+
     try {
-      if (context != null && viewModel is GenericScreenViewModel) {
-        _toolRegistry!.updateViewModelTools(viewModel, context);
-        logger.d('Updated MCP tools for ViewModel: ${viewModel.runtimeType}');
+      if (viewModel is GenericScreenViewModel) {
+        _toolRegistry!.updateTools(viewModel, ctx);
+        // Get the tool names for logging
+        final toolNames = _toolRegistry!.getAllTools().map((t) => t.name).toList();
+        logger.d('Updated MCP tools for ViewModel: ${viewModel.runtimeType} - Tools: [${toolNames.join(', ')}]');
       }
     } catch (e) {
       logger.e('Error updating ViewModel tools for MCP: $e');
@@ -168,10 +187,6 @@ class MCPLangbarIntegration {
     await _server?.stop();
   }
 
-  /// Register a keyword handler
-  void registerKeywordHandler(String pattern, Function handler) {
-    _toolRegistry?.registerKeywordTool(pattern, handler);
-  }
 
   /// Record a GUI event
   void recordEvent(String type, String description, [Map<String, dynamic>? data]) {
