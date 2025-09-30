@@ -31,16 +31,19 @@ import 'llm_keys.dart';
 ///
 /// To use MCP:
 /// 1. Set enableMCP to true (default)
-/// 2. Run the app - MCP server will start on ws://localhost:3001/mcp
-/// 3. Configure your MCP client to connect to the server
-/// 4. For Claude Desktop: Use the bridge script at ws://localhost:3000/mcp
+/// 2. Choose transport: MCPTransport.websocket or MCPTransport.http
+/// 3. Run the app - MCP server will start on configured port
+///   - WebSocket: ws://localhost:3001/mcp
+///   - HTTP/SSE: http://localhost:3001/mcp/events (SSE) and /mcp/rpc (RPC)
+/// 4. Configure your MCP client to connect to the server
 ///
 /// The MCP server exposes:
 /// - All DocumentedGoRoute routes as navigation tools
 /// - ViewModels that implement appropriate interfaces
 /// - Resources for current screen, GUI events, and conversation history
 const bool enableMCP = true; // Set to false to disable MCP server
-const int mcpPort = 3001; // MCP server port (bridge uses 3000)
+const int mcpPort = 3001; // MCP server port
+const MCPTransport mcpTransport = MCPTransport.websocket; // Choose: websocket or http
 
 class GlobalContextService {
   static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -155,10 +158,10 @@ void main() async {
   // Setup MCP server if enabled
   if (enableMCP) {
     try {
-      print('🔄 Setting up MCP server...');
+      print('🔄 Setting up MCP server with $mcpTransport transport...');
       await setupMCP(
         configuration: MCPConfiguration(
-          transport: MCPTransport.websocket,
+          transport: mcpTransport,
           port: mcpPort,
           exposeRoutes: true,
           exposeViewModels: true,
@@ -173,7 +176,14 @@ void main() async {
         autoStart: true,
       );
 
-      print('🚀 MCP Server started on ws://localhost:$mcpPort/mcp');
+      final protocolPrefix = mcpTransport == MCPTransport.websocket ? 'ws' : 'http';
+      final endpoints = mcpTransport == MCPTransport.http
+          ? '\n  - SSE Events: http://localhost:$mcpPort/mcp/events\n  - RPC Endpoint: http://localhost:$mcpPort/mcp/rpc'
+          : '';
+
+      print('🚀 MCP Server started with $mcpTransport transport');
+      print('📡 Endpoints:');
+      print('  - Main: $protocolPrefix://localhost:$mcpPort/mcp$endpoints');
       print('📋 Available tools: ${getMCPStatistics()['tools']}');
       print('📚 Available resources: ${getMCPStatistics()['resources']}');
       print('✅ MCP Server is running: ${isMCPRunning()}');

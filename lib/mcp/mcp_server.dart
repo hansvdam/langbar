@@ -7,10 +7,11 @@ import 'package:web_socket_channel/io.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:async/async.dart';
 import 'mcp_session.dart';
+import 'mcp_http_server.dart';
 import 'tool_registry.dart';
 import '../logger_utils.dart';
 
-enum MCPTransport { stdio, websocket }
+enum MCPTransport { stdio, websocket, http }
 
 /// Window behavior when MCP navigation occurs
 enum MCPWindowMode {
@@ -49,6 +50,7 @@ class MCPServer {
   final List<MCPSession> _sessions = [];
   final Map<String, json_rpc.Peer> _sessionPeers = {}; // Store peers for notifications
   HttpServer? _httpServer;
+  MCPHttpServer? _httpServerInstance; // For HTTP/SSE transport
   json_rpc.Server? _currentRpcServer;
   json_rpc.Peer? _stdioPeer; // For stdio transport
   bool _isRunning = false;
@@ -72,6 +74,9 @@ class MCPServer {
         break;
       case MCPTransport.websocket:
         await _startWebSocketServer();
+        break;
+      case MCPTransport.http:
+        await _startHttpServer();
         break;
     }
     _isRunning = true;
@@ -123,6 +128,20 @@ class MCPServer {
           ..close();
       }
     });
+  }
+
+  Future<void> _startHttpServer() async {
+    if (configuration.port == null) {
+      throw ArgumentError('Port must be specified for HTTP transport');
+    }
+
+    _httpServerInstance = MCPHttpServer(
+      port: configuration.port!,
+      toolRegistry: toolRegistry,
+    );
+
+    await _httpServerInstance!.start();
+    logger.i('MCP HTTP Server started on port ${configuration.port}');
   }
 
   void _handleWebSocketConnection(WebSocket socket) {
@@ -286,6 +305,13 @@ class MCPServer {
   }
 
   Future<void> notifyToolsChanged() async {
+    // If using HTTP transport, delegate to HTTP server
+    if (configuration.transport == MCPTransport.http && _httpServerInstance != null) {
+      await _httpServerInstance!.notifyToolsChanged();
+      return;
+    }
+
+    // Original WebSocket/stdio notification logic
     logger.i('=== NOTIFY TOOLS CHANGED ===');
     logger.i('Total sessions: ${_sessions.length}');
     logger.i('Session details:');
@@ -323,6 +349,12 @@ class MCPServer {
 
   Future<void> stop() async {
     if (!_isRunning) return;
+
+    // Stop HTTP server if running
+    if (_httpServerInstance != null) {
+      await _httpServerInstance!.stop();
+      _httpServerInstance = null;
+    }
 
     // Close all peers
     for (final peer in _sessionPeers.values) {
