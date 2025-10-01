@@ -47,6 +47,7 @@ dependencies:
   json_rpc_2: ^3.0.2
   async: ^2.11.0
   window_manager: ^0.5.1
+  crypto: ^3.0.3
 dev_dependencies:
   flutter_test:
     sdk: flutter

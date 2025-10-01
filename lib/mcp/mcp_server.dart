@@ -8,10 +8,11 @@ import 'package:stream_channel/stream_channel.dart';
 import 'package:async/async.dart';
 import 'mcp_session.dart';
 import 'mcp_http_server.dart';
+import 'mcp_streamable_http_server.dart';
 import 'tool_registry.dart';
 import '../logger_utils.dart';
 
-enum MCPTransport { stdio, websocket, http }
+enum MCPTransport { stdio, websocket, http, streamableHttp }
 
 /// Window behavior when MCP navigation occurs
 enum MCPWindowMode {
@@ -51,6 +52,7 @@ class MCPServer {
   final Map<String, json_rpc.Peer> _sessionPeers = {}; // Store peers for notifications
   HttpServer? _httpServer;
   MCPHttpServer? _httpServerInstance; // For HTTP/SSE transport
+  MCPStreamableHttpServer? _streamableHttpServer; // For Streamable HTTP transport
   json_rpc.Server? _currentRpcServer;
   json_rpc.Peer? _stdioPeer; // For stdio transport
   bool _isRunning = false;
@@ -77,6 +79,9 @@ class MCPServer {
         break;
       case MCPTransport.http:
         await _startHttpServer();
+        break;
+      case MCPTransport.streamableHttp:
+        await _startStreamableHttpServer();
         break;
     }
     _isRunning = true;
@@ -142,6 +147,20 @@ class MCPServer {
 
     await _httpServerInstance!.start();
     logger.i('MCP HTTP Server started on port ${configuration.port}');
+  }
+
+  Future<void> _startStreamableHttpServer() async {
+    if (configuration.port == null) {
+      throw ArgumentError('Port must be specified for Streamable HTTP transport');
+    }
+
+    _streamableHttpServer = MCPStreamableHttpServer(
+      port: configuration.port!,
+      toolRegistry: toolRegistry,
+    );
+
+    await _streamableHttpServer!.start();
+    logger.i('MCP Streamable HTTP Server started on port ${configuration.port}');
   }
 
   void _handleWebSocketConnection(WebSocket socket) {
@@ -311,6 +330,12 @@ class MCPServer {
       return;
     }
 
+    // If using Streamable HTTP transport, delegate to streamable server
+    if (configuration.transport == MCPTransport.streamableHttp && _streamableHttpServer != null) {
+      await _streamableHttpServer!.notifyToolsChanged();
+      return;
+    }
+
     // Original WebSocket/stdio notification logic
     logger.i('=== NOTIFY TOOLS CHANGED ===');
     logger.i('Total sessions: ${_sessions.length}');
@@ -354,6 +379,12 @@ class MCPServer {
     if (_httpServerInstance != null) {
       await _httpServerInstance!.stop();
       _httpServerInstance = null;
+    }
+
+    // Stop Streamable HTTP server if running
+    if (_streamableHttpServer != null) {
+      await _streamableHttpServer!.stop();
+      _streamableHttpServer = null;
     }
 
     // Close all peers
