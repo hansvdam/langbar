@@ -33,3 +33,5 @@ build/
 # Environment variables
 .env
 /.specstory/
+/node_modules/
+/temp/

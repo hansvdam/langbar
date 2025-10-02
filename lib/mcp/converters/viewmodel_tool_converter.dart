@@ -70,7 +70,7 @@ class ViewModelToolConverter {
     final params = <String, dynamic>{};
 
     // LangChain tools have inputJsonSchema property
-    if (tool.inputJsonSchema != null && tool.inputJsonSchema is Map) {
+    if (tool.inputJsonSchema is Map) {
       // Convert to Map<String, dynamic> safely
       final schema = Map<String, dynamic>.from(tool.inputJsonSchema as Map);
 
