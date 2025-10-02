@@ -84,7 +84,6 @@ class ContactsScreenViewModel extends AppGenericScreenViewModel<ContactsScreenSt
   /// Update from constructor parameters (used when navigating with params)
   void updateFromConstructorParams({String? searchString}) {
     if (searchString != null && searchString != state.searchString) {
-      final previousSearch = state.searchString;
       emit(state.copyWith(searchString: searchString));
 
       if (searchString.isNotEmpty) {

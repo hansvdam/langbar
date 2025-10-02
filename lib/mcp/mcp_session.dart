@@ -16,8 +16,6 @@ class MCPSession {
   final Map<String, MCPResourceProvider> _resourceProviders = {};
 
   bool _isInitialized = false;
-  String? _protocolVersion;
-  Map<String, dynamic>? _clientInfo;
   BuildContext? _context;
 
   MCPSession({
@@ -42,8 +40,6 @@ class MCPSession {
     required Map<String, dynamic> clientInfo,
   }) {
     _isInitialized = true;
-    _protocolVersion = protocolVersion;
-    _clientInfo = clientInfo;
 
     logger.i('MCP Session $id initialized with protocol version: $protocolVersion');
     logger.d('Client info: $clientInfo');

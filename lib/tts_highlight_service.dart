@@ -27,7 +27,6 @@ class TtsHighlightService extends ChangeNotifier {
   bool _isHighlighting = false;
   StreamController<String?>? _highlightController;
   bool _isTabBarHighlighted = false;
-  String? _currentHighlightedTabIcon;
   StreamController<String?>? _tabBarHighlightController;
 
   TtsHighlightService._internal() {
@@ -148,7 +147,6 @@ class TtsHighlightService extends ChangeNotifier {
   Future<void> _highlightTabBarIcon(String? iconId) async {
     if (iconId == null) return;
     _isTabBarHighlighted = true;
-    _currentHighlightedTabIcon = iconId;
     langbarLogger.d('Highlighting tab bar icon: $iconId');
     _tabBarHighlightController?.add(iconId);
     notifyListeners();
@@ -157,7 +155,6 @@ class TtsHighlightService extends ChangeNotifier {
   /// Clear the tab bar highlight
   Future<void> _clearTabBarHighlight() async {
     _isTabBarHighlighted = false;
-    _currentHighlightedTabIcon = null;
     langbarLogger.d('Cleared tab bar highlight');
     _tabBarHighlightController?.add(null);
     notifyListeners();

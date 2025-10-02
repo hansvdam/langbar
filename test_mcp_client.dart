@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:convert';
 import 'package:web_socket_channel/io.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 

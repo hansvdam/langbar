@@ -26,7 +26,6 @@ class MCPBridgeServer {
   StreamSubscription? _wsSubscription;
   StreamSubscription? _stdinSubscription;
 
-  final _pendingRequests = <int, Completer<Map<String, dynamic>>>{};
   bool _isConnected = false;
   Timer? _reconnectTimer;
   int _reconnectAttempts = 0;

@@ -1,7 +1,5 @@
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
-import '../send_to_llm.dart'
-    show preserveLastMessageAndClearHistory, setHistoryCleared;
 import '../ui/cubits/current_screen_cubit.dart';
 
 // filtering in logviewer:
@@ -66,7 +64,6 @@ void activateUri(String navUri, bool openModal) {
   langbarLogger.i('activateUri called with: $navUri, openModal: $openModal');
 
   var currentUri = goRouter.routeInformationProvider.value.uri;
-  var targetUri = Uri.parse(navUri);
 
   if (openModal) {
     langbarLogger.i('Current URI: $currentUri');

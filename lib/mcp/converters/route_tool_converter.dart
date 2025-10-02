@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
-import 'package:window_manager/window_manager.dart';
 import '../../documented_route.dart';
 import '../../data/for_langchain.dart' as langbar;
 import '../tool_registry.dart';
