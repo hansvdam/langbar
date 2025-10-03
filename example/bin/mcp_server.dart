@@ -16,6 +16,20 @@ import 'package:args/args.dart';
 ///
 /// Usage:
 /// dart run mcp_server.dart [--port 3000] [--host localhost]
+///
+/// add the following to ~/Library/Application Support/Claude/claude_desktop_config.json:
+///
+///     "flutter-langbar": {
+//       "command": "/Users/<username>/Library/flutter/bin/dart",
+//       "args": [
+//         "run",
+//         "/Users/<username>/Projects/Flutter/langbar_core/example/bin/mcp_server.dart",
+//         "--port",
+//         "3001",
+//         "--host",
+//         "localhost"
+//       ]
+//     }
 
 class MCPBridgeServer {
   final String host;

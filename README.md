@@ -12,29 +12,25 @@ A Flutter library for natural language interface components that integrate with 
 - 💾 **Conversation history** with persistent storage
 - 🎯 **Natural language input** via `LangField` widget
 - 📱 **Cross-platform** Flutter support
-- 🔌 **MCP (Model Context Protocol)** support for Claude Desktop integration
+- 🔌 **MCP (Model Context Protocol)** support for e.g. Claude Desktop integration
 
-## Installation
-
-Add this to your package's `pubspec.yaml`:
-
-```yaml
-dependencies:
-  langbar_core: ^0.1.0
-```
 
 ## Quick Start
 
-### 1. Environment Setup
+### 1. Run the example
 
-Create a `.env` file in your project root:
+To run the example application:
+
+Create a `.env` file in the example directory:
 
 ```env
 OPENAI_API_KEY=your_openai_key_here
 # Or other provider keys as needed
 ```
 
-### 2. Initialize in main()
+## To reuse the example in your own project
+
+### Initialize in main()
 
 ```dart
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -56,7 +52,7 @@ void main() async {
 }
 ```
 
-### 3. Use LangField Widget
+### Use LangField Widget
 
 ```dart
 import 'package:langbar_core/langbar_core.dart';
@@ -77,7 +73,7 @@ class MyScreen extends StatelessWidget {
 }
 ```
 
-### 4. Create AI-enabled ViewModels
+### Create AI-enabled ViewModels
 
 ```dart
 class MyScreenViewModel extends GenericScreenViewModel<MyScreenState> {
@@ -93,6 +89,11 @@ class MyScreenViewModel extends GenericScreenViewModel<MyScreenState> {
 }
 ```
 
+### Easier:
+- clone this repo, e.g. to ~/temp/langbar_core
+- get a subscription to an AI code CLI (Claude Code, Cursor CLI etc.).
+- open the cli in your own project
+- issue a 
 ## Project Overview
 
 Langbar Core is a Flutter library for natural language interface components that integrate with LLMs using LangChain.dart. The architecture follows MVVM pattern where ViewModels serve as orchestrators between GUI and LLM assistants.
