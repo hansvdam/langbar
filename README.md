@@ -16,6 +16,8 @@ A Flutter library for natural language interface components that integrate with 
 - 🔌 **MCP (Model Context Protocol)** support for Claude Desktop integration
 
 ## Connect your app to OS assistants using MCP:
+
+![MCP Flow](images/mcp-flow.png)
 https://github.com/user-attachments/assets/b20636a9-edf7-45e7-b74f-880c9b624a3e
 ## Installation
 
