@@ -96,7 +96,7 @@ class MyScreenViewModel extends GenericScreenViewModel<MyScreenState> {
 - clone this repo, e.g. to ~/myprojects/langbar_core
 - get a subscription to an AI code CLI (Claude Code, Cursor CLI etc.).
 - open the cli in your own project
-- issue a prompt like: "First read ~/myprojects/langbar_core/readme.md. Then make a plan to modify the flutter app in this package to include LLM based assistance by carefully analyzing the code of the example project in ~/myprojects/langbar_core/example. Analyze carefuly how you can apply the mechanism employed there to the current project. Pay special attention to the routes and viewmodels for screens in the example project. Make sure routes and screens in the project in the current directory follow the same strategy for exposing their functionality and handling of LLM responses."
+- issue a prompt like: `"First read ~/myprojects/langbar_core/readme.md. Then make a plan to modify the flutter app in this package to include LLM based assistance by carefully analyzing the code of the example project in ~/myprojects/langbar_core/example. Analyze carefuly how you can apply the mechanism employed there to the current project. Pay special attention to the routes and viewmodels for screens in the example project. Make sure routes and screens in the project in the current directory follow the same strategy for exposing their functionality and handling of LLM responses."`
 - after the plan is created, execute it and see how far you get.
 
 ## Connect your app to OS assistants using MCP:
