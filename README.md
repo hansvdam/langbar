@@ -15,11 +15,6 @@ A Flutter library for natural language interface components that integrate with 
 - 🔌 **MCP (Model Context Protocol)** support for e.g. Claude Desktop integration
 - 🔌 **MCP (Model Context Protocol)** support for Claude Desktop integration
 
-## Connect your app to OS assistants using MCP:
-
-![MCP Flow](images/mcp-flow.png)
-
-https://github.com/user-attachments/assets/b20636a9-edf7-45e7-b74f-880c9b624a3e
 ## Installation
 
 
@@ -98,10 +93,18 @@ class MyScreenViewModel extends GenericScreenViewModel<MyScreenState> {
 ```
 
 ### Easier:
-- clone this repo, e.g. to ~/temp/langbar_core
+- clone this repo, e.g. to ~/myprojects/langbar_core
 - get a subscription to an AI code CLI (Claude Code, Cursor CLI etc.).
 - open the cli in your own project
-- issue a 
+- issue a prompt like: "First read ~/myprojects/langbar_core/readme.md. Then make a plan to modify the flutter app in this package to include LLM based assistance by carefully analyzing the code of the example project in ~/myprojects/langbar_core/example. Analyze carefuly how you can apply the mechanism employed there to the current project. Pay special attention to the routes and viewmodels for screens in the example project. Make sure routes and screens in the project in the current directory follow the same strategy for exposing their functionality and handling of LLM responses."
+- after the plan is created, execute it and see how far you get.
+
+## Connect your app to OS assistants using MCP:
+
+![MCP Flow](images/mcp-flow.png)
+
+https://github.com/user-attachments/assets/b20636a9-edf7-45e7-b74f-880c9b624a3e
+
 ## Project Overview
 
 Langbar Core is a Flutter library for natural language interface components that integrate with LLMs using LangChain.dart. The architecture follows MVVM pattern where ViewModels serve as orchestrators between GUI and LLM assistants.
