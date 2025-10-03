@@ -116,6 +116,7 @@ Standard Flutter commands apply:
 - `flutter pub deps` - Show dependency tree
 
 ## Architecture
+![Mobile ViewModel](images/MobileViewModel.png)
 
 ### Core Components
 
