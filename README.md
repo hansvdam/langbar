@@ -183,14 +183,6 @@ Key external dependencies:
 - `flutter_tts: ^4.2.3` - Text-to-speech output
 - `get_it: ^7.7.0` - Dependency injection
 
-## Documentation
-
-For detailed documentation and examples, see:
-- [Architecture Guide](https://github.com/hansvandam/langbar_core/wiki/Architecture)
-- [API Reference](https://pub.dev/documentation/langbar_core/latest/)
-- [Example App](https://github.com/hansvandam/langbar_core/tree/main/example)
-- [MCP Integration Guide](MCP_INTEGRATION.md) - Model Context Protocol support for Claude Desktop
-
 ## Contributing
 
 1. Fork the repository
