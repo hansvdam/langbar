@@ -1,6 +1,6 @@
 # Langbar Core
 
-A Flutter library for natural language interface components that integrate with LLMs using LangChain.dart. Build voice and text-enabled AI interfaces with MVVM architecture and dependency injection.
+A Flutter library for natural language interface components that integrate with LLMs using LangChain.dart. Build voice and text-enabled AI interfaces with MVVM architecture. LLM and speech integration for voide interaction from within the app als well as from external assistants using MCP.
 
 ## Features
 
@@ -13,10 +13,8 @@ A Flutter library for natural language interface components that integrate with 
 - 🎯 **Natural language input** via `LangField` widget
 - 📱 **Cross-platform** Flutter support
 - 🔌 **MCP (Model Context Protocol)** support for e.g. Claude Desktop integration
-- 🔌 **MCP (Model Context Protocol)** support for Claude Desktop integration
 
-## Installation
-
+https://github.com/user-attachments/assets/6b5a420d-b92c-4af9-a6c8-d64e8107c810
 
 ## Quick Start
 
