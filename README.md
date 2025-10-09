@@ -1,6 +1,7 @@
 # Langbar Core
 
 A Flutter library for natural language interface components that integrate with LLMs using LangChain.dart. Build voice and text-enabled AI interfaces with MVVM architecture. LLM and speech integration for voice interaction from within the app als well as from external assistants using MCP.
+
 It showcases an architecture for interfacing between GUIs and LLM based conversational assistance as described in https://arxiv.org/abs/2510.06223.
 
 ## Features
