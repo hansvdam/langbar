@@ -16,7 +16,7 @@ It showcases an architecture for interfacing between GUIs and LLM based conversa
 - 📱 **Cross-platform** Flutter support
 - 🔌 **MCP (Model Context Protocol)** support for e.g. Claude Desktop integration
 
-The following video demonstrates the MCP connection of the example app in this project to Claude Desktop.
+The following video demonstrates the MCP connection of the app in the example dir of this project to Claude Desktop.
 **Switch sound ON to hear the TTS:**
 
 https://github.com/user-attachments/assets/6b5a420d-b92c-4af9-a6c8-d64e8107c810
