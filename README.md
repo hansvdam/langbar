@@ -17,7 +17,6 @@ It showcases an architecture for interfacing between GUIs and LLM based conversa
 
 The following video demonstrates the MCP connection of the example app in this project to Claude Desktop:
 **Switch sound ON to hear the TTS:**
-[![MCP Integration Demo](https://img.youtube.com/vi/4pGmYHk1k1I/0.jpg)](https://www.youtube.com/watch?v=4pGmYHk1k1I)
 https://github.com/user-attachments/assets/6b5a420d-b92c-4af9-a6c8-d64e8107c810
 
 ## Quick Start
