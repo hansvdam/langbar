@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -226,6 +228,12 @@ Future<void> sendToOpenai(BaseChatModel llm, BuildContext context,
     lastResult = await tool.invoke(toolCallToCall.arguments);
     results.add(lastResult);
     // }
+    await _writeLastLLMInteraction(
+      query: query,
+      tools: tools,
+      toolCalls: toolcalls,
+      chatResult: repairingToolsOutputParser.lastChatResult,
+    );
     print(output1);
     langbarState.controllerOutlined.clear();
     langbarState.sendingToOpenAI = false;
@@ -507,4 +515,74 @@ void enableMCPMode(bool enabled) {
     getIt.unregister<bool>(instanceName: 'mcpEnabled');
   }
   getIt.registerSingleton<bool>(enabled, instanceName: 'mcpEnabled');
+}
+
+Future<void> _writeLastLLMInteraction({
+  required String query,
+  required List<Tool> tools,
+  required List<ParsedToolCall> toolCalls,
+  required ChatResult? chatResult,
+}) async {
+  // Get system prompt from dependency injection
+  String systemPrompt = 'N/A';
+  if (getIt.isRegistered<String>(instanceName: 'systemPrompt')) {
+    systemPrompt = getIt<String>(instanceName: 'systemPrompt');
+  }
+
+  final buffer = StringBuffer();
+  buffer.writeln('# LLM Interaction — ${DateTime.now().toIso8601String()}');
+
+  // REQUEST
+  buffer.writeln('## 📤 Sent to LLM');
+  buffer.writeln('### System Prompt');
+  buffer.writeln('```');
+  buffer.writeln(systemPrompt);
+  buffer.writeln('```');
+  buffer.writeln('### User Message');
+  buffer.writeln('```');
+  buffer.writeln(query);
+  buffer.writeln('```');
+  buffer.writeln('### Tools');
+  for (var tool in tools) {
+    buffer.writeln('- **${tool.name}**: ${tool.description}');
+    final schema = tool.inputJsonSchema;
+    if (schema.isNotEmpty && schema.containsKey('properties')) {
+      final properties = schema['properties'] as Map?;
+      final required = (schema['required'] as List?)?.cast<String>() ?? [];
+      if (properties != null && properties.isNotEmpty) {
+        final params = properties.entries.map((e) {
+          final name = e.key;
+          final def = e.value as Map?;
+          final type = def?['type'] ?? 'any';
+          final desc = def?['description'] ?? '';
+          final req = required.contains(name) ? '*' : '';
+          return '`$name`$req: $type${desc.isNotEmpty ? ' — $desc' : ''}';
+        }).join(', ');
+        buffer.writeln('  - Params: $params');
+      }
+    }
+  }
+
+  // RESPONSE
+  buffer.writeln('## 📥 Received from LLM');
+  buffer.writeln('### Tool Calls');
+  if (toolCalls.isEmpty) {
+    buffer.writeln('*None*');
+  } else {
+    for (var tc in toolCalls) {
+      buffer.writeln('- **${tc.name}**: `${tc.arguments}`');
+    }
+  }
+  buffer.writeln('### Raw Output');
+  buffer.writeln('```');
+  buffer.writeln(chatResult?.outputAsString ?? 'N/A');
+  buffer.writeln('```');
+
+  try {
+    final tempDir = Directory.systemTemp;
+    final file = File('${tempDir.path}/langbar_core_lastllm.md');
+    await file.writeAsString(buffer.toString());
+  } catch (e) {
+    print('Could not write LLM interaction log: $e');
+  }
 }
