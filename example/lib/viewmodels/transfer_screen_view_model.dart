@@ -6,6 +6,7 @@ import 'package:langbar_core/speech_enabled.dart';
 import 'package:langbar_core/tts_highlight_service.dart';
 import 'package:langbar_core/ui/langfield/langbar_states.dart';
 import 'package:langbar_core/ui/switchable_screen.dart';
+import 'package:langchain/langchain.dart';
 import 'package:langchain_core/src/chat_models/types.dart';
 import 'package:langchain_core/src/output_parsers/types.dart';
 import 'package:langchain_core/src/prompts/chat_prompt.dart';
@@ -306,8 +307,22 @@ class TransferScreenViewModel
 
   @override
   void maybeAddInitialMessageToChatHistory() {
-    // Add any initial context message for the transfer screen if needed
-    // For now, we'll keep it empty to let the conversation flow naturally
+    final details = <String>[];
+    if (state.amount != null) {
+      details.add('amount: ${state.amount!.toStringAsFixed(2)} euros');
+    }
+    if (state.destinationName != null) {
+      details.add('recipient: ${state.destinationName}');
+    }
+    if (state.description != null) {
+      details.add('description: ${state.description}');
+    }
+    var message = 'The user is currently on the transfer screen, for making a '
+        'payment from account ${state.fromAccountId}.';
+    message += details.isEmpty
+        ? ' No transfer details have been entered yet.'
+        : ' Transfer details entered so far: ${details.join(', ')}.';
+    addSystemChatMessage(message);
   }
 
   void navigateBack(BuildContext context) {
@@ -435,7 +450,9 @@ class TransferScreenViewModel
       String query) async {
     String currentScreenName = currentPath!.split("/")[1];
     var chatMessages = await chatMessageMemory.chatHistory.getChatMessages();
-    var memoryLength = chatMessages.length;
+    // system messages only carry screen context, they are not conversation
+    var memoryLength =
+        chatMessages.where((m) => m is! SystemChatMessage).length;
     if ((toolcalls.length > 1 || (firstToolCall.name != currentScreenName)) &&
         memoryLength > 1) {
       // context change, try again without history

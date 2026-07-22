@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:langbar_core/send_to_llm.dart';
 import 'package:langbar_core/speech_enabled.dart';
 import 'package:langbar_core/utils/utils.dart';
 import 'app_generic_screen_view_model.dart';
@@ -44,6 +45,18 @@ class ContactsScreenViewModel extends AppGenericScreenViewModel<ContactsScreenSt
         speakSearchConfirmation(initialSearchString);
       });
     }
+  }
+
+  @override
+  void maybeAddInitialMessageToChatHistory() {
+    var message = 'The user is currently on the contacts screen.';
+    if (state.searchString != null && state.searchString!.isNotEmpty) {
+      message += ' Contacts are filtered on "${state.searchString}".';
+    }
+    if (state.selectedContact != null) {
+      message += ' Selected contact: ${state.selectedContact}.';
+    }
+    addSystemChatMessage(message);
   }
 
   void updateSearchString(String searchString) {

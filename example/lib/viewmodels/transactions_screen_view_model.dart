@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:langbar_core/send_to_llm.dart';
 import 'package:langbar_core/speech_enabled.dart';
 import 'package:langbar_core/utils/utils.dart';
 import 'app_generic_screen_view_model.dart';
@@ -52,6 +53,22 @@ class TransactionsScreenViewModel extends AppGenericScreenViewModel<Transactions
         speakFilterConfirmation(initialFilterString);
       });
     }
+  }
+
+  @override
+  void maybeAddInitialMessageToChatHistory() {
+    var message = 'The user is currently on the transactions screen';
+    if (state.accountId != null) {
+      message += ', showing transactions of account ${state.accountId}';
+    }
+    message += '.';
+    if (state.searchFilter != null && state.searchFilter!.isNotEmpty) {
+      message += ' Transactions are filtered on "${state.searchFilter}".';
+    }
+    if (state.selectedTransaction != null) {
+      message += ' Selected transaction: ${state.selectedTransaction}.';
+    }
+    addSystemChatMessage(message);
   }
 
   void updateSearchFilter(String filter) {

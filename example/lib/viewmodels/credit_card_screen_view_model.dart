@@ -132,6 +132,19 @@ class CreditCardScreenViewModel
     }
   }
 
+  @override
+  void maybeAddInitialMessageToChatHistory() {
+    var message =
+        'The user is currently on the ${_ttsConfig.screenName.toLowerCase()} screen.';
+    if (state.action != ActionOnCard.none) {
+      message += ' Pending card action: ${state.action.name}.';
+    }
+    if (state.limit != null) {
+      message += ' Card limit: ${state.limit} euros.';
+    }
+    addSystemChatMessage(message);
+  }
+
   /// Update the ViewModel with new constructor parameters
   void updateFromConstructorParams({
     ActionOnCard? action,
@@ -216,7 +229,9 @@ class CreditCardScreenViewModel
       String query) async {
     String currentScreenName = currentPath!.split("/")[1];
     var chatMessages = await chatMessageMemory.chatHistory.getChatMessages();
-    var memoryLength = chatMessages.length;
+    // system messages only carry screen context, they are not conversation
+    var memoryLength =
+        chatMessages.where((m) => m is! SystemChatMessage).length;
     if ((toolcalls.length > 1 || (firstToolCall.name != currentScreenName)) &&
         memoryLength > 1) {
       // context change, try again without history

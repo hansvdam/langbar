@@ -94,6 +94,13 @@ class MapScreenViewModel extends AppGenericScreenViewModel<MapScreenState>
     // We'll let updateFromConstructorParams handle the speaking
   }
 
+  @override
+  void maybeAddInitialMessageToChatHistory() {
+    var showing = state.selectedLocation == 'atms' ? 'ATMs' : 'bank offices';
+    addSystemChatMessage(
+        'The user is currently on the map screen, showing $showing near them.');
+  }
+
   /// Update the ViewModel with new constructor parameters
   void updateFromConstructorParams({String? atmOrOffice}) {
     langbarLogger.i(
@@ -174,7 +181,9 @@ class MapScreenViewModel extends AppGenericScreenViewModel<MapScreenState>
       String query) async {
     String currentScreenName = currentPath!.split("/")[1];
     var chatMessages = await chatMessageMemory.chatHistory.getChatMessages();
-    var memoryLength = chatMessages.length;
+    // system messages only carry screen context, they are not conversation
+    var memoryLength =
+        chatMessages.where((m) => m is! SystemChatMessage).length;
     if ((toolcalls.length > 1 ||
         (firstToolCall.name != currentScreenName)) &&
         memoryLength > 1) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:langbar_core/send_to_llm.dart';
 import 'package:langbar_core/speech_enabled.dart';
 import 'package:langbar_core/utils/utils.dart';
 import 'app_generic_screen_view_model.dart';
@@ -35,6 +36,20 @@ class AccountsScreenViewModel extends AppGenericScreenViewModel<AccountsScreenSt
         ) {
     _ttsConfig = AccountsScreenTtsConfig();
     langbarLogger.i('AccountsScreenViewModel created');
+  }
+
+  @override
+  void maybeAddInitialMessageToChatHistory() {
+    var message = 'The user is currently on the accounts screen, '
+        'which lists their bank accounts.';
+    if (state.selectedAccount != null) {
+      message += ' Selected account: ${state.selectedAccount}';
+      if (state.selectedAccountBalance != null) {
+        message += ' (balance: ${state.selectedAccountBalance})';
+      }
+      message += '.';
+    }
+    addSystemChatMessage(message);
   }
 
   void selectAccount(String accountName, String balance) {

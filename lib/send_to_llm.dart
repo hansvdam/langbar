@@ -95,6 +95,14 @@ void addHumanChatMessage(String message) {
   _chatMessageMemory.chatHistory.addHumanChatMessage(message);
 }
 
+/// Adds a system message to the LLM chat memory. Meant for
+/// [SpeechEnabled.maybeAddInitialMessageToChatHistory] implementations to tell
+/// the LLM which screen the user is on (and its state) when a conversation
+/// starts fresh, e.g. after a manual tab switch cleared the memory.
+void addSystemChatMessage(String message) {
+  _chatMessageMemory.chatHistory.addChatMessage(ChatMessage.system(message));
+}
+
 bool _historyWasIntentionallyCleared = false;
 
 void setHistoryCleared(bool cleared) {
